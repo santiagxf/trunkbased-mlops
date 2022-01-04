@@ -11,11 +11,11 @@ inputs:
     dataset: azureml:portuguese-hate-speech-tweets:1
     mode: ro_mount
   eval_dataset:
-    dataset: azureml:portuguese-hate-speech-eval:1
+    dataset: azureml:portuguese-hate-speech-tweets-eval:1
   params:
     data:
       local_path: train.params.yml
     mode: download
 
-environment: azureml:transformers-torch-19:3
+environment: azureml:transformers-torch-19:1
 compute: azureml:gpuprdev
