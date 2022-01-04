@@ -5,6 +5,7 @@ trigger:
   paths:
     include:
     - datasets/*
+    - workspaces/templates/*
 
 pool:
   vmImage: ubuntu-latest
@@ -16,7 +17,19 @@ stages:
 - stage: aml_workspace_init
   displayName: Workspace - Initialization
   jobs:
-  - job: deployment
+  - job: iac-deployment
+    displayName: IaC - Deployment
+    steps:
+      - template: templates/azure-arm-template-deployment/action.yaml
+        parameters:
+          azureServiceConnectionName: $(SERVICECONNECTION)
+          resourceGroup: $(RESOURCEGROUPNAME)
+          location: $(LOCATION)
+          deploymentName: aml-deployment
+          templateFile: workspaces/templates/deploy.json
+          templateVersion: 1.0
+          parametersFile: workspaces/$(env)/deploy.parameters.json
+  - job: datasets-init
     displayName: Datasets - Initialization
     steps:
       - template: templates/aml-cli-install/step.yaml

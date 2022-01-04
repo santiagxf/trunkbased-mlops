@@ -1,0 +1,230 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "resourceGroupName": {
+            "type": "string",
+            "metadata": {
+                "description": "Resource group where 'Data' resources will be provisioned"
+            }
+        },
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Specifies the location for all resources."
+            }
+        },
+        "workspaceName": {
+            "type": "string",
+            "metadata": {
+                "description": "Specifies the name of the Azure Machine Learning workspace."
+            }
+        },
+        "computeAdminUserName": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The name of the administrator user account which can be used to SSH into nodes. It must only contain lower case alphabetic characters [a-z]."
+            }
+        },
+        "computeAdminUserPassword": {
+            "type": "securestring",
+            "metadata": {
+                "description": "The password of the administrator user account."
+            }
+        },
+        "cpuTrainComputeSize": {
+            "type": "string",
+            "metadata": {
+                "description": "The VM size for the CPU compute train cluster"
+            }
+        },
+        "gpuTrainComputeSize": {
+            "type": "string",
+            "metadata": {
+                "description": "The VM size for the CPU compute train cluster"
+            }
+        },
+        "cpuTrainNodeCount": {
+            "type": "int",
+            "metadata": {
+                "description": "The number of nodes for the CPU compute train cluster"
+            }
+        },
+        "gpuTrainNodeCount": {
+            "type": "int",
+            "metadata": {
+                "description": "The number of nodes for the CPU compute train cluster"
+            }
+        },
+        "datasetsAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the storage account where datasets will be placed"
+            }
+        },
+        "datasetsResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the resource group where the storage account for datasets is placed"
+            }
+        },
+        "datasetsFileSystem": {
+            "type": "string",
+            "metadata": {
+                "description": "Name of the file system where datasets will be placed"
+            }
+        },
+        "datasetsClientId": {
+            "type": "string",
+            "metadata": {
+                "description": "Client ID used to query data from the account"
+            }
+        },
+        "datasetsClientSecret": {
+            "type": "string",
+            "metadata": {
+                "description": "Client secret used to query data from the account"
+            }
+        }
+    },
+    "functions": [],
+    "variables": {
+        "workspaceDeploymentName": "[concat('azureml-', deployment().name)]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-06-01",
+            "name": "[variables('workspaceDeploymentName')]",
+            "resourceGroup": "[parameters('resourceGroupName')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "relativePath": "workspace/workspace.json"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "resourceGroupName": {
+                        "value": "[parameters('resourceGroupName')]"
+                    },
+                    "workspaceName": {
+                        "value": "[parameters('workspaceName')]"
+                    },
+                    "tagValues": {
+                        "value": {
+                            "workspace": "[parameters('workspaceName')]"
+                        }
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-06-01",
+            "name": "[concat('cpu-compute-', variables('workspaceDeploymentName'))]",
+            "resourceGroup": "[parameters('resourceGroupName')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "relativePath": "workspace/compute/cluster-cpu.json"
+                },
+                "parameters": {
+                    "workspaceName": {
+                        "value": "[parameters('workspaceName')]"
+                    },
+                    "clusterName": {
+                        "value": "cpuprdev"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "adminUserName": {
+                        "value": "[parameters('computeAdminUserName')]"
+                    },
+                    "adminUserPassword": {
+                        "value": "[parameters('computeAdminUserPassword')]"
+                    },
+                    "maxNodeCount": {
+                        "value": "[parameters('cpuTrainNodeCount')]"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('cpuTrainComputeSize')]"
+                    }
+                }
+            },
+            "dependsOn": ["[variables('workspaceDeploymentName')]"]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-06-01",
+            "name": "[concat('gpu-compute-', variables('workspaceDeploymentName'))]",
+            "resourceGroup": "[parameters('resourceGroupName')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "relativePath": "workspace/compute/cluster-gpu.json"
+                },
+                "parameters": {
+                    "workspaceName": {
+                        "value": "[parameters('workspaceName')]"
+                    },
+                    "clusterName": {
+                        "value": "gpuprdev"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "adminUserName": {
+                        "value": "[parameters('computeAdminUserName')]"
+                    },
+                    "adminUserPassword": {
+                        "value": "[parameters('computeAdminUserPassword')]"
+                    },
+                    "maxNodeCount": {
+                        "value": "[parameters('gpuTrainNodeCount')]"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('gpuTrainComputeSize')]"
+                    }
+                }
+            },
+            "dependsOn": ["[variables('workspaceDeploymentName')]"]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-06-01",
+            "name": "[concat('datasource-trusted-', variables('workspaceDeploymentName'))]",
+            "resourceGroup": "[parameters('resourceGroupName')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "relativePath": "workspace/source/adlg2.json"
+                },
+                "parameters": {
+                    "workspaceName": {
+                        "value": "[parameters('workspaceName')]"
+                    },
+                    "datastoreName": {
+                        "value": "trusted"
+                    },
+                    "accountName": {
+                        "value": "[parameters('datasetsAccountName')]"
+                    },
+                    "fileSystem": {
+                        "value": "[parameters('datasetsFileSystem')]"
+                    },
+                    "clientId": {
+                        "value": "[parameters('datasetsClientId')]"
+                    },
+                    "clientSecret": {
+                        "value": "[parameters('datasetsClientSecret')]"
+                    }
+                }
+            },
+            "dependsOn": ["[variables('workspaceDeploymentName')]"]
+        }
+    ],
+    "outputs": {}
+}

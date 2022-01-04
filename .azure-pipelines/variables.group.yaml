@@ -7,6 +7,8 @@ variables:
   value: mlops-trunkbased-dev
 - name: STORAGEACCOUNTNAME
   value: aamldatalake
+- name: LOCATION
+  value: eastus2
 - name: env
   value: dev
 - name: modelName
