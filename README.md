@@ -1,6 +1,6 @@
 # Trunk-based development for Machine Learning models with Azure Machine Learning
 
-This repository contains an example about how to use trunk-based development in a Machine Learning project. It demostrate how the workflow should follow in a sample project that would seek to deploy an ML model able to detect hate speech in tweets in the portuguese language. The repository also contains implementations of CI/CD pipelines to do continuous integration and deployment off all the assets required for the solution using Azure Machine Learning as the ML platform and Azure DevOps as the CI/CD solution. An implementation using GitHub Actions will be posted soon.
+This repository contains an example about how to use trunk-based development in a Machine Learning project. It demostrates how the workflow should follow in a sample project that would seek to deploy an ML model able to detect hate speech in tweets in the portuguese language. The repository also contains implementations of CI/CD pipelines to do continuous integration and deployment off all the assets required for the solution using Azure Machine Learning as the ML platform and Azure DevOps as the CI/CD solution. An implementation using GitHub Actions will be posted soon.
 
 ## Motivation
 

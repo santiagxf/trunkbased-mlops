@@ -18,4 +18,4 @@ inputs:
     mode: download
 
 environment: azureml:transformers-torch-19:3
-compute: azureml:cpuprdev
+compute: azureml:gpuprdev
