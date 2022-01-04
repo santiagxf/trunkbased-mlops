@@ -1,0 +1,42 @@
+parameters:
+- name: source
+  type: string
+  default: .
+- name: moduleOrPackage
+  type: string
+  default: '*'
+- name: useConda
+  type: boolean
+  default: false
+- name: condaEnvName
+  type: string
+  default: 
+- name: disable
+  type: string
+  default: None
+- name: pkgWhitelist
+  type: string
+  default: None
+
+steps:
+  - task: Bash@3
+    displayName: Running PyLint
+    inputs:
+      targetType: inline
+      script: |
+        if ${{ lower(parameters.useConda) }}; then
+          echo "##[debug]Activating conda environment ${{ parameters.condaEnvName }}"
+          source activate ${{ parameters.condaEnvName }}
+
+          if ! [[ $(conda list --json | jq -r '.[] | select(.name=="pylint")') ]]; then
+            echo "##[debug]Environment doesn't contain PyLint. Installing"
+            pip install pylint==2.12.1
+          fi
+        fi
+
+        for PACKAGE_FOLDER in ${{ parameters.source }}/${{ parameters.moduleOrPackage }}/
+        do
+          PACKAGE=$(basename $PACKAGE_FOLDER)
+          echo "##[debug]>pylint $PACKAGE --disable=${{ parameters.disable}} --extension-pkg-whitelist=${{ parameters.pkgWhitelist }}"
+          (cd ${{ parameters.source }} && python -m pylint $PACKAGE --disable=${{ parameters.disable}} --extension-pkg-whitelist=${{ parameters.pkgWhitelist }})
+        done

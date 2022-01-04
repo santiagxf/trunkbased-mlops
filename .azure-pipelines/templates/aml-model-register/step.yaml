@@ -1,0 +1,48 @@
+parameters:
+- name: azureServiceConnectionName
+  type: string
+- name: name
+  type: string
+- name: description
+  type: string
+  default: 
+- name: fromJob
+  type: boolean
+  default: false
+- name: jobName
+  type: string
+  default: .
+- name: modelPath
+  type: string
+- name: modelVersion
+  type: string
+  default: 
+- name: workspaceName
+  type: string
+  default: 
+- name: resourceGroup
+  type: string
+  default:
+- name: workspaceConfig
+  type: string
+  default: 
+
+steps:
+  - task: AzureCLI@2
+    name: modelRegistration
+    displayName: Registering model
+    inputs:
+      scriptType: bash
+      scriptLocation: inlineScript
+      azureSubscription: ${{ parameters.azureServiceConnectionName }}
+      inlineScript: |
+        pip install azureml-core==1.37.0
+        pip install azure-cli-core==2.30.0
+        
+        python $(Build.SourcesDirectory)/services/post-processing/source/.azure-pipelines/templates/aml-model-register/register.py \
+          --ws-config ${{ parameters.workspaceConfig }} \
+          --name ${{ parameters.name }} \
+          --version ${{ parameters.modelVersion }} \
+          --model-path ${{ parameters.modelPath }} \
+          --description "${{ parameters.description }}" \
+          --run-id ${{ parameters.jobName }}

@@ -1,0 +1,99 @@
+parameters:
+- name: azureServiceConnectionName
+  type: string
+- name: endpointFile
+  type: string
+- name: deploymentFile
+  type: string
+- name: workspaceName
+  type: string
+- name: resourceGroup
+  type: string
+- name: noWait
+  type: boolean
+  default: false
+- name: secretsToKeyVault
+  type: boolean
+  default: false
+- name: keyVaultName
+  type: string
+  default: 
+
+steps:
+  - task: AzureCLI@2
+    name: deployment
+    displayName: Deploying endpoint
+    inputs:
+      scriptType: bash
+      scriptLocation: inlineScript
+      azureSubscription: ${{ parameters.azureServiceConnectionName }}
+      inlineScript: |
+        az configure --defaults workspace=$(WORKSPACENAME) group=$(RESOURCEGROUPNAME)
+
+        ENDPOINT_FILES=$(find ${{ parameters.endpointFile }})
+        for ENDPOINT_FILE in $ENDPOINT_FILES
+        do
+          ENDPOINT_FOLDER=$(dirname $ENDPOINT_FILE)
+          ENDPOINT_NAME=$(yq -r ".name" $ENDPOINT_FILE)
+          echo "##[debug]Creating endpoint with name: $ENDPOINT_NAME"
+        
+          SCORING_URI=$(az ml online-endpoint create -f $ENDPOINT_FILE | jq -r '.scoring_uri')
+          SCORING_KEY=$(az ml online-endpoint get-credentials -n $ENDPOINT_NAME -o tsv --query primaryKey)
+            
+          echo "##[debug]Looking for deployments in folder $ENDPOINT_FOLDER/${{ parameters.deploymentFile }}"
+          DEPLOYMENT_FILES=$(find $ENDPOINT_FOLDER/${{ parameters.deploymentFile }})
+            
+          for DEPLOYMENT_FILE in $DEPLOYMENT_FILES
+          do
+            echo "##[debug]Working on deployment file $DEPLOYMENT_FILE"
+            DEPLOYMENT_NAME=$(yq -r ".name" $DEPLOYMENT_FILE)
+            DEPLOYMENT_MODEL=$(yq -r ".model" $DEPLOYMENT_FILE | cut -d: -f2)
+            DEPLOYMENT_MODEL_VERSION=$(yq -r ".model" $DEPLOYMENT_FILE | cut -d: -f3)
+            
+            echo "##[debug]Working on deployment with name: $ENDPOINT_NAME/$DEPLOYMENT_NAME"
+
+            if [[ "$DEPLOYMENT_MODEL_VERSION" == "current" ]]; then
+              echo "##[debug]Identifying current version of the model at deployment $ENDPOINT_NAME/$DEPLOYMENT_NAME"
+              MODEL_CURRENT_URL=$(az ml online-deployment show --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r ".model")
+              MODEL_CURRENT=$(basename $MODEL_CURRENT_URL)
+
+              echo "##[debug]Updating yaml files with current model version: $MODEL_CURRENT"
+              sed -i 's/:current/:'$MODEL_CURRENT'/' $DEPLOYMENT_FILE
+            fi
+
+            if [[ "$DEPLOYMENT_MODEL_VERSION" == "latest" ]]; then
+              echo "##[debug]Identifying latest version of the model $DEPLOYMENT_MODEL"
+              MODEL_LATEST=$(az ml model list --name $DEPLOYMENT_MODEL -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r '.[0].version')
+              
+              echo "##[debug]Updating yaml files with latest model version: $MODEL_LATEST"
+              sed -i 's/:latest/:'$MODEL_LATEST'/' $DEPLOYMENT_FILE 
+            fi
+        
+            echo "##[debug]Creating deployment with name: $ENDPOINT_NAME/$DEPLOYMENT_NAME"
+            if ${{ lower(parameters.noWait) }}; then
+              az ml online-deployment create -f $DEPLOYMENT_FILE --no-wait
+            else
+              az ml online-deployment create -f $DEPLOYMENT_FILE
+  
+              echo "##[debug]Adquiring logs for deployment with name: $ENDPOINT_NAME/$DEPLOYMENT_NAME"
+              mkdir -p logs
+              az ml online-deployment get-logs --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME >> logs/$ENDPOINT_NAME_$DEPLOYMENT_NAME.log
+            fi
+        
+            echo "##[debug]Deployment completed"
+          done
+        
+          if ${{ lower(parameters.secretsToKeyVault) }}; then
+            echo "##[debug]Uploading secrets to key vault ${{ parameters.keyVaultName }}"
+            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name 'ScoringUri' --value $SCORING_URI
+            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name 'ScoringKey' --value $SCORING_KEY
+          fi
+          echo "##[debug]Endpoint evaluation completed"
+        done
+  
+  - task: PublishPipelineArtifact@1
+    displayName: Uploading deployment logs
+    condition: and(succeededOrFailed(), eq('${{ parameters.noWait }}', 'false'))
+    inputs:
+      artifactName: deployment-logs
+      targetPath: logs

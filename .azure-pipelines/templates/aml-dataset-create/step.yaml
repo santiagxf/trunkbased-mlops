@@ -1,0 +1,61 @@
+parameters:
+- name: azureServiceConnectionName
+  type: string
+- name: datasetFile
+  type: string
+- name: workspaceName
+  type: string
+- name: resourceGroup
+  type: string
+- name: initialize
+  type: boolean
+  default: false
+- name: initialDataPath
+  type: string
+  default: data
+- name: storageAccount
+  type: string
+  default:
+
+steps:
+  - task: AzureCLI@2
+    name: datasetsInit
+    displayName: Generating datasets
+    inputs:
+      scriptType: bash
+      scriptLocation: inlineScript
+      azureSubscription: ${{ parameters.azureServiceConnectionName }}
+      inlineScript: |
+        echo "##[debug]Looking for datasets definition at '${{ parameters.datasetFile }}'"
+        DATASETS_FILES=$(find ${{ parameters.datasetFile }};)
+
+        for DATASET_FILE in $DATASETS_FILES
+        do
+          DATASET_NAME=$(yq -r ".name" $DATASET_FILE)
+          REMOTE_FILE=$(yq -r ".paths[0].file" $DATASET_FILE)
+          REMOTE_FOLDER=$(dirname $REMOTE_FILE | cut -d/ -f6-)
+          CONTAINER_NAME=$(dirname $REMOTE_FILE | cut -d/ -f4)
+          LOCAL_FOLDER=$(dirname $DATASET_FILE)
+
+          if [[ $(az ml dataset list --name $DATASET_NAME --workspace-name ${{ parameters.workspaceName }} --resource-group ${{ parameters.resourceGroup }}) ]]; then
+            echo "##[debug]Dataset $DATASET_NAME already in target workspace."
+          else
+            echo "##[debug]Dataset $DATASET_NAME is missing. Creating from file $DATASET_FILE."
+            az ml dataset create --file $DATASET_FILE --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }}
+            
+            if ${{ lower(parameters.initialize) }}; then
+              # Data uploaded manually as AzureFileCopy@4 not supported in Linux
+              echo "##[debug]Uploading data for $DATASET_NAME in container $CONTAINER_NAME (${{ parameters.storageAccount }})"
+              echo "##[debug]Source: $LOCAL_FOLDER/${{ parameters.initialDataPath }}"
+              echo "##[debug]Destination: $REMOTE_FOLDER"
+
+              if test -d "$LOCAL_FOLDER/${{ parameters.initialDataPath }}"; then
+                az storage blob upload-batch -d $CONTAINER_NAME --account-name ${{ parameters.storageAccount }} --source "$LOCAL_FOLDER/${{ parameters.initialDataPath }}" --destination-path $REMOTE_FOLDER
+              else
+                echo "##vso[task.logissue type=error]Folder $LOCAL_FOLDER/${{ parameters.initialDataPath }} not found."
+                exit 1
+              fi
+            fi
+          fi
+        done
+

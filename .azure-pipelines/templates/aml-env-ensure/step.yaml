@@ -1,0 +1,80 @@
+parameters:
+- name: azureServiceConnectionName
+  type: string
+- name: envFile
+  type: string
+- name: validateOnly
+  type: boolean
+  default: false
+- name: failOnMissing
+  type: boolean
+  default: true
+- name: workspaceName
+  type: string
+- name: resourceGroup
+  type: string
+
+steps:
+  - task: AzureCLI@2
+    displayName: Ensuring environment
+    inputs:
+      scriptType: bash
+      scriptLocation: inlineScript
+      azureSubscription: ${{ parameters.azureServiceConnectionName }}
+      inlineScript: |
+        echo "##[debug]Looking for environment definition at '${{ parameters.envFile }}'"
+        ENV_FILES=$(find ${{ parameters.envFile }})
+        VALIDATION_PASS=true
+
+        for ENV_FILE in $ENV_FILES
+        do
+          ENV_FOLDER=$(dirname $ENV_FILE)
+          ENV_VERSION=$(yq ".version" $ENV_FILE)
+          ENV_CONDA_FILE=$(yq -r ".conda_file" $ENV_FILE)
+          ENV_NAME=$(yq -r ".name" $ENV_FILE)
+          
+          echo "##[debug]Looking for environment $ENV_NAME in workspace."
+          if [[ $(az ml environment list --name $ENV_NAME --workspace-name ${{ parameters.workspaceName }} --resource-group ${{ parameters.resourceGroup }}) ]]; then
+            echo "##[debug]Environments $ENV_NAME already in target workspace. Retrieving details..."
+            echo "##[debug]Environment version is $ENV_VERSION."
+            
+            if [[ $(az ml environment show --name $ENV_NAME --workspace-name ${{ parameters.workspaceName }} --resource-group ${{ parameters.resourceGroup }} --version $ENV_VERSION) ]]; then
+              echo "##[debug]Verifying environment specification and checking for differences with given"
+              az ml environment show --name $ENV_NAME --workspace-name ${{ parameters.workspaceName }} --resource-group ${{ parameters.resourceGroup }} --version $ENV_VERSION | jq ".conda_file | del(.name)" | yq -y > conda.yml
+              if cmp -s conda.yml $ENV_FOLDER/$ENV_CONDA_FILE; then
+                echo "##[debug]Environments validation passed"
+              else
+                echo "##vso[task.logissue type=error;sourcepath=$ENV_FILE;]Environment file definition doesn't match the one registered. Please increase version to get it created"
+                VALIDATION_PASS=false
+              fi
+            else
+              if ${{ lower(parameters.validateOnly) }} ; then
+                if ${{ lower(parameters.failOnMissing) }} ; then
+                  echo "##vso[task.logissue type=error;sourcepath=$ENV_FILE;]Environment '$ENV_NAME' exists, but not in the required version ($ENV_VERSION)."
+                  VALIDATION_PASS=false
+                else
+                  echo "##[debug]Environment $ENV_NAME needs to be deployed in target workspace with version $ENV_VERSION"
+                fi
+              else
+                echo "##[debug]Creating new version of the environment"
+                az ml environment create --name $ENV_NAME --workspace-name ${{ parameters.workspaceName }} --resource-group ${{ parameters.resourceGroup }} --version $ENV_VERSION --file $ENV_FILE
+              fi
+            fi
+          else
+            if ${{ lower(parameters.validateOnly) }}; then
+              if ${{ lower(parameters.failOnMissing) }} ; then
+                echo "##vso[task.logissue type=error;sourcepath=$ENV_FILE;]Environment '$ENV_NAME' doesn't exist in the workspace."
+                VALIDATION_PASS=false
+              else
+                echo "##[debug]Environment $ENV_NAME needs to be deployed in target workspace with version $ENV_VERSION"
+              fi
+            else
+              echo "##[debug]Creating new environment"
+              az ml environment create --name $ENV_NAME --workspace-name ${{ parameters.workspaceName }} --resource-group ${{ parameters.resourceGroup }} --file $ENV_FILE
+            fi
+          fi
+        done
+
+        if ! $VALIDATION_PASS ; then
+          return -1
+        fi

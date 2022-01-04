@@ -1,0 +1,84 @@
+parameters:
+  - name: azureServiceConnectionName
+    type: string
+  - name: modelName
+    type: string
+  - name: champion
+    type: string
+  - name: challenger
+    type: string
+    default: latest
+  - name: endpoint
+    type: string
+    default: 
+  - name: compareBy
+    type: string
+    default: accuracy
+  - name: greaterIsBetter
+    type: boolean
+    default: true
+  - name: workspaceName
+    type: string
+    default: 
+  - name: resourceGroup
+    type: string
+    default:
+  - name: workspaceConfig
+    type: string
+    default: 
+
+steps:
+  - task: AzureCLI@2
+    name: compare
+    displayName: Comparing model
+    inputs:
+      scriptType: bash
+      scriptLocation: inlineScript
+      azureSubscription: ${{ parameters.azureServiceConnectionName }}
+      inlineScript: |
+        pip install azureml-core==1.37.0
+        pip install azure-cli-core==2.30.0
+        
+        if [[ "${{ parameters.champion }}" == "current" ]]; then
+          echo "##[debug]Resolving current champion version from endpoint"
+          ENDPOINT_NAME=$(yq -r ".name" ${{ parameters.endpoint }})
+          
+          echo "##[debug]Querying champion version from endpoint with name $ENDPOINT_NAME"
+          CHAMPION_MODEL=$(az ml online-deployment list --endpoint-name $ENDPOINT_NAME -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r ".[].model")
+          if [[ $CHAMPION_MODEL ]]; then
+            CHAMPION=$(basename $CHAMPION_MODEL)
+          else
+            echo "##vso[task.logissue type=warning;]There are no models deployed at endpoint $ENDPOINT_NAME. Model will be deployed without compare."
+            echo "##vso[task.setvariable variable=result;isOutput=true]0"
+            exit 0
+          fi
+        else
+          CHAMPION=${{ parameters.champion }}
+        fi
+        echo "##[debug]CHAMPION is version:$CHAMPION"
+
+        if [[ "${{ parameters.challenger }}" == "latest" ]]; then
+          echo "##[debug]Resolving challenger version from latest available"
+          CHALLENGER=$(az ml model list --name ${{ parameters.modelName }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r '.[0].version')
+        else
+          CHALLENGER=${{ parameters.champion }}
+        fi
+        echo "##[debug]CHALLENGER is version:$CHALLENGER"
+
+        echo "##[debug]Comparing models by ${{ parameters.compareBy }}"
+        python $(Build.SourcesDirectory)/services/post-processing/source/.azure-pipelines/templates/aml-model-compare/compare.py \
+          --ws-config ${{ parameters.workspaceConfig }} \
+          --model-name ${{ parameters.modelName }} \
+          --champion $CHAMPION \
+          --challenger $CHALLENGER \
+          --compare-by ${{ parameters.compareBy }} \
+          --greater-is-better ${{ parameters.greaterIsBetter }}
+
+        # compare.py will return true or false depending if challenger is better. false is encoded as 0 en bash and any other value is true.
+        if [[ $? == 0 ]]; then
+          echo "##vso[task.logissue type=warning;]Challenger model is not better than the current champion."
+          echo "##vso[task.setvariable variable=result;isOutput=true]false"
+        else
+          echo "##[debug]Challenger model won the compare and will be deployed."
+          echo "##vso[task.setvariable variable=result;isOutput=true]true"
+        fi

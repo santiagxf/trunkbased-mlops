@@ -1,0 +1,7 @@
+$schema: https://azuremlschemas.azureedge.net/latest/model.schema.json
+name: hate-pt-speech
+model_format: custom
+description: A hate detection model for tweets in portuguese
+tags:
+  backend: torch
+  framework: transformers 

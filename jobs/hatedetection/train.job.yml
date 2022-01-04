@@ -1,0 +1,21 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+display_name: hate-pt-speech
+experiment_name: hate-pt-speech
+description: Trains a model to clasificate tweets text according to hate/no hate
+code: 
+  local_path: ../../src/
+command: >-
+  python -m hatedetection.train --input-dataset ${{ inputs.input_dataset }} --eval-dataset ${{ inputs.eval_dataset }} --params ${{ inputs.params }}
+inputs:
+  input_dataset:
+    dataset: azureml:portuguese-hate-speech-tweets:1
+    mode: ro_mount
+  eval_dataset:
+    dataset: azureml:portuguese-hate-speech-eval:1
+  params:
+    data:
+      local_path: train.params.yml
+    mode: download
+
+environment: azureml:transformers-torch-19:3
+compute: azureml:cpuprdev

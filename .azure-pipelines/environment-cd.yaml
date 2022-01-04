@@ -1,0 +1,37 @@
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - services/post-processing/source/environments/*
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+- name: SERVICECONNECTION
+  value: rg-dataplatform-dev
+- name: WORKSPACENAME
+  value: aa-ml-aml-workspace-dev
+- name: RESOURCEGROUPNAME
+  value: Analytics.Aml.Experiments.Workspaces
+
+stages:
+- stage: aml_ensure_env
+  displayName: Environments - Deployment
+  jobs:
+  - job: deployment
+    displayName: Environments - Deployment
+    steps:
+      - template: templates/aml-cli-install/step.yaml
+        parameters:
+          componentSupport: false
+          minVersion: 2.0
+      - template: templates/aml-env-ensure/step.yaml
+        parameters:
+          envFile: services/post-processing/source/environments/*/environment.yml
+          validateOnly: false
+          workspaceName: $(WORKSPACENAME)
+          resourceGroup: $(RESOURCEGROUPNAME)
+          azureServiceConnectionName: $(SERVICECONNECTION)

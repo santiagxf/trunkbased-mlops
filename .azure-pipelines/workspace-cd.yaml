@@ -1,0 +1,43 @@
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - datasets/*
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+- name: SERVICECONNECTION
+  value: rg-dataplatform-dev
+- name: WORKSPACENAME
+  value: aa-ml-aml-workspace-dev
+- name: RESOURCEGROUPNAME
+  value: Analytics.Aml.Experiments.Workspaces
+- name: STORAGEACCOUNTNAME
+  value: amldatalake
+- name: env
+  value: dev
+
+stages:
+- stage: aml_workspace_init
+  displayName: Workspace - Initialization
+  jobs:
+  - job: deployment
+    displayName: Datasets - Initialization
+    steps:
+      - template: templates/aml-cli-install/step.yaml
+        parameters:
+          componentSupport: false
+          minVersion: 2.0
+      - template: templates/aml-dataset-create/step.yaml
+        parameters:
+          azureServiceConnectionName: $(SERVICECONNECTION)
+          datasetFile: services/post-processing/source/datasets/*/dataset.yml
+          initialize: true
+          initialDataPath: data
+          storageAccount: $(STORAGEACCOUNTNAME)
+          workspaceName: $(WORKSPACENAME)
+          resourceGroup: $(RESOURCEGROUPNAME)

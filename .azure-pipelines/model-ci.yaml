@@ -1,0 +1,61 @@
+trigger: none
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+- name: SERVICECONNECTION
+  value: rg-dataplatform-dev
+- name: WORKSPACENAME
+  value: aa-ml-aml-workspace-dev
+- name: RESOURCEGROUPNAME
+  value: Analytics.Aml.Experiments.Workspaces
+- name: modelName
+  value: hate-pt-speech
+- name: condaEnvName
+  value: transformers-torch-19
+- name: env
+  value: dev
+
+stages:
+- stage: aml_model_integrate
+  displayName: Model - Integration
+  jobs:
+  - job: train
+    displayName: Model validation
+    steps:
+      - template: templates/aml-cli-install/step.yaml
+        parameters:
+          componentSupport: false
+          minVersion: 2.0
+      - template: templates/aml-env-build/step.yaml
+        parameters:
+          envFile: services/post-processing/source/environments/${{ variables.condaEnvName}}/environment.yml
+      - template: templates/pylint-run/step.yaml
+        parameters:
+          source: services/post-processing/source/src
+          useConda: true
+          condaEnvName: ${{ variables.condaEnvName }}
+          disable: W1203,C0103,W0603,R0801
+      - template: templates/azure-pytest-run/step.yaml
+        parameters:
+          azureServiceConnectionName: $(SERVICECONNECTION)
+          source: services/post-processing/source/src
+          useConda: true
+          condaEnvName: ${{ variables.condaEnvName }}
+      - template: templates/aml-env-ensure/step.yaml
+        parameters:
+          azureServiceConnectionName: $(SERVICECONNECTION)
+          envFile: services/post-processing/source/environments/${{ variables.condaEnvName}}/environment.yml
+          validateOnly: true
+          workspaceName: $(WORKSPACENAME)
+          resourceGroup: $(RESOURCEGROUPNAME)
+      - template: templates/aml-job-create/step.yaml
+        parameters:
+          azureServiceConnectionName: $(SERVICECONNECTION)
+          name: ${{ variables.modelName}}
+          jobFile: services/post-processing/source/jobs/hatedetection/tune.job.yml
+          workspaceName: $(WORKSPACENAME)
+          resourceGroup: $(RESOURCEGROUPNAME)
+          noWait: false
+

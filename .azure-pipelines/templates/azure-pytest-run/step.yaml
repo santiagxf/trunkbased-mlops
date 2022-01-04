@@ -1,0 +1,59 @@
+parameters:
+- name: azureServiceConnectionName
+  type: string
+- name: source
+  type: string
+  default: .
+- name: configuration
+  type: string
+  default: 
+- name: useConda
+  type: boolean
+  default: false
+- name: condaEnvName
+  type: string
+  default: 
+- name: testFolder
+  type: string
+  default: tests
+- name: version
+  type: string
+  default: 6.2.5
+
+steps:
+  - task: AzureCLI@2
+    displayName: Running PyTest
+    inputs:
+      scriptType: bash
+      scriptLocation: inlineScript
+      azureSubscription: ${{ parameters.azureServiceConnectionName }}
+      inlineScript: |
+        if ${{ lower(parameters.useConda) }}; then
+          echo "##[debug]Activating conda environment ${{ parameters.condaEnvName }}"
+          source activate ${{ parameters.condaEnvName }}
+
+          if ! [[ $(conda list --json | jq -r '.[] | select(.name=="pytest")') ]]; then
+            echo "##[debug]Environment doesn't contain PyTest. Installing"
+            pip install pytest==${{ parameters.version }}
+          fi
+        fi
+
+        if [[ '${{ parameters.configuration }}' == '' ]]; then
+          echo "##[debug]Running tests"
+          (cd ${{ parameters.source }} && python -m pytest ${{ parameters.testFolder }} --junit-xml=$(System.DefaultWorkingDirectory)/test-results/results.xml)
+        else
+          echo "##[debug]Running tests with configuration from ${{ parameters.configuration }}."
+          (cd ${{ parameters.source }}; python -m pytest ${{ parameters.testFolder }} -c ${{ parameters.configuration }} --junit-xml=$(System.DefaultWorkingDirectory)/test-results/results.xml)
+        fi
+
+        if ${{ lower(parameters.useConda) }}; then
+          echo "##[debug]Deactivating conda environment ${{ parameters.condaEnvName }}"
+        fi
+  - task: PublishTestResults@2
+    displayName: Publish test results
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: test-results/*.xml 
+      searchFolder: '$(System.DefaultWorkingDirectory)'
+      mergeTestResults: true
+      failTaskOnFailedTests: true

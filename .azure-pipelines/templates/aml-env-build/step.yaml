@@ -1,0 +1,43 @@
+parameters:
+  - name: envFile
+    type: string
+  
+steps:
+  - task: Bash@3
+    displayName: Building environment
+    inputs:
+      targetType: inline
+      script: |
+        echo "##[debug]Looking for environment definition at '${{ parameters.envFile }}'"
+        ENV_FILES=$(find ${{ parameters.envFile }};)
+        BUILD_OK=true
+
+        for ENV_FILE in $ENV_FILES
+        do
+          echo "##[debug]Getting details for $ENV_FILE"
+          ENV_FOLDER=$(dirname $ENV_FILE)
+          ENV_VERSION=$(yq -r ".version" $ENV_FILE)
+          ENV_CONDA_FILE=$(yq -r ".conda_file" $ENV_FILE)
+          ENV_NAME=$(yq -r ".name" $ENV_FILE)
+          
+          echo "##[debug]Building environment $ENV_NAME with conda file $ENV_FOLDER/$ENV_CONDA_FILE"
+          
+          # Note: According to https://github.com/conda/conda/issues/8537, conda will create the environment even if it fails when requirements are indicated with pip. This
+          # is problematic since any error will not be noticed. To fix it, we will redict any output happening in the conda command and capture it. This is what 2>&1 is for
+          # since some output is being sent to STDERR. The command grep then looks for an exception CondaEnvException.
+
+          if conda env create -n $ENV_NAME -f $ENV_FOLDER/$ENV_CONDA_FILE 2>&1 | grep -q CondaEnvException ; then
+            echo "##vso[task.logissue type=error;sourcepath=$ENV_FOLDER/$ENV_CONDA_FILE;]Failed to build the environment indicated using conda. CondaEnvException happened"
+            BUILD_OK=false
+          fi
+
+          if ! [[ $(conda env list --json | jq -r --arg ENV_NAME $ENV_NAME '.envs[] | select(endswith($ENV_NAME))') ]]; then
+            echo "##vso[task.logissue type=error;sourcepath=$ENV_FOLDER/$ENV_CONDA_FILE;]Failed to build the environment indicated using conda"
+            BUILD_OK=false
+          fi
+        done
+
+        if ! $BUILD_OK ; then
+          return -1
+        fi
+        
