@@ -43,7 +43,7 @@ stages:
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
           name: ${{ variables.modelName}}
-          jobFile: jobs/hatedetection/tune.job.yml
+          jobFile: jobs/hatedetection/train.job.yml
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
           noWait: false
