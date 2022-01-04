@@ -26,7 +26,7 @@ stages:
       - template: templates/aml-dataset-create/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
-          datasetFile: services/post-processing/source/datasets/*/dataset.yml
+          datasetFile: datasets/*/dataset.yml
           initialize: true
           initialDataPath: data
           storageAccount: $(STORAGEACCOUNTNAME)

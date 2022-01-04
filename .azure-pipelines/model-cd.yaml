@@ -27,7 +27,7 @@ stages:
       - template: templates/aml-env-ensure/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
-          envFile: services/post-processing/source/environments/${{ variables.condaEnvName }}/environment.yml
+          envFile: environments/${{ variables.condaEnvName }}/environment.yml
           validateOnly: true
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
@@ -35,7 +35,7 @@ stages:
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
           name: ${{ variables.modelName }}
-          jobFile: services/post-processing/source/jobs/hatedetection/tune.job.yml
+          jobFile: jobs/hatedetection/tune.job.yml
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
           noWait: false
@@ -68,7 +68,7 @@ stages:
                 modelVersion: latest
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)
-                workspaceConfig: services/post-processing/source/workspaces/dev/workspace.json
+                workspaceConfig: workspaces/dev/workspace.json
 
 - stage: aml_model_evaluate
   displayName: Model - Evaluation
@@ -83,7 +83,7 @@ stages:
       - template: templates/aml-env-ensure/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
-          envFile: services/post-processing/source/environments/${{ variables.condaEnvName}}/environment.yml
+          envFile: environments/${{ variables.condaEnvName}}/environment.yml
           validateOnly: true
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
@@ -93,11 +93,11 @@ stages:
           modelName: ${{ variables.modelName }}
           champion: current
           challenger: latest
-          endpoint: services/post-processing/source/endpoints/hate-pt-speech/endpoint.yml
+          endpoint: endpoints/hate-pt-speech/endpoint.yml
           compareBy: eval_recall
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
-          workspaceConfig: services/post-processing/source/workspaces/dev/workspace.json
+          workspaceConfig: workspaces/dev/workspace.json
 
 - stage: aml_model_deployment
   displayName: Model - Deployment
@@ -119,7 +119,7 @@ stages:
             - template: templates/aml-endpoint-deploy/step.yaml
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)
-                endpointFile: services/post-processing/source/endpoints/*/endpoint.yml
+                endpointFile: endpoints/*/endpoint.yml
                 deploymentFile: deployments/*.yml
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)

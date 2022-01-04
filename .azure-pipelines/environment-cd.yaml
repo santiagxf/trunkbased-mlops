@@ -4,7 +4,7 @@ trigger:
     - main
   paths:
     include:
-    - services/post-processing/source/environments/*
+    - environments/*
 
 pool:
   vmImage: ubuntu-latest
@@ -25,7 +25,7 @@ stages:
           minVersion: 2.0
       - template: templates/aml-env-ensure/step.yaml
         parameters:
-          envFile: services/post-processing/source/environments/*/environment.yml
+          envFile: environments/*/environment.yml
           validateOnly: false
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)

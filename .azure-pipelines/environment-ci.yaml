@@ -19,11 +19,11 @@ stages:
           minVersion: 2.0
       - template: templates/aml-env-build/step.yaml
         parameters:
-          envFile: services/post-processing/source/environments/*/environment.yml
+          envFile: environments/*/environment.yml
       - template: templates/aml-env-ensure/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
-          envFile: services/post-processing/source/environments/*/environment.yml
+          envFile: environments/*/environment.yml
           validateOnly: true
           failOnMissing: false
           workspaceName: $(WORKSPACENAME)
