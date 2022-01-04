@@ -4,18 +4,7 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-- name: SERVICECONNECTION
-  value: rg-dataplatform-dev
-- name: WORKSPACENAME
-  value: aa-ml-aml-workspace-dev
-- name: RESOURCEGROUPNAME
-  value: Analytics.Aml.Experiments.Workspaces
-- name: modelName
-  value: hate-pt-speech
-- name: condaEnvName
-  value: transformers-torch-19
-- name: env
-  value: dev
+  - template: variables.group.yaml
 
 stages:
 - stage: aml_model_integrate

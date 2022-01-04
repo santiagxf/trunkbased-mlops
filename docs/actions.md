@@ -205,7 +205,8 @@ Compares two model versions, a champion and a challenger, based on a given metri
 | modelName                  | Name of the model.  | Yes | 
 | champion                   | Version of the model that is acting as the champion. It can be indicated using a given model version, like 22, or using tokens like `current` indicating the current deployed version in a given endpoint/deployment. If indicated with `current`, then `endpoint` parameter should be specified. If `current` is indicated and there is no model deployed in `endpoint` then the comparison will always vote for challenger. | Yes |
 | challenger                 | Version of the model that is acting as the challenger. It can be indicated using a given model version, like 22, or using tokens like `latest` indicating the latest version of the model in the registry. Defaults to `latest`. | Yes |
-| endpoint                   | The name of the endpoint where the model is being deployed later. This is used to infer which is the current version of the model. The first deployment will be used if `deployment` is not indicated. This parameter is required if `champion` is `current`. | No |
+| endpoint                   | The path of the endpoint `YAML` file. This is used to infer which is the current version of the model. The first deployment will be used if `deployment` is not indicated. This parameter is required if `champion` is `current`. | No |
+| deployment                 | The name of the deployment inside the given endpoint to get the model from. If this parameter is not indicated but an endpoint has been specified, then the first available endpoint is used inside the endpoint. | No |
 | compareBy                  | The name of the metric used to compare the models. This metric should be logged in the runs that generated the given models. Defaults to `accuracy` | Yes |
 | greaterIsBetter            | Indicates if greater values of the metric `compareBy` are better. Defaults to `true`. | Yes |
 | workspaceName              | Name of the workspace to work against. | Yes |
@@ -267,7 +268,7 @@ Deploys a model endpoint in Azure Machine Learning Services all along with all t
 | workspaceName              | Name of the workspace to work against. | Yes |
 | resourceGroup              | Name of the resource group where the workspace is placed. | Yes |
 | noWait                     | Indicates if the action should not wait for the deployment to finish. If `true`, logs are not captured. | Yes |
-| secretsToKeyVault          | Indicates if the `scoring url` and the `scoring key` should be uploaded to Azure Key Vault. | No |
+| secretsToKeyVault          | Indicates if the `scoring url` and the `scoring key` should be uploaded to Azure Key Vault. Secrets naming convention is "<ENDPOINT_NAME>_SCORING_URL" and "<ENDPOINT_NAME>_SCORING_KEY" | No |
 | keyVaultName               | The name of the key vault to use. Required if `secretsToKeyVault` is `true`. | No | 
 
 **Sample usage**

@@ -85,8 +85,8 @@ steps:
         
           if ${{ lower(parameters.secretsToKeyVault) }}; then
             echo "##[debug]Uploading secrets to key vault ${{ parameters.keyVaultName }}"
-            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name 'ScoringUri' --value $SCORING_URI
-            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name 'ScoringKey' --value $SCORING_KEY
+            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '$ENDPOINT_NAME_SCORING_URL' --value $SCORING_URI
+            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '$ENDPOINT_NAME_SCORING_KEY' --value $SCORING_KEY
           fi
           echo "##[debug]Endpoint evaluation completed"
         done

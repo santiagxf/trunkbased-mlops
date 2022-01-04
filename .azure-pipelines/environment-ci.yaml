@@ -4,12 +4,7 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
-- name: SERVICECONNECTION
-  value: rg-dataplatform-dev
-- name: WORKSPACENAME
-  value: aa-ml-aml-workspace-dev
-- name: RESOURCEGROUPNAME
-  value: Analytics.Aml.Experiments.Workspaces
+  - template: variables.group.yaml
 
 stages:
 - stage: aml_ensure_env
