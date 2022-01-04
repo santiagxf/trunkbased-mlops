@@ -1,3 +1,6 @@
 # Python
 .pytest_cache/
 .ipynb_checkpoints/
+
+# VSCode
+.vscode
