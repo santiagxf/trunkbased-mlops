@@ -38,4 +38,4 @@ The workspace profile is used in order to provide conectivity with the workspace
 
 ## Next steps
 
-After you are done, you will have to follow some configuration related to the CI/CD implementation. That will depend on the tool you are using. Follow [Quick start guide for Azure DevOps](docs/quickstart-devops.md) and [Quick start guide for GitHub Actions](docs/quickstart-github.md) depending which one you are using.
+After you are done, you will have to follow some configuration related to the CI/CD implementation. That will depend on the tool you are using. Follow [Quick start guide for Azure DevOps](quickstart-devops.md) and [Quick start guide for GitHub Actions](quickstart-github.md) depending which one you are using.
