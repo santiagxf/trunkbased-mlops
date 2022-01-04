@@ -22,10 +22,13 @@ If we see this in a different perspective, that means that `main` always contain
 
 > Note that this doesn’t mean that `main` is actually always deployed. The current version of the model in production may be different to the one in main since that depends on how delivery and releasing is happening.
 
+## About the sample model
+
+To ilustrate the use of this repository, we are including a sample project that tries to create a model to detect hate speech in tweet text in portuguese. The models uses `PyTorch` and the `transformers` library from `huggingface` to create a language model based on `BERT`. There are a lot of details about how this model is structured in a way to ensure good coding practices. For more information about that please check [Hate detection model details](docs/model.md)
 
 ## CI/CD
 
-In the folder `azure-pipelines` you will find the following pipelines available:
+In the folder `.azure-pipelines` (for Azure DevOps) and in the folder `.github` (for GitHub Actions) you will find the following pipelines available:
 
 ### Workspaces
 
@@ -87,7 +90,7 @@ For a detail of the actions used to implement this pipelines see [Custom Actions
 
 ## Starting using this project
 
-To get yourself started using this repository, please follow the steps at [quick start guide](docs/quickstart.md).
+To get yourself started using this repository, please follow the steps at [Quick start](docs/quickstart.md). After you are done, you will have to follow some configuration related to the CI/CD implementation. That will depend on the tool you are using. Follow [Quick start guide for Azure DevOps](docs/quickstart-devops.md) and [Quick start guide for GitHub Actions](docs/quickstart-github.md) depending which one you are using.
 
 ## Contributing
 
