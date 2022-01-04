@@ -1,5 +1,5 @@
 {
     "subscription_id": "18522758-626e-4d88-92ac-dc9c7a5c26d4",
-    "resource_group": "aa-ml-aml-workspace-dev",
-    "workspace_name": "Analytics.Aml.Experiments.Workspaces"
+    "resource_group": "mlops-trunkbased-dev",
+    "workspace_name": "mlw-trunkbased-dev"
 }
