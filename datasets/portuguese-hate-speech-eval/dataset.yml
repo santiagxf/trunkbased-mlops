@@ -3,4 +3,4 @@ name: portuguese-hate-speech-eval
 description: Dataset containing the evaluation text to compute metrics.
 version: 1
 paths:
-  - file: azureml://datastores/trusted/paths/datasets/relatus-hate-speech-eval/1/*.csv
+  - file: azureml://datastores/trusted/paths/datasets/portuguese-hate-speech-eval/1/*.csv
