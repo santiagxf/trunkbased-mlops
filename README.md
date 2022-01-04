@@ -33,7 +33,8 @@ In the folder `.azure-pipelines` (for Azure DevOps) and in the folder `.github` 
 ### Workspaces
 
 - **Workspace-CD:** Performs deployments and initialization of some of the elements of the workspace. Particularly:
-    - **Datasets:** Ensures that datasets are created and available in the workspace. If they are not, they are initialized with data in the current git repository. Then datasets will be updated with live data coming from the Azure PostgreSQL database.
+    - **Infrastructure:** Infraestructure should be deployed by code under IaC. This step will be included soon in the repo. Please create assets manually by the time being.
+    - **Datasets:** Ensures that datasets are created and available in the workspace. If they are not, they are initialized with data in the current git repository. For datasets that evolve over time, this pipeline will just create the initial version and the registration. You can leverage tools like Azure Data Factory to move data to the datasets and update the versions. This is outside of the scope of this repository right now but will be shared soon.
 
 
 ### Environments:
