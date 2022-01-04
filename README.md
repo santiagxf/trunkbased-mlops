@@ -1,14 +1,18 @@
+[![Build Status](https://santiagxf.visualstudio.com/trunkbased-mlops/_apis/build/status/workspace-CD?branchName=main)](https://santiagxf.visualstudio.com/trunkbased-mlops/_build/latest?definitionId=15&branchName=main)
+[![Build Status](https://santiagxf.visualstudio.com/trunkbased-mlops/_apis/build/status/environment-CD?branchName=main)](https://santiagxf.visualstudio.com/trunkbased-mlops/_build/latest?definitionId=12&branchName=main)
+[![Build Status](https://santiagxf.visualstudio.com/trunkbased-mlops/_apis/build/status/model-CD?branchName=main)](https://santiagxf.visualstudio.com/trunkbased-mlops/_build/latest?definitionId=14&branchName=main)
+
 # Trunk-based development for Machine Learning models with Azure Machine Learning
 
-This repository contains an example about how to use trunk-based development in a Machine Learning project. It demostrates how the workflow should follow in a sample project that would seek to deploy an ML model able to detect hate speech in tweets in the portuguese language. The repository also contains implementations of CI/CD pipelines to do continuous integration and deployment off all the assets required for the solution using Azure Machine Learning as the ML platform and Azure DevOps as the CI/CD solution. An implementation using GitHub Actions will be posted soon.
+This repository contains an example about how to use trunk-based development in a Machine Learning project. It demostrates how apply the workflow in a sample machine learning project. The model we implemented here is a hate detection model for tweets in the portuguese language. The repository also contains implementations of CI/CD pipelines to do continuous integration and deployment off all the assets required for the solution using Azure Machine Learning as the ML platform and Azure DevOps as the CI/CD solution. An implementation using GitHub Actions will be posted soon.
 
 ## Motivation
 
 As always, technology is applied in the context of people and processes and there are no exceptions to this rule. A common pitfall when trying to use a git repository in a new ML project is to do so without any clear rules about how the repository should be used or how changes should be posted (committed). In the software development world, this is know as a workflow.
 
-For a more in depth introduction an explanation about the need of a git workflow and how trunk-based development works please visit the following post: [Put git to work for a Machine Learning projects: How to implement truck-based development for Machine Learning models projects](https://santiagof.medium.com/put-git-to-work-for-a-machine-learning-projects-8ab79939b88d)
+For a more in depth introduction an explanation about the need of a git workflow and how trunk-based development works please visit the following post: [Put git to work for a Machine Learning projects: How to implement trunk-based development for Machine Learning models projects](https://santiagof.medium.com/put-git-to-work-for-a-machine-learning-projects-8ab79939b88d)
 
-## Landing truck-based development in ML projects
+## Landing trunk-based development in ML projects
 
 Machine Learning models are a combination of data and code. As a consecuence, versioning the code is not enought nor versioning the data. In git workflow, `main` represents the official history of the solution, in our case the model, and should always be deployable. How can we make `main` always deployable considering that what we want to deploy is not the source code but the model? The model itself, which is the output of the training process, is the result of combining the model source code with the data.
 
