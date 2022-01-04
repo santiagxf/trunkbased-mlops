@@ -36,4 +36,6 @@ The workspace profile is used in order to provide conectivity with the workspace
 4. Save the file in the repository on the folder `workspaces/dev`.
 5. Commit the changes.
 
+## Next steps
 
+After you are done, you will have to follow some configuration related to the CI/CD implementation. That will depend on the tool you are using. Follow [Quick start guide for Azure DevOps](docs/quickstart-devops.md) and [Quick start guide for GitHub Actions](docs/quickstart-github.md) depending which one you are using.
