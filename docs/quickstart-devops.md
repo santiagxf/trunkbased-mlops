@@ -36,6 +36,23 @@ The following variables are also present, but are specific to the project you ar
 - description: Description of the model you are building.
 - condaEnvName: Name of the environment that the model uses for training. This environment should match any of the environments that are available under the folder `environments`.
 
+## Configure secrets
+
+Infrastructure is deployed automatically by IaC pipelines. However, some secrets are required and needs to be provided in the form of Azure DevOps Variable Group. To configure that:
+
+1. On Azure DevOps, on the `Pipelines` tab, go to `Library`.
+2. Click on `+ Variable group`.
+3. Named secrets and configure the following secrets:
+
+    - datasetsClientId: The Client ID of the service principal created before.
+    - datasetsClientSecret: The Client Secret of the service principal created before.
+    - computeAdminUserName: The user name of the compute instances you want to use. For instance `mladmin`.
+    - computeAdminUserPassword: The password used for compute instances. For instance `Pass@word1`.
+
+It should look like something like this:
+
+![](assets/devops-secrets.png)
+
 
 ## Create the pipelines
 

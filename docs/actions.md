@@ -343,3 +343,38 @@ Run lintering over the source code.
     condaEnvName: cicd
     disable: W1203,C0103
 ```
+
+
+## azure-arm-template-deployment
+
+Deploys resources using ARM templates at the resource group level.
+
+**Inputs**
+
+| Parameter                  | Description | Required |
+|----------------------------|-------------|----------|
+| azureServiceConnectionName | Service connection used to connect with Azure. | Yes |
+| resourceGroup              | Resource group where resources will be placed.  | Yes | 
+| location                   | Location where resources will be placed. See Azure supported regions for a list of possibe values | Yes |
+| deploymentName             | Discplay name for the deployment. | Yes |
+| templateFile               | `JSON` ARM template. This template will be created as a Template resource in the resource group mentioned. | Yes |
+| templateVersion            | Version of the template your are creating. Defaults to `1.0`. | No |
+| parametersFile             | `JSON` ARM template parameters file. | Yes |
+| secureParameters           | If parameters of type `secureString` are specified, pass them here. Use the format `parameter1=value1 parameter2=value2`. | No | 
+
+**Sample usage**
+
+> Deploy resources with `secureString` paramters.
+
+```yml
+- template: templates/azure-arm-template-deployment/action.yaml
+  parameters:
+    azureServiceConnectionName: $(SERVICECONNECTION)
+    resourceGroup: my-resourcegroup-dev
+    location: eastus2
+    deploymentName: mydeployment
+    templateFile: workspaces/templates/deploy.json
+    templateVersion: 1.0
+    parametersFile: workspaces/dev/deploy.parameters.json
+    secureParameters: computeAdminUserName=$(computeAdminUserName) computeAdminUserPassword=$(computeAdminUserPassword)
+```

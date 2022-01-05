@@ -36,9 +36,11 @@ In the folder `.azure-pipelines` (for Azure DevOps) and in the folder `.github` 
 
 ### Workspaces
 
-- **Workspace-CD:** Performs deployments and initialization of some of the elements of the workspace. Particularly:
-    - **Infrastructure:** Infraestructure should be deployed by code under IaC. This step will be included soon in the repo. Please create assets manually by the time being.
-    - **Datasets:** Ensures that datasets are created and available in the workspace. If they are not, they are initialized with data in the current git repository. For datasets that evolve over time, this pipeline will just create the initial version and the registration. You can leverage tools like Azure Data Factory to move data to the datasets and update the versions. This is outside of the scope of this repository right now but will be shared soon.
+- **Workspace-CD:** Performs deployments and initialization of some of the elements of the workspace.
+    - **Triggers on:** `main` for changes in path `datasets/*` and `workspaces/templates/*`
+    - **Actions:**
+        - **Infrastructure:** Infraestructure is deployed by code under IaC. The ARM templates are located in the folder `workspaces`.
+        - **Datasets:** Ensures that datasets are created and available in the workspace. If they are not, they are initialized with data in the current git repository. For datasets that evolve over time, this pipeline will just create the initial version and the registration. You can leverage tools like Azure Data Factory to move data to the datasets and update the versions. This is outside of the scope of this repository right now but will be shared soon.
 
 
 ### Environments:
@@ -69,7 +71,7 @@ In the folder `.azure-pipelines` (for Azure DevOps) and in the folder `.github` 
         - Publish logs into the assets of the pipeline.
         - Capture metrics, parameters and models and register them in the experiment.
 - **Model-CD:** This pipeline is responsable of continuously building and deploying the last version of the model accourding to `main`. 
-    - **Triggers on:** `main` for changes in path `src/*` and when new versions of the datasets are available.
+    - **Triggers on:** `main` for changes in path `src/*` and `jobs/*`.
     - **Actions:**
         - Stage 1: Model build
             - Ensure the environment for training exists in Azure ML with the right version.
