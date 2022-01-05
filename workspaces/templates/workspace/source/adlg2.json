@@ -89,9 +89,7 @@
 		}
 	},
 	"variables": {
-        "tenantId": "[subscription().tenantId]",
-        "storageAccountSubscriptionId": "[subscription().subscriptionId]",
-        "storageAccountResourceGroup": "[resourceGroup().name]"
+        "tenantId": "[subscription().tenantId]"
     },
 	"resources": [
 		{
@@ -109,8 +107,8 @@
 				"TenantId": "[variables('tenantId')]",
 				"ResourceUrl": "[parameters('resourceUrl')]",
 				"AuthorityUrl": "[parameters('authorityUrl')]",
-				"SubscriptionId": "[variables('storageAccountSubscriptionId')]",
-				"ResourceGroupName": "[variables('storageAccountResourceGroup')]"
+				"SubscriptionId": "[parameters('storageAccountSubscriptionId')]",
+				"ResourceGroupName": "[parameters('storageAccountResourceGroup')]"
 			}
 		}
 	]

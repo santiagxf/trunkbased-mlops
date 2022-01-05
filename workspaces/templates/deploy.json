@@ -209,6 +209,9 @@
                     "datastoreName": {
                         "value": "trusted"
                     },
+                    "storageAccountResourceGroup": {
+                        "value": "[parameters('datasetsResourceGroup')]"
+                    },
                     "accountName": {
                         "value": "[parameters('datasetsAccountName')]"
                     },
