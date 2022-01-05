@@ -268,7 +268,7 @@ Deploys a model endpoint in Azure Machine Learning Services all along with all t
 | workspaceName              | Name of the workspace to work against. | Yes |
 | resourceGroup              | Name of the resource group where the workspace is placed. | Yes |
 | noWait                     | Indicates if the action should not wait for the deployment to finish. If `true`, logs are not captured. | Yes |
-| secretsToKeyVault          | Indicates if the `scoring url` and the `scoring key` should be uploaded to Azure Key Vault. Secrets naming convention is "<ENDPOINT_NAME>_SCORING_URL" and "<ENDPOINT_NAME>_SCORING_KEY" | No |
+| secretsToKeyVault          | Indicates if the `scoring url` and the `scoring key` should be uploaded to Azure Key Vault. Secrets naming convention is `<ENDPOINT_NAME>_scoringUrl` and `<ENDPOINT_NAME>_scoringKey` | No |
 | keyVaultName               | The name of the key vault to use. Required if `secretsToKeyVault` is `true`. | No | 
 
 **Sample usage**
