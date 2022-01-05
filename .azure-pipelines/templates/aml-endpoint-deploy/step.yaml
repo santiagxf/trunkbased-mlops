@@ -38,9 +38,12 @@ steps:
         do
           ENDPOINT_FOLDER=$(dirname $ENDPOINT_FILE)
           ENDPOINT_NAME=$(yq -r ".name" $ENDPOINT_FILE)
+
           echo "##[debug]Creating endpoint with name: $ENDPOINT_NAME"
-        
-          SCORING_URI=$(az ml online-endpoint create -f $ENDPOINT_FILE | jq -r '.scoring_uri')
+          az ml online-endpoint create -f $ENDPOINT_FILE
+
+          echo "##[debug]Retrieving URL and credentials"
+          SCORING_URI=$(az ml online-endpoint show -n $ENDPOINT_NAME | jq -r ".scoring_uri")
           SCORING_KEY=$(az ml online-endpoint get-credentials -n $ENDPOINT_NAME -o tsv --query primaryKey)
             
           echo "##[debug]Looking for deployments in folder $ENDPOINT_FOLDER/${{ parameters.deploymentFile }}"
@@ -88,8 +91,8 @@ steps:
         
           if ${{ lower(parameters.secretsToKeyVault) }}; then
             echo "##[debug]Uploading secrets to key vault ${{ parameters.keyVaultName }}"
-            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '$ENDPOINT_NAME_scoringUrl' --value $SCORING_URI
-            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '$ENDPOINT_NAME_scoringKey' --value $SCORING_KEY
+            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '$ENDPOINT_NAME-scoringUrl' --value $SCORING_URI
+            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '$ENDPOINT_NAME-scoringKey' --value $SCORING_KEY
           fi
 
           if [[ "${{ parameters.sampleRequest }}" != "" ]]; then
