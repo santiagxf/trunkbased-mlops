@@ -6,8 +6,8 @@ trainer:
     output_dir: './results'
     logging_dir: './logs'
     num_train_epochs: 3
-    per_device_train_batch_size: 256
-    per_device_eval_batch_size: 256
+    per_device_train_batch_size: 64
+    per_device_eval_batch_size: 64
     warmup_steps: 500
     weight_decay: 0.01
 data:
