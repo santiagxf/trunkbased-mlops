@@ -71,9 +71,9 @@ steps:
         
             echo "##[debug]Creating deployment with name: $ENDPOINT_NAME/$DEPLOYMENT_NAME"
             if ${{ lower(parameters.noWait) }}; then
-              az ml online-deployment create -f $DEPLOYMENT_FILE --no-wait
+              az ml online-deployment create -f $DEPLOYMENT_FILE --only-show-errors --no-wait
             else
-              az ml online-deployment create -f $DEPLOYMENT_FILE
+              az ml online-deployment create -f $DEPLOYMENT_FILE --only-show-errors
   
               echo "##[debug]Adquiring logs for deployment with name: $ENDPOINT_NAME/$DEPLOYMENT_NAME"
               mkdir -p logs
