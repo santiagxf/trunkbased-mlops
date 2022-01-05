@@ -34,7 +34,7 @@ steps:
 
         SPECIFICATION_ID=$(az ts list --resource-group ${{ parameters.resourceGroup }} | jq '.[0].id')
         
-        if [[ "${{ parameters.secureParameters }}" == "" ]]
+        if [[ "${{ parameters.secureParameters }}" == "" ]]; then
           az deployment group create --resource-group ${{ parameters.resourceGroup }} \
                                      --name deployment01 \
                                      --template-spec $SPECIFICATION_ID/versions/${{ parameters.templateVersion }} \
