@@ -23,7 +23,7 @@ The automated pipelines provided in this repository will require credentials to 
 Ensure the service principal created before has the following permissions:
 
  - At least `contribute` acccess to the resource group you created before.
- - At least `contribute` access to the Azure Storage Account mentioned as prerequisite in point #3.
+ - At least `contribute` and `Storage Blob Data Reader` access to the Azure Storage Account mentioned as prerequisite in point #3.
 
 To add role assignments to Azure resources follow the guide: [Assign Azure roles using the Azure portal](https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-portal?tabs=current).
 
