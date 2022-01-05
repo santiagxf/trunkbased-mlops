@@ -9,6 +9,8 @@ variables:
   value: aamldatalake
 - name: LOCATION
   value: eastus2
+- name: KEYVAULTNAME
+  value: kv-trunkbased-dev
 - name: env
   value: dev
 - name: modelName
