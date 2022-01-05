@@ -64,4 +64,4 @@ steps:
 
   - bash: echo "##vso[task.prependpath]$CONDA/bin"
     displayName: Preparing conda
-    condition: ne(parameters.initConda,true)
+    condition: and(succeeded(), eq(${{ parameters.initConda }}, 'true'))
