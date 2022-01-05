@@ -5,6 +5,9 @@ parameters:
 - name: minVersion
   type: string
   default: '2.0'
+- name: initConda
+  type: boolean
+  default: true
 
 steps:
   - task: Bash@3
@@ -61,3 +64,4 @@ steps:
 
   - bash: echo "##vso[task.prependpath]$CONDA/bin"
     displayName: Preparing conda
+    condition: ne(parameters.initConda,true)

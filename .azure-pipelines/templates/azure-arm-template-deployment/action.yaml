@@ -16,6 +16,7 @@ parameters:
     type: string
   - name: secureParameters
     type: string
+    default: 
   
 steps:
   - task: AzureCLI@2

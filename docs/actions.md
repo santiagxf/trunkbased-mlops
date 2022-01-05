@@ -2,6 +2,31 @@
 
 The following actions are available in this repository and allows to build CI/CD pipelines for automation.
 
+## aml-cli-install
+
+Install the Azure CLI, Azure Machine Learning CLI, and all the required tools. It also configured conda if indicated.
+
+**Inputs**
+
+| Parameter              | Description | Required |
+|------------------------|-------------|----------|
+| componentSupport       | Indicates if components (aka modules) support should be enabled in the CLI. Defaults to `false` | Yes |
+| minVersion             | Minimum version of Azure CLI to install. Defaults to `2.0`.   | Yes |
+| initConda              | Indicates if conda should be initialized. Defaults to `true`. | Yes |
+
+
+**Sample usage**
+
+> Configure Azure ML CLI in preview (2.0) and initializes conda.
+
+```yml
+- template: templates/aml-cli-install/step.yaml
+  parameters:
+    componentSupport: false
+    minVersion: 2.0
+    condaInit: true
+```
+
 ## aml-env-build
 
 Builds an Azure ML Environment in the local instance using `conda` and checks that the builds are completed without errors. If a library can't be installed, this action will fail. Note that this build action only can build environments inside the agent running the action. Building the environment in a `container` is not supported by the moment but in roadmap.
@@ -90,7 +115,7 @@ Ensure that a given dataset exists in Azure Machine Learning Services. If the da
 | Parameter                  | Description | Required |
 |----------------------------|-------------|----------|
 | azureServiceConnectionName | Service connection used to connect with Azure. | Yes | 
-| datasetFile                | Dataset YAML definition file. Wildcard paths are supported | Yes | 
+| datasetFile                | Dataset YAML definition file. Wildcard paths are supported. | Yes | 
 | initialize                 | Indicates if the dataset should be initialized with same data in the current repository. Defaults to `false`. | No |
 | initialDataPath            | Path where the data is located. This path is relative to the location of the dataset YAML definition file. Required if `initialize` is set to `true`. Defaults to `data`. | No |
 | storageAccount             | Name of the storage account where data should be uploaded. This storage account should be also registered in Azure Machine Learning as a data store. Required if `initialize` is set to `true`. | No |
@@ -356,7 +381,7 @@ Deploys resources using ARM templates at the resource group level.
 | azureServiceConnectionName | Service connection used to connect with Azure. | Yes |
 | resourceGroup              | Resource group where resources will be placed.  | Yes | 
 | location                   | Location where resources will be placed. See Azure supported regions for a list of possibe values | Yes |
-| deploymentName             | Discplay name for the deployment. | Yes |
+| deploymentName             | Display name for the deployment. | Yes |
 | templateFile               | `JSON` ARM template. This template will be created as a Template resource in the resource group mentioned. | Yes |
 | templateVersion            | Version of the template your are creating. Defaults to `1.0`. | No |
 | parametersFile             | `JSON` ARM template parameters file. | Yes |
