@@ -99,6 +99,32 @@ For a detail of the actions used to implement this pipelines see [Custom Actions
 
 To get yourself started using this repository, please follow the steps at [Quick start](docs/quickstart.md). After you are done, you will have to follow some configuration related to the CI/CD implementation. That will depend on the tool you are using. Follow [Quick start guide for Azure DevOps](docs/quickstart-devops.md) and [Quick start guide for GitHub Actions](docs/quickstart-github.md) depending which one you are using.
 
+
+## Known issues
+
+### #1 Pipeline `workspace-CD` failed in the datasets initialization steps with the error `trusted data source not found`
+
+This issue looks to be related to a race condition in Azure Machine Learning. The data store created by ARM templates is created, but it looks that it is not ready to be used right after. The workaround to this issue is to re-run the pipeline. It will work next time.
+
+### #2 Access denied errors when trying to preview datasets right after deployment
+
+This issue, again, looks to be related to a race condition. It take same time to Azure ML to propagate permissions. Wait 15 minutes and try again.
+
+### #3 Metrics are not being logged when using the library `common` provided in this repository
+
+This issue is still under investigation. The workaround is to add an `sleep(5)` at the end of your training script to delay the execution.
+
+```python
+from time import sleep
+from common.jobs.runner import TaskRunner
+from hatedetection.train.trainer import train_and_evaluate
+
+if __name__ == "__main__":
+    tr = TaskRunner()
+    tr.run_and_log(train_and_evaluate)
+    sleep(5)
+```
+
 ## Contributing
 
 This project welcomes contributions and suggestions.  Most contributions require you to agree to a

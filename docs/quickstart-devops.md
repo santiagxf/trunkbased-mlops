@@ -24,17 +24,17 @@ The automated pipelines in this repository will use a set of variables to config
 
 Open the file `.azure-pipelines/variables.group.yml` and review the values of the following variables. Save the changes in this file and commit the changes to the repo.
 
-- SERVICECONNECTION: It is the name of the service connection you created in the previous step.
-- WORKSPACENAME: The name of the Azure Machine Learning workspace you want to use.
-- RESOURCEGROUPNAME: The name of the resource group where the resources are located.
-- STORAGEACCOUNTNAME: The name of the storage account where you want datasets to be placed. This datastorage account has to have a container named `trusted` and be configured as a data source in Azure Machine Learning with the name `trusted`.
+- `SERVICECONNECTION`: It is the name of the service connection you created in the previous step.
+- `WORKSPACENAME`: The name of the Azure Machine Learning workspace you want to use.
+- `RESOURCEGROUPNAME`: The name of the resource group where the resources are located.
+- `STORAGEACCOUNTNAME`: The name of the storage account where you want datasets to be placed. This datastorage account has to have a container named `trusted` and be configured as a data source in Azure Machine Learning with the name `trusted`.
 
 The following variables are also present, but are specific to the project you are working on.
 
-- env: Name of the environment. By default its `dev` reffering to `development`. Possible values can be `qa`, `stg` and `prd`.
-- modelName: The name of the model you are building. 
-- description: Description of the model you are building.
-- condaEnvName: Name of the environment that the model uses for training. This environment should match any of the environments that are available under the folder `environments`.
+- `env`: Name of the environment. By default its `dev` reffering to `development`. Possible values can be `qa`, `stg` and `prd`.
+- `modelName`: The name of the model you are building. 
+- `description`: Description of the model you are building.
+- `condaEnvName`: Name of the environment that the model uses for training. This environment should match any of the environments that are available under the folder `environments`.
 
 ## Configure secrets
 
@@ -44,10 +44,10 @@ Infrastructure is deployed automatically by IaC pipelines. However, some secrets
 2. Click on `+ Variable group`.
 3. Named secrets and configure the following secrets:
 
-    - datasetsClientId: The Client ID of the service principal created before.
-    - datasetsClientSecret: The Client Secret of the service principal created before.
-    - computeAdminUserName: The user name of the compute instances you want to use. For instance `mladmin`.
-    - computeAdminUserPassword: The password used for compute instances. For instance `Pass@word1`.
+    - `datasetsClientId`: The Client ID of the service principal created before.
+    - `datasetsClientSecret`: The Client Secret of the service principal created before.
+    - `computeAdminUserName`: The user name of the compute instances you want to use. For instance `mladmin`.
+    - `computeAdminUserPassword`: The password used for compute instances. For instance `Pass@word1`.
 
 It should look like something like this:
 

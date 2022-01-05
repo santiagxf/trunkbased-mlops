@@ -74,7 +74,7 @@ steps:
         echo "##[debug]CHALLENGER is version:$CHALLENGER"
 
         echo "##[debug]Comparing models by ${{ parameters.compareBy }}"
-        python $(Build.SourcesDirectory)/services/post-processing/source/.azure-pipelines/templates/aml-model-compare/compare.py \
+        python $(Build.SourcesDirectory)/.azure-pipelines/templates/aml-model-compare/compare.py \
           --ws-config ${{ parameters.workspaceConfig }} \
           --model-name ${{ parameters.modelName }} \
           --champion $CHAMPION \

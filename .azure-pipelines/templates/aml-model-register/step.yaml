@@ -39,7 +39,7 @@ steps:
         pip install azureml-core==1.37.0
         pip install azure-cli-core==2.30.0
         
-        python $(Build.SourcesDirectory)/services/post-processing/source/.azure-pipelines/templates/aml-model-register/register.py \
+        python $(Build.SourcesDirectory)/.azure-pipelines/templates/aml-model-register/register.py \
           --ws-config ${{ parameters.workspaceConfig }} \
           --name ${{ parameters.name }} \
           --version ${{ parameters.modelVersion }} \
