@@ -57,7 +57,7 @@ steps:
             CHAMPION=$(basename $CHAMPION_MODEL)
           else
             echo "##vso[task.logissue type=warning;]There are no models deployed at endpoint $ENDPOINT_NAME. Model will be deployed without compare."
-            echo "##vso[task.setvariable variable=result;isOutput=true]1"
+            echo "##vso[task.setvariable variable=result;isOutput=true]true"
             exit 0
           fi
         else
