@@ -102,7 +102,7 @@ stages:
 - stage: aml_model_deployment
   displayName: Model - Deployment
   dependsOn: aml_model_evaluate
-  condition: eq(stageDependencies.aml_model_evaluate.evaluate.outputs['compare.result'], 'true')
+  condition: and(succeeded(), eq(dependencies.aml_model_evaluate.outputs['evaluate.compare.result'], 'true'))
   jobs:
   - deployment: model_deployment
     displayName: Model deployment
