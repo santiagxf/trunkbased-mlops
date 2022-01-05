@@ -32,7 +32,7 @@ steps:
                      --template-file ${{ parameters.templateFile }} \
                      --yes
 
-        SPECIFICATION_ID=$(az ts list --resource-group ${{ parameters.resourceGroup }} | jq '.[0].id')
+        SPECIFICATION_ID=$(az ts list --resource-group ${{ parameters.resourceGroup }} | jq -r '.[0].id')
         
         if [[ "${{ parameters.secureParameters }}" == "" ]]; then
           az deployment group create --resource-group ${{ parameters.resourceGroup }} \
