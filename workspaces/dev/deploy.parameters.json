@@ -3,19 +3,13 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "location": {
-            "value": "eastus"
+            "value": "eastus2"
         },
         "workspaceName": {
             "value": "mlw-trunkbased-dev"
         },
         "resourceGroupName": {
             "value": "mlops-trunkbased-dev"
-        },
-        "computeAdminUserName": {
-            "value": "mladmin"
-        },
-        "computeAdminUserPassword": {
-            "value": "Pass@word1"
         },
         "cpuTrainComputeSize": {
             "value": "STANDARD_D12"
@@ -37,12 +31,6 @@
         },
         "datasetsFileSystem": {
             "value": "trusted"
-        },
-        "datasetsClientId": {
-            "value": "9ae925ab-0c61-46d4-b09f-499c8d8ded58"
-        },
-        "datasetsClientSecret": {
-            "value": "MDN7Q~47Khpbav9dFWxY~KTisw1EznfistLeJ"
         }
     }
 }

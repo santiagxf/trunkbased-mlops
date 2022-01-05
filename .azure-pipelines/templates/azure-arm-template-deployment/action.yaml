@@ -14,6 +14,8 @@ parameters:
     default: 1.0
   - name: parametersFile
     type: string
+  - name: secureParameters
+    type: string
   
 steps:
   - task: AzureCLI@2
@@ -23,6 +25,24 @@ steps:
       scriptLocation: inlineScript
       azureSubscription: ${{ parameters.azureServiceConnectionName }}
       inlineScript: |
-        az ts create --name ${{ parameters.deploymentName }} --version "${{ parameters.templateVersion }}" --resource-group ${{ parameters.resourceGroup }} --location ${{ parameters.location }} --template-file ${{ parameters.templateFile }} --yes
+        az ts create --name ${{ parameters.deploymentName }} \
+                     --version "${{ parameters.templateVersion }}" \
+                     --resource-group ${{ parameters.resourceGroup }} \
+                     --location ${{ parameters.location }} \
+                     --template-file ${{ parameters.templateFile }} \
+                     --yes
+
         SPECIFICATION_ID=$(az ts list --resource-group ${{ parameters.resourceGroup }} | jq '.[0].id')
-        az deployment group create --resource-group ${{ parameters.resourceGroup }} --name deployment01 --template-spec $SPECIFICATION_ID/versions/${{ parameters.templateVersion }} --parameters ${{ parameters.parametersFile }}
+        
+        if [[ "${{ parameters.secureParameters }}" == "" ]]
+          az deployment group create --resource-group ${{ parameters.resourceGroup }} \
+                                     --name deployment01 \
+                                     --template-spec $SPECIFICATION_ID/versions/${{ parameters.templateVersion }} \
+                                     --parameters ${{ parameters.parametersFile }}
+        else
+          az deployment group create --resource-group ${{ parameters.resourceGroup }} \
+                                    --name deployment01 \
+                                    --template-spec $SPECIFICATION_ID/versions/${{ parameters.templateVersion }} \
+                                    --parameters ${{ parameters.parametersFile }} \
+                                    --parameters ${{ parameters.secureParameters }}
+        fi

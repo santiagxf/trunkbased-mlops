@@ -11,13 +11,14 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
+  - group: secrets
   - template: variables.group.yaml
 
 stages:
 - stage: aml_workspace_init
   displayName: Workspace - Initialization
   jobs:
-  - job: iac-deployment
+  - job: iac_deployment
     displayName: IaC - Deployment
     steps:
       - template: templates/azure-arm-template-deployment/action.yaml
@@ -29,7 +30,8 @@ stages:
           templateFile: workspaces/templates/deploy.json
           templateVersion: 1.0
           parametersFile: workspaces/$(env)/deploy.parameters.json
-  - job: datasets-init
+          secureParameters: computeAdminUserName=$(computeAdminUserName) computeAdminUserPassword=$(computeAdminUserPassword) datasetsClientId=$(datasetsClientId) datasetsClientSecret=$(datasetsClientSecret)
+  - job: datasets_init
     displayName: Datasets - Initialization
     steps:
       - template: templates/aml-cli-install/step.yaml

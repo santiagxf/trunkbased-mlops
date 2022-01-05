@@ -75,13 +75,13 @@
             }
         },
         "datasetsClientId": {
-            "type": "string",
+            "type": "securestring",
             "metadata": {
                 "description": "Client ID used to query data from the account"
             }
         },
         "datasetsClientSecret": {
-            "type": "string",
+            "type": "securestring",
             "metadata": {
                 "description": "Client secret used to query data from the account"
             }
