@@ -18,9 +18,6 @@ parameters:
 - name: keyVaultName
   type: string
   default: 
-- name: sampleRequest
-  type: string
-  default:
 
 steps:
   - task: AzureCLI@2
@@ -93,12 +90,6 @@ steps:
             echo "##[debug]Uploading secrets to key vault ${{ parameters.keyVaultName }}"
             az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '$ENDPOINT_NAME-scoringUrl' --value $SCORING_URI
             az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '$ENDPOINT_NAME-scoringKey' --value $SCORING_KEY
-          fi
-
-          if [[ "${{ parameters.sampleRequest }}" != "" ]]; then
-            echo "##[debug]Evaluating endpoint $ENDPOINT_NAME/$DEPLOYMENT_NAME"
-            BODY="${{ parameters.sampleRequest }}"
-            curl --fail --data "$BODY" -H "Content-Type: application/json" -H "Authorization: Bearer $SCORING_KEY" $SCORING_URI
           fi
 
           echo "##[debug]Endpoint evaluation completed"

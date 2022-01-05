@@ -9,7 +9,7 @@ from enum import Enum
 from common.jobs.arguments import TaskArguments, get_args_from_signature
 
 try:
-    from azureml.core import Run
+    from azureml.core import Run, Experiment, Workspace
     from azureml.core.run import RunEnvironmentException
 except ImportError:
     logging.info("[INFO] Method to_azureml won't be available as azureml-sdk is not installed")
@@ -45,6 +45,7 @@ class TaskRunner():
         command line. Otherwise they will.
         """
         self.run = None
+        self.experiment = None
         self.task_arguments = args
         try:
             if Run is not None:
@@ -52,7 +53,41 @@ class TaskRunner():
             else:
                 logging.warning("[WARN] azureml-sdk is not installed. Logging won't happen in workspace")
         except RunEnvironmentException:
-            logging.warning("[WARN] Unable to get current run in Azure ML. Logging won't happen in workspace.")
+            logging.warning("[WARN] Unable to get current run in Azure ML. Logging won't happen in workspace unless prepare_experiment is used.")
+    
+    def track_in_experiment(self, experiment_name: str, 
+                            workspace: Workspace = None, 
+                            workspace_config: str = None, 
+                            auth = None):
+        """
+        Prepares the Task Runner to tack elements inside of a remote experiment. This method can be
+        used when routines are not executed from a training job or a pipeline.
+
+        Parameters
+        ----------
+        experiment_name: str
+            Name of the experiment.
+        workspace: Workspace
+            The workspace where the experiment will be tracked. If you run this method form inside
+            an Azure Machine Learning compute, this parameter can be `None`. Otherwise you has to
+            indicate `workspace` or `workspace_config`.
+        workspace_config: str
+            The workspace configuration file where the experiment will be tracked. If you run this
+            method form inside an Azure Machine Learning compute, this parameter can be `None`.
+            Otherwise you has to indicate `workspace` or `workspace_config`.
+        auth: Authentication
+            The Authentication object to connect to the provided workspace. If `workspace` or
+            `workspace` config are provided, you should indicate `auth`.
+        """
+        if workspace is None:
+            if workspace_config is None:
+                logging.warning("[WARN] Loading workspace from config. This will only work inside Azure ML Compute.")
+            ws = Workspace.from_config(workspace_config, auth=auth)
+        else:
+            ws = workspace
+
+        self.experiment = Experiment(workspace=ws, name=experiment_name)
+        self.run = self.experiment.start_logging()
 
     def log_on_run(self, key: str, value: Any) -> None:
         """
@@ -136,4 +171,7 @@ class TaskRunner():
 
         outputs = task(**args)
         self.to_azureml(outputs)
-        sleep(5) # This line looks is a hack for some extrage behaviour in AML. Metrics are not logged otherwise
+        
+        if self.experiment:
+            self.run.complete()
+            self.experiment = None
