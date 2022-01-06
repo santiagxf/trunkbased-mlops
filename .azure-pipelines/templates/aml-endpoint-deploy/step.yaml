@@ -28,6 +28,7 @@ steps:
       scriptLocation: inlineScript
       azureSubscription: ${{ parameters.azureServiceConnectionName }}
       inlineScript: |
+        set -e #Fail on errors
         az configure --defaults workspace=$(WORKSPACENAME) group=$(RESOURCEGROUPNAME)
 
         ENDPOINT_FILES=$(find ${{ parameters.endpointFile }})
@@ -88,8 +89,8 @@ steps:
         
           if ${{ lower(parameters.secretsToKeyVault) }}; then
             echo "##[debug]Uploading secrets to key vault ${{ parameters.keyVaultName }}"
-            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '$ENDPOINT_NAME-scoringUrl' --value $SCORING_URI
-            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '$ENDPOINT_NAME-scoringKey' --value $SCORING_KEY
+            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '${ENDPOINT_NAME}-scoringUrl' --value $SCORING_URI
+            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '${ENDPOINT_NAME}-scoringKey' --value $SCORING_KEY
           fi
 
           echo "##[debug]Endpoint evaluation completed"
