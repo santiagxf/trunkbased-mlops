@@ -78,10 +78,17 @@ def get_args_from_signature(method: Callable) -> argparse.Namespace:
 
         if arg_type is SimpleNamespace:
             if not is_required:
-                raise ValueError("An argument of type SimpleNamespace can't be optional. Remove default values.")
-            parser.add_argument(f"--{arg.replace('_','-')}", dest=arg, type=yml2config, required=is_required)
+                raise ValueError("An argument of type SimpleNamespace can't be optional.\
+                     Remove default values.")
+            parser.add_argument(f"--{arg.replace('_','-')}",
+                                dest=arg,
+                                type=yml2config,
+                                required=is_required)
         else:
-            parser.add_argument(f"--{arg.replace('_','-')}", dest=arg, type=arg_type, required=is_required)
+            parser.add_argument(f"--{arg.replace('_','-')}",
+                                dest=arg,
+                                type=arg_type,
+                                required=is_required)
 
     return parser.parse_args()
 
@@ -117,10 +124,12 @@ class TaskArguments():
             conversion in case requried.
         """
         fullargs = inspect.getfullargspec(method)
-        args_annotations = dict(filter(lambda key: key[0] != 'return', fullargs.annotations.items()))
+        args_annotations = dict(filter(lambda key: key[0] != 'return',
+                                fullargs.annotations.items()))
         parsed_args = dict()
 
-        required_args_idxs = len(args_annotations) - len(fullargs.defaults if fullargs.defaults else [])
+        required_args_idxs = len(args_annotations) \
+            - len(fullargs.defaults if fullargs.defaults else [])
         for idx, (arg_name, arg_type) in enumerate(args_annotations.items()):
             is_required = idx < required_args_idxs
 
@@ -132,6 +141,7 @@ class TaskArguments():
             elif arg_type is SimpleNamespace and isinstance(self.args[arg_name], str):
                 parsed_args[arg_name] = yml2config(self.args[arg_name])
             else:
-                raise ValueError(f"Parameter {arg_name} is expecting {arg_type} but got {type(self.args[arg_name])} which is incompatible.")
+                raise ValueError(f"Parameter {arg_name} is expecting {arg_type} but got \
+                    {type(self.args[arg_name])} which is incompatible.")
 
         return parsed_args

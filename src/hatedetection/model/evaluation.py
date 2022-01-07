@@ -1,8 +1,11 @@
-from typing import Dict
+import logging
+from typing import Dict, Any
 import pandas as pd
 from sklearn.metrics import f1_score, precision_score, confusion_matrix
 from sklearn.metrics import accuracy_score, recall_score, precision_recall_fscore_support
-from common.models.model_management import download_model_from_context
+from statsmodels.stats.contingency_tables import mcnemar
+
+import common.models.model_management as amlmodels
 from hatedetection.prep.text_preparation import load_examples 
 from hatedetection.model.hate_detection_classifier import HateDetectionClassifier
 
@@ -51,10 +54,79 @@ def resolve_and_evaluate(model_name: str, eval_dataset: str, threshold: float = 
     Dict[str, float]
        A dictionary containing the keys `f1_score`, `precision`, `recall`, `specificity` and `accuracy` as the results of the run.
     """
-    model_path = download_model_from_context(model_name)
+    model_path = amlmodels.resolve_model_from_context(model_name, "latest")
+    
     return evaluate(model_path, eval_dataset, threshold)
 
-def evaluate(model_path: str, eval_dataset: str, threshold: float = 0.5) -> Dict[str, float]:
+def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_dataset: str, confidence: float = 0.05) -> Dict[str, Dict[str, float]]:
+    """
+    Resolves the model from it's name and runs the evaluation routine.
+
+    Parameters
+    ----------
+    model_name: str
+        Name of the model to get. The model will be downloaded from the model registry.
+    eval_dataset: str
+        Path that leads to the dataset.
+    threshold: float
+        The workspace to load the model from.
+        If not indicated, it will use the default model.
+
+    Returns
+    -------
+    Dict[str, float]
+       A dictionary containing the keys `f1_score`, `precision`, `recall`, `specificity` and `accuracy` as the results of the run.
+    """
+    champion_path = amlmodels.resolve_model_from_context(model_name, verion=champion)
+    challenger_path = amlmodels.resolve_model_from_context(model_name, verion=challenger)
+
+    return compare(champion_path, challenger_path, eval_dataset, confidence)
+
+def compare(champion_path: str, challenger_path: str, eval_dataset: str, confidence: float = 0.05) -> Dict[str, Dict[str, float]]:
+    """
+    Compares two hate detection models and decides if the two models make the same mistakes or not.
+    Note that this method doesn't tell if challenger is better that champion but if the models are
+    statistically different.
+
+    Parameters
+    ----------
+    champion_path: str
+        Path to the champion model.
+    challenger_path: str
+        Path to the challenger model.
+    eval_dataset: str
+        Path to the evaluation dataset.
+    confidente: float
+        The condifidence level of the test (p-value). Defaults to 95% (0.05)
+
+    Returns
+    -------
+    Dict[str, Dict[str, float]]:
+        A dictionary of metrics with keys `statistic`, `pvalue`, `confidence` and `test`. Test
+        is a boolean value indicating if the hypotesis of models are equivalent is `false`.
+    """
+    text, _ = load_examples(eval_dataset)
+    champion_model = HateDetectionClassifier()
+    champion_model.load(champion_path)
+    champion_scores = champion_model.predict_proba(data=text)
+
+    challenger_model = HateDetectionClassifier()
+    challenger_model.load(challenger_path)
+    challenger_scores = challenger_model.predict_proba(data=text)
+
+    cont_table = confusion_matrix(champion_scores, challenger_scores)
+    results = mcnemar(cont_table, exact=False)
+
+    return { 
+        "metrics": {
+            "statistic": results.statistic,
+            "pvalue": results.pvalue,
+            "confidence": confidence,
+            "test": results.pvalue < confidence
+        }
+    }
+
+def evaluate(model_path: str, eval_dataset: str, threshold: float = 0.5) -> Dict[str, Dict[str, float]]:
     """
     Evaluation routine for the model
     
@@ -70,22 +142,20 @@ def evaluate(model_path: str, eval_dataset: str, threshold: float = 0.5) -> Dict
 
     Returns
     -------
-    Dict[str, float]
-       A dictionary containing the keys `f1_score`, `precision`, `recall`, `specificity` and `accuracy` as the results of the run.
+    Dict[str, Dict[str, float]]
+       A dictionary of "metrics" containing the keys `f1_score`, `precision`, `recall`, `specificity`
+       and `accuracy` as the results of the run.
     """
     # Get the path for the dataset from the input
     text, labels = load_examples(eval_dataset)
     model = HateDetectionClassifier()
     model.load(model_path)
 
-    # Create a new pandas dataframe from the pandas.Series created in load_examples
-    df = pd.concat([text], axis=1)
-
     # Runs the model and transform the results into binaries according to the threshold
-    scores     = model.predict_proba(data=df)
+    scores     = model.predict_proba(data=text)
     bin_scores = [1 if score > threshold else 0 for score in scores]
 
-    tn, fp, fn, tp = confusion_matrix(labels, bin_scores).ravel()
+    tn, fp, _, _ = confusion_matrix(labels, bin_scores).ravel()
 
     # Metrics
     f1 = f1_score(labels, bin_scores)

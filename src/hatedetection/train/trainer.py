@@ -12,7 +12,8 @@ from hatedetection.model.evaluation import compute_classification_metrics
 from hatedetection.train.datasets import ClassificationDataset
 from hatedetection.prep.text_preparation import load_examples
 
-def train_and_evaluate(input_dataset: str, eval_dataset: str, params: SimpleNamespace) -> Dict[str, Dict[str, Any]]:
+def train_and_evaluate(input_dataset: str, eval_dataset: str,
+                       params: SimpleNamespace) -> Dict[str, Dict[str, Any]]:
     """
     Trains and evaluete the hate detection model
 

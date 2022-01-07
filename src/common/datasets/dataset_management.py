@@ -1,3 +1,6 @@
+"""
+A module to facilitate the use of Azure ML datasets.
+"""
 import azureml.core as aml
 
 def get_dataset(workspace: aml.Workspace, name: str) -> aml.Dataset:
@@ -10,6 +13,6 @@ def get_dataset(workspace: aml.Workspace, name: str) -> aml.Dataset:
             name=name,
             version="latest"
         )
-    except Exception:
+    except RuntimeError:
         dataset = None
     return dataset

@@ -3,7 +3,6 @@ This module provides orchestration to run and execute a job in Azure ML
 """
 import os
 import logging
-from time import sleep
 from typing import Callable, Dict, Any
 from enum import Enum
 from common.jobs.arguments import TaskArguments, get_args_from_signature
@@ -41,8 +40,8 @@ class TaskRunner():
     """
     def __init__(self, args: TaskArguments = None) -> None:
         """
-        Initializes the TaskRunner. If `args` is indicated, then the argument's won't be parsed from the
-        command line. Otherwise they will.
+        Initializes the TaskRunner. If `args` is indicated, then the argument's won't be parsed
+        from the command line. Otherwise they will.
         """
         self.run = None
         self.experiment = None
@@ -51,13 +50,14 @@ class TaskRunner():
             if Run is not None:
                 self.run = Run.get_context()
             else:
-                logging.warning("[WARN] azureml-sdk is not installed. Logging won't happen in workspace")
+                logging.warning("[WARN] azureml-sdk not installed. Logging won't happen.")
         except RunEnvironmentException:
-            logging.warning("[WARN] Unable to get current run in Azure ML. Logging won't happen in workspace unless prepare_experiment is used.")
-    
-    def track_in_experiment(self, experiment_name: str, 
-                            workspace: Workspace = None, 
-                            workspace_config: str = None, 
+            logging.warning("[WARN] Unable to get current run in Azure ML. Logging won't happen \
+                in workspace unless prepare_experiment is used.")
+
+    def track_in_experiment(self, experiment_name: str,
+                            workspace: Workspace = None,
+                            workspace_config: str = None,
                             auth = None):
         """
         Prepares the Task Runner to tack elements inside of a remote experiment. This method can be
@@ -81,7 +81,8 @@ class TaskRunner():
         """
         if workspace is None:
             if workspace_config is None:
-                logging.warning("[WARN] Loading workspace from config. This will only work inside Azure ML Compute.")
+                logging.warning("[WARN] Loading workspace from config. This will only work \
+                    inside Azure ML Compute.")
             ws = Workspace.from_config(workspace_config, auth=auth)
         else:
             ws = workspace
@@ -107,9 +108,11 @@ class TaskRunner():
                     try:
                         self.run.log_list(key, value)
                     except RuntimeError:
-                        logging.error(f"[ERROR] Unable to log key {key} of type [LIST] {type(value)}.")
+                        logging.error(f"[ERROR] Unable to log key {key} of type \
+                            [LIST] {type(value)}.")
                 else:
-                    logging.warning(f"[WARN] Attempt to log an list object with no items. Key was {key}.")
+                    logging.warning(f"[WARN] Attempt to log an list object with no \
+                        items. Key was {key}.")
             else:
                 try:
                     self.run.log(key, value)
@@ -152,9 +155,10 @@ class TaskRunner():
 
     def run_and_log(self, task: Callable[[], Dict[TaskResultKey, Dict[str, Any]]]) -> None:
         """
-        Runs the given task specified as a method and log any of the returning elements from the run
-        in Azure Machine Learning if possible. The method should return a dictionary containing the
-        elements in `TaskResultKey` and they will be properly logged in the run as metrics or assets.
+        Runs the given task specified as a method and log any of the returning elements from the
+        run in Azure Machine Learning if possible. The method should return a dictionary containing
+        the elements in `TaskResultKey` and they will be properly logged in the run as metrics or
+        assets.
 
         Parameters
         ----------
@@ -171,7 +175,7 @@ class TaskRunner():
 
         outputs = task(**args)
         self.to_azureml(outputs)
-        
+
         if self.experiment:
             self.run.complete()
             self.experiment = None
