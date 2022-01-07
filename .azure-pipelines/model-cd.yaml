@@ -71,3 +71,13 @@ stages:
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)
                 workspaceConfig: workspaces/dev/workspace.json
+            - template: templates/aml-model-set/step.yaml
+              parameters:
+                azureServiceConnectionName: $(SERVICECONNECTION)
+                name: ${{ variables.modelName }}
+                modelVersion: latest
+                property: stage
+                value: production
+                exclusive: true
+                workspaceName: $(WORKSPACENAME)
+                resourceGroup: $(RESOURCEGROUPNAME)

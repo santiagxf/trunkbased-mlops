@@ -1,0 +1,48 @@
+parameters:
+- name: azureServiceConnectionName
+  type: string
+- name: name
+  type: string
+- name: modelVersion
+  type: string
+  default: latest
+- name: property
+  type: string
+- name: value
+  type: string
+- name: exclusive
+  type: boolean
+  default: false
+- name: workspaceName
+  type: string 
+- name: resourceGroup
+  type: string
+
+steps:
+- task: AzureCLI@2
+  name: modelSet
+  displayName: Configuring model's ${{ parameters.property }}
+  inputs:
+    scriptType: bash
+    scriptLocation: inlineScript
+    azureSubscription: ${{ parameters.azureServiceConnectionName }}
+    inlineScript: |
+      set -e
+      
+      if ${{ lower(parameters.exclusive) }}; then
+        $VERSION_RESET=$(az ml model list ${{ parameters.name }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r --arg PROP_VALUE ${{ parameters.value }} '.[] | select(.tags.${{ parameters.property }} == $PROP_VALUE) | .version')
+
+        if [[ "$VERSION_RESET" != "" ]]; then
+          echo "##[debug]Removing tag ${{ parameters.property }} from model ${{ parameters.name }}:$VERSION_REST"
+          az ml model update -n ${{ parameters.name }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} --version $VERSION_RESET --set tags={}
+        fi
+      fi
+
+      if [[ ${{ parameters.modelVersion }} == "latest" ]]; then
+        echo "##[debug]Identifying latest version of the model ${{ parameters.name }}"
+        MODEL_VERSION=$(az ml model list --name ${{ parameters.name }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r '.[0].version')
+      else
+        MODEL_VERSION=${{ parameters.modelVersion }}
+      fi
+      
+      az ml model update -n ${{ parameters.name }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} --version $MODEL_VERSION --set tags.${{ parameters.property }}=${{ parameters.value }}
