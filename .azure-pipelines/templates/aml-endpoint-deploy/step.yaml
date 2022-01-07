@@ -5,6 +5,9 @@ parameters:
   type: string
 - name: deploymentFile
   type: string
+- name: modelVersion
+  type: string
+  default:
 - name: workspaceName
   type: string
 - name: resourceGroup
@@ -89,12 +92,21 @@ steps:
         
           if ${{ lower(parameters.secretsToKeyVault) }}; then
             echo "##[debug]Uploading secrets to key vault ${{ parameters.keyVaultName }}"
-            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '${ENDPOINT_NAME}-scoringUrl' --value $SCORING_URI
-            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '${ENDPOINT_NAME}-scoringKey' --value $SCORING_KEY
+            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '${ENDPOINT_NAME}ScoringUrl' --value $SCORING_URI
+            az keyvault secret set --vault-name ${{ parameters.keyVaultName }} --name '${ENDPOINT_NAME}ScoringKey' --value $SCORING_KEY
           fi
+
+          echo "##[debug]Getting deployed version for model at file $DEPLOYMENT_FILE"
+
+          DEPLOYED_VERSION=$(yq -r ".model" $DEPLOYMENT_FILE | cut -d: -f3)
+          echo "##vso[task.setvariable variable=deployedVersion;isOutput=true]$DEPLOYED_VERSION" 
+          echo "##[debug]Deployed version is: $DEPLOYED_VERSION"
 
           echo "##[debug]Endpoint evaluation completed"
         done
+    target:
+      settableVariables:
+      - deployedVersion
   
   - task: PublishPipelineArtifact@1
     displayName: Uploading deployment logs
