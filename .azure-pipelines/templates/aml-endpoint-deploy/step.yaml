@@ -56,24 +56,32 @@ steps:
             DEPLOYMENT_NAME=$(yq -r ".name" $DEPLOYMENT_FILE)
             DEPLOYMENT_MODEL=$(yq -r ".model" $DEPLOYMENT_FILE | cut -d: -f2)
             DEPLOYMENT_MODEL_VERSION=$(yq -r ".model" $DEPLOYMENT_FILE | cut -d: -f3)
+
+            # User can overwrite the version in the YAML 
+            if [[ "${{ parameters.modelVersion }}" == "" ]]; then
+              TARGET_MODEL_VERSION=$DEPLOYMENT_MODEL_VERSION
+            else
+              echo "##[debug]Model being targeted is being overwriten with version ${{ parameters.modelVersion }}"
+              TARGET_MODEL_VERSION=${{ parameters.modelVersion }}
+            fi
             
             echo "##[debug]Working on deployment with name: $ENDPOINT_NAME/$DEPLOYMENT_NAME"
 
-            if [[ "$DEPLOYMENT_MODEL_VERSION" == "current" ]]; then
+            if [[ "$TARGET_MODEL_VERSION" == "current" ]]; then
               echo "##[debug]Identifying current version of the model at deployment $ENDPOINT_NAME/$DEPLOYMENT_NAME"
               MODEL_CURRENT_URL=$(az ml online-deployment show --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r ".model")
               MODEL_CURRENT=$(basename $MODEL_CURRENT_URL)
 
               echo "##[debug]Updating yaml files with current model version: $MODEL_CURRENT"
-              sed -i 's/:current/:'$MODEL_CURRENT'/' $DEPLOYMENT_FILE
+              sed -i 's/:'$DEPLOYMENT_MODEL_VERSION'/:'$MODEL_CURRENT'/' $DEPLOYMENT_FILE
             fi
 
-            if [[ "$DEPLOYMENT_MODEL_VERSION" == "latest" ]]; then
+            if [[ "$TARGET_MODEL_VERSION" == "latest" ]]; then
               echo "##[debug]Identifying latest version of the model $DEPLOYMENT_MODEL"
               MODEL_LATEST=$(az ml model list --name $DEPLOYMENT_MODEL -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r '.[0].version')
               
               echo "##[debug]Updating yaml files with latest model version: $MODEL_LATEST"
-              sed -i 's/:latest/:'$MODEL_LATEST'/' $DEPLOYMENT_FILE 
+              sed -i 's/:'$DEPLOYMENT_MODEL_VERSION'/:'$MODEL_LATEST'/' $DEPLOYMENT_FILE 
             fi
         
             echo "##[debug]Creating deployment with name: $ENDPOINT_NAME/$DEPLOYMENT_NAME"
