@@ -30,7 +30,7 @@ steps:
       set -e
       
       if ${{ lower(parameters.exclusive) }}; then
-        $VERSION_RESET=$(az ml model list -n ${{ parameters.name }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r --arg PROP_VALUE ${{ parameters.value }} '.[] | select(.tags.${{ parameters.property }} == $PROP_VALUE) | .version')
+        VERSION_RESET=$(az ml model list -n ${{ parameters.name }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r --arg PROP_VALUE ${{ parameters.value }} '.[] | select(.tags.${{ parameters.property }} == $PROP_VALUE) | .version')
 
         if [[ "$VERSION_RESET" != "" ]]; then
           echo "##[debug]Removing tag ${{ parameters.property }} from model ${{ parameters.name }}:$VERSION_REST"
