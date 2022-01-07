@@ -97,7 +97,6 @@ steps:
           fi
 
           echo "##[debug]Getting deployed version for model at file $DEPLOYMENT_FILE"
-
           DEPLOYED_VERSION=$(yq -r ".model" $DEPLOYMENT_FILE | cut -d: -f3)
           echo "##vso[task.setvariable variable=deployedVersion;isOutput=true]$DEPLOYED_VERSION" 
           echo "##[debug]Deployed version is: $DEPLOYED_VERSION"
