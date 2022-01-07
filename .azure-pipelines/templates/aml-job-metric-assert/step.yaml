@@ -1,0 +1,51 @@
+parameters:
+- name: azureServiceConnectionName
+  type: string
+- name: jobName
+  type: string
+- name: metric
+  type: string
+- name: expecting
+  type: string
+- name: dataType
+  type: string
+- name: greaterIsBetter
+  type: boolean
+  default: true
+- name: workspaceName
+  type: string
+- name: resourceGroup
+  type: string
+- name: workspaceConfig
+  type: string
+- name: failureMessage
+  type: string
+
+steps:
+  - task: AzureCLI@2
+    name: jobMetricAssert
+    displayName: ${{ parameters.stepDisplayName }}
+    inputs:
+      scriptType: bash
+      scriptLocation: inlineScript
+      azureSubscription: ${{ parameters.azureServiceConnectionName }}
+      inlineScript: |
+        python $(Build.SourcesDirectory)/.azure-pipelines/templates/aml-job-metric-assert/assert.py \
+          --ws-config ${{ parameters.workspaceConfig }} \
+          --job-name ${{ parameters.jobName }} \
+          --metric ${{ parameters.metric }} \
+          --expected ${{ parameters.expecting }} \
+          --data-type ${{ parameters.dataType }} \
+          --greater-is-better ${{ parameters.greaterIsBetter }}
+        
+        # assert.py will return true or false. false is encoded as 0 en bash and any other value is true.
+        if [[ $? == 0 ]]; then
+          echo "##vso[task.logissue type=warning;]${{ parameters.failureMessage }}."
+          echo "##vso[task.setvariable variable=result;isOutput=true]false"
+        else
+          echo "##[debug]Assertion returned true."
+          echo "##vso[task.setvariable variable=result;isOutput=true]true"
+        fi
+    target:
+      settableVariables:
+      - result

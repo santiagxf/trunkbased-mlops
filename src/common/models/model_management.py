@@ -7,7 +7,7 @@ import logging
 from typing import Any, List, Dict
 
 import azureml.core as aml
-from azureml.exceptions import RunEnvironmentException
+from azureml.exceptions import RunEnvironmentException, ModelNotFoundException
 from azureml.core.authentication import AzureCliAuthentication
 from common.datasets.dataset_management import get_dataset
 
@@ -35,7 +35,10 @@ def resolve_model_from_context(model_name: str, version: str = None, **tags) -> 
         workspace = aml.Workspace.from_config()
 
     model = get_model(workspace, model_name, version, **tags)
-    return model.download(exists_ok=True)
+    if model:
+        return model.download(exists_ok=True)
+    else:
+        return None
 
 def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **tags) -> aml.Model:
     """
@@ -74,12 +77,15 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
     else:
         model_version = int(version)
 
-    model = aml.Model(workspace=workspace,
-                      name=stripped_model_name,
-                      version=model_version,
-                      tags=tags)
-    return model
-
+    try:
+        model = aml.Model(workspace=workspace,
+                          name=stripped_model_name,
+                          version=model_version,
+                          tags=tags)
+        return model
+    except ModelNotFoundException:
+        logging.warning("[WARN] Unable to find a model with the given specification")
+        return None
 
 def get_metric_for_model(workspace: aml.Workspace,
                          model_name: str,

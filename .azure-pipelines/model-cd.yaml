@@ -98,6 +98,17 @@ stages:
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
           noWait: false
+      - template: templates/aml-job-metric-assert/step.yaml
+        parameters:
+          azureServiceConnectionName: $(SERVICECONNECTION)
+          jobName: ${{ variables['jobRun.jobName'] }}
+          metric: test
+          expecting: true
+          dataType: boolean
+          workspaceName: $(WORKSPACENAME)
+          resourceGroup: $(RESOURCEGROUPNAME)
+          workspaceConfig: workspaces/dev/workspace.json
+          failureMessage: Unable to conclude if challenger is better than champion.
       - template: templates/aml-model-compare/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
@@ -113,7 +124,7 @@ stages:
 - stage: aml_model_deployment
   displayName: Model - Deployment
   dependsOn: aml_model_evaluate
-  condition: and(succeeded(), eq(dependencies.aml_model_evaluate.outputs['evaluate.compare.result'], 'true'))
+  condition: and(eq(dependencies.aml_model_evaluate.outputs['evaluate.jobMetricAssert.result'], 'true'), eq(dependencies.aml_model_evaluate.outputs['evaluate.compare.result'], 'true'))
   jobs:
   - deployment: model_deployment
     displayName: Model deployment

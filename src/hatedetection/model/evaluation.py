@@ -105,26 +105,38 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
         A dictionary of metrics with keys `statistic`, `pvalue`, `confidence` and `test`. Test
         is a boolean value indicating if the hypotesis of models are equivalent is `false`.
     """
-    text, _ = load_examples(eval_dataset)
-    champion_model = HateDetectionClassifier()
-    champion_model.load(champion_path)
-    champion_scores = champion_model.predict_proba(data=text)
+    if champion_path and challenger_path:
+        text, _ = load_examples(eval_dataset)
+        champion_model = HateDetectionClassifier()
+        champion_model.load(champion_path)
+        champion_scores = champion_model.predict_proba(data=text)
 
-    challenger_model = HateDetectionClassifier()
-    challenger_model.load(challenger_path)
-    challenger_scores = challenger_model.predict_proba(data=text)
+        challenger_model = HateDetectionClassifier()
+        challenger_model.load(challenger_path)
+        challenger_scores = challenger_model.predict_proba(data=text)
 
-    cont_table = confusion_matrix(champion_scores, challenger_scores)
-    results = mcnemar(cont_table, exact=False)
+        cont_table = confusion_matrix(champion_scores, challenger_scores)
+        results = mcnemar(cont_table, exact=False)
 
-    return { 
-        "metrics": {
-            "statistic": results.statistic,
-            "pvalue": results.pvalue,
-            "confidence": confidence,
-            "test": results.pvalue < confidence
+        return { 
+            "metrics": {
+                "statistic": results.statistic,
+                "pvalue": results.pvalue,
+                "confidence": confidence,
+                "test": results.pvalue < confidence
+            }
         }
-    }
+    else:
+        return  { 
+            "metrics": {
+                "statistic": 0,
+                "pvalue": 0,
+                "confidence": confidence,
+                "test": True,
+                "warning": "No champion model indicated"
+            }
+        }
+
 
 def evaluate(model_path: str, eval_dataset: str, threshold: float = 0.5) -> Dict[str, Dict[str, float]]:
     """
