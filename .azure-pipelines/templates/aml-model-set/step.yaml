@@ -37,7 +37,7 @@ steps:
         fi
       fi
 
-      if [[ ${{ parameters.modelVersion }} == "latest" ]]; then
+      if [[ "${{ parameters.modelVersion }}" == "latest" ]]; then
         echo "##[debug]Identifying latest version of the model ${{ parameters.name }}"
         MODEL_VERSION=$(az ml model list --name ${{ parameters.name }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r '.[0].version')
       else

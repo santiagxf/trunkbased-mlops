@@ -89,13 +89,22 @@ stages:
           validateOnly: true
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
+      - template: templates/aml-job-create/step.yaml
+        parameters:
+          azureServiceConnectionName: $(SERVICECONNECTION)
+          stepDisplayName: Computing McNemar statistic
+          name: ${{ variables.modelName }}-eval
+          jobFile: jobs/hatedetection/evaluate.job.yml
+          workspaceName: $(WORKSPACENAME)
+          resourceGroup: $(RESOURCEGROUPNAME)
+          noWait: false
       - template: templates/aml-model-compare/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
           modelName: ${{ variables.modelName }}
           champion: current
           challenger: latest
-          endpoint: endpoints/hate-pt-speech/endpoint.yml
+          endpoint: endpoints/${{ variables.modelName }}/endpoint.yml
           compareBy: eval_recall
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)

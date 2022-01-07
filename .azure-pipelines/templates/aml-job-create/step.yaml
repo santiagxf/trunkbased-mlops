@@ -13,11 +13,14 @@ parameters:
 - name: noWait
   type: boolean
   default: false
+- name: stepDisplayName
+  type: string
+  default: Submitting job
 
 steps:
   - task: AzureCLI@2
     name: jobRun
-    displayName: Submitting job
+    displayName: ${{ parameters.stepDisplayName }}
     inputs:
       scriptType: bash
       scriptLocation: inlineScript
