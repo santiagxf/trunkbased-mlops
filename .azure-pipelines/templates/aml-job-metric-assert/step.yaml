@@ -18,6 +18,9 @@ parameters:
   type: string
 - name: workspaceConfig
   type: string
+- name: stepDisplayName
+  type: string
+  default: Validating metric
 - name: failureMessage
   type: string
 

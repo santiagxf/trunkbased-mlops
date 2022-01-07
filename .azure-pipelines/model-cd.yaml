@@ -101,6 +101,7 @@ stages:
       - template: templates/aml-job-metric-assert/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
+          stepDisplayName: Verifying evaluation
           jobName: ${{ variables['jobRun.jobName'] }}
           metric: test
           expecting: true
