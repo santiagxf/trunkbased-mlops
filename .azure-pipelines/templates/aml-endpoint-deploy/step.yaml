@@ -103,9 +103,6 @@ steps:
 
           echo "##[debug]Endpoint evaluation completed"
         done
-    target:
-      settableVariables:
-      - deployedVersion
   
   - task: PublishPipelineArtifact@1
     displayName: Uploading deployment logs
