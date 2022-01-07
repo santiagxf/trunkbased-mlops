@@ -20,7 +20,7 @@ parameters:
 
 steps:
 - task: AzureCLI@2
-  name: modelSet
+  name: ${{ concat("modelSet", parameters.property ) }}
   displayName: Configuring model's ${{ parameters.property }}
   inputs:
     scriptType: bash
