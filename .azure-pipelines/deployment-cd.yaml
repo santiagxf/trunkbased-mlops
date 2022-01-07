@@ -77,3 +77,13 @@ stages:
                 resourceGroup: $(RESOURCEGROUPNAME)
                 secretsToKeyVault: true
                 keyVaultName: $(KEYVAULTNAME)
+            - template: templates/aml-model-set/step.yaml
+              parameters:
+                azureServiceConnectionName: $(SERVICECONNECTION)
+                name: ${{ variables.modelName }}
+                modelVersion: ${{ variables['deployment.deployedVersion'] }}
+                property: stage
+                value: champion
+                exclusive: true
+                workspaceName: $(WORKSPACENAME)
+                resourceGroup: $(RESOURCEGROUPNAME)
