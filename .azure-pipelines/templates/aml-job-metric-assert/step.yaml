@@ -33,6 +33,9 @@ steps:
       scriptLocation: inlineScript
       azureSubscription: ${{ parameters.azureServiceConnectionName }}
       inlineScript: |
+        pip install azureml-core==1.37.0
+        pip install azure-cli-core==2.30.0
+        
         python $(Build.SourcesDirectory)/.azure-pipelines/templates/aml-job-metric-assert/assert.py \
           --ws-config ${{ parameters.workspaceConfig }} \
           --job-name ${{ parameters.jobName }} \
