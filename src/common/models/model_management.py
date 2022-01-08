@@ -68,12 +68,12 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
     else:
         stripped_model_name = model_name
 
-    if '=' in version:
+    if version is None or version == "latest":
+        model_version = None
+    elif '=' in version:
         model_tag_name, model_tag_value = version.split('=')
         model_version = None
         tags = { model_tag_name: model_tag_value }
-    elif version == "latest" or version is None:
-        model_version = None
     else:
         model_version = int(version)
 
