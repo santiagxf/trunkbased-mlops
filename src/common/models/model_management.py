@@ -7,7 +7,7 @@ import logging
 from typing import Any, List, Dict
 
 import azureml.core as aml
-from azureml.exceptions import RunEnvironmentException, ModelNotFoundException
+from azureml.exceptions import RunEnvironmentException, ModelNotFoundException, WebserviceException
 from azureml.core.authentication import AzureCliAuthentication
 from common.datasets.dataset_management import get_dataset
 
@@ -84,6 +84,9 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
                           tags=tags)
         return model
     except ModelNotFoundException:
+        logging.warning("[WARN] Unable to find a model with the given specification")
+        return None
+    except WebserviceException:
         logging.warning("[WARN] Unable to find a model with the given specification")
         return None
 
