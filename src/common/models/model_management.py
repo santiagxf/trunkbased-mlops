@@ -5,13 +5,14 @@ Model management capabilities from Azure ML
 import os
 import logging
 from typing import Any, List, Dict
+from os import PathLike
 
 import azureml.core as aml
 from azureml.exceptions import RunEnvironmentException, ModelNotFoundException, WebserviceException
 from azureml.core.authentication import AzureCliAuthentication
 from common.datasets.dataset_management import get_dataset
 
-def resolve_model_from_context(model_name: str, version: str = None, **tags) -> os.PathLike:
+def resolve_model_from_context(model_name: str, version: str = None, target_path: PathLike = '.', **tags) -> os.PathLike:
     """
     Resolves the name of a given model registered in Azure ML and downloads it in a local
     directory ready to be used. This method can resolve the model either when working inside
@@ -25,6 +26,8 @@ def resolve_model_from_context(model_name: str, version: str = None, **tags) -> 
     version: str
         The version of the model. Version can be a number, a token like "latest" or a tag in
         the form <tag>=<tag_value>.
+    target_path: PathLike
+        The target path where the model should be placed. Defaults to current directory
     """
     try:
         run = aml.Run.get_context(allow_offline=False)
@@ -36,7 +39,8 @@ def resolve_model_from_context(model_name: str, version: str = None, **tags) -> 
 
     model = get_model(workspace, model_name, version, **tags)
     if model:
-        return model.download(exist_ok=True)
+        os.makedirs(target_path, exist_ok=True)
+        return model.download(target_dir=target_path, exist_ok=True)
     else:
         return None
 
