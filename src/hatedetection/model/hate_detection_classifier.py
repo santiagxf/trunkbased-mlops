@@ -56,10 +56,10 @@ class HateDetectionClassifier:
         self.tokenizer.save_pretrained(save_directory)
         self.model.save_pretrained(save_directory)
     
-    def predict(self, data: Union[list, pd.Series]):
-        if isinstance(data, pd.DataFrame) or isinstance(data, pd.Series):
+    def predict(self, data: Union[list, pd.Series, pd.DataFrame]):
+        if isinstance(data, pd.DataFrame):
             data = data["text"]
-        else:
+        elif isinstance(data, list):
             data = pd.Series(data)
         data = data.apply(split_to_sequences).explode()
         
@@ -76,10 +76,10 @@ class HateDetectionClassifier:
 
         return scores
     
-    def predict_proba(self, data: Union[list, pd.DataFrame]):
-        if isinstance(data, pd.DataFrame) or isinstance(data, pd.Series):
+    def predict_proba(self, data: Union[list, pd.Series, pd.DataFrame]):
+        if isinstance(data, pd.DataFrame):
             data = data["text"]
-        else:
+        elif isinstance(data, list):
             data = pd.Series(data)
         data = data.apply(split_to_sequences).explode()
         
