@@ -72,7 +72,7 @@ class HateDetectionClassifier:
 
         data = data.reset_index()
         data['hate'] = hate.detach().numpy()
-        scores = data[['index', 'hate']].groupby('index').agg('mode')['hate']
+        scores = data[['index', 'hate']].groupby('index').agg(pd.Series.mode)['hate']
 
         return scores
     
