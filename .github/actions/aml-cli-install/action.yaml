@@ -1,0 +1,65 @@
+name: 'Installing Azure ML CLI'
+description: 'Install the Azure CLI, Azure Machine Learning CLI, and all the required tools.'
+
+inputs:
+  componentSupport:
+    description: 'Indicates if components (aka modules) support should be enabled in the CLI.'
+    required: true
+    default: 'false'
+  minVersion:
+    description: 'Minimum version of Azure CLI to install'
+    required: true
+    default: '2.0'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Installing Azure CLI
+      shell: bash
+      run: |
+        echo "::debug::Installing Azure CLI"
+        if [ -x "$(command -v az)" ]; then
+          echo "::debug::Azure CLI is already installed"
+        else
+          curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+        fi
+
+    - name: Installing Azure ML CLI
+      shell: bash
+      run: |
+        if ${{ inputs.componentSupport }}; then
+          echo "::debug::Installing azure-cli-ml extension with components support"
+          
+          if [[ $(az extension show --name azure-cli-ml) ]]; then
+            echo "::debug::azure-cli-ml extension is already installed."
+          else
+            echo "::debug::Adding extension from a preview build. This is experimental."
+            az extension add --source https://azuremlsdktestpypi.blob.core.windows.net/wheels/componentsdk/azure_cli_ml-0.9.1-py3-none-any.whl --pip-extra-index-urls https://azuremlsdktestpypi.azureedge.net/componentsdk/0.9.1 --yes --verbose
+          fi
+        else
+          echo "::debug::Installing azure-cli-ml extension version ${{ inputs.minVersion }}"
+
+          if [[ $(az extension show --name ml) ]]; then
+            echo "::debug::azure-cli-ml extension is already installed."
+            
+            if [[ $(az extension show --name ml | jq -r .version) < "${{ inputs.minVersion }}" ]]; then
+              echo "::debug::Updating version to ${{ inputs.minVersion }}."
+              az extension update -n ml
+            fi
+          else
+            echo "::debug::Adding extension"
+            az extension add -n ml -y
+          fi
+        fi
+
+    - name: Installing tools
+      shell: bash
+      run: |
+        sudo apt install jq
+        pip install yq
+        pip install azureml-core==1.37.0
+        pip install azure-cli-core==2.30.0
+
+    - name: Preparing conda
+      shell: bash
+      run: echo "${HOME}/$CONDA/bin" >> $GITHUB_PATH

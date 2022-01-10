@@ -1,15 +1,28 @@
 name: workspace-CD
 
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - datasets/*
+      - workspaces/templates/*
+
 jobs:
   deployment:
     environment: dev
     runs-on: ubuntu-latest
 
     env:
-      ARTIFACT_NAME: build
-      ENVIRONMENT_PREFIX: dev
-      PROFILE_PATH: profiles
-      RESOURCE_GROUP: Analytics.DataPlatform.Group
+      SERVICECONNECTION: rg-dataplatform-dev
+      WORKSPACENAME: mlw-trunkbased-dev
+      RESOURCEGROUPNAME: mlops-trunkbased-dev
+      STORAGEACCOUNTNAME: aamldatalake
+      LOCATION: eastus2
+      KEYVAULTNAME: kv-trunkbased-dev
+      env: dev
+      modelName: hate-pt-speech
+      description: 'A hate detection model for tweets in portuguese'
+      condaEnvName: transformers-torch-19
 
     steps:
       - uses: actions/checkout@v2
@@ -25,18 +38,16 @@ jobs:
         uses: Azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-
-      - id: iac_deployment
-        name: IaC - Deployment
-        uses: ./.github/actions/azure-arm-template-deployment
+      
+      - uses: azure/arm-deploy@v1
+        name: IaC - Deploying resources
         with:
-          resourceGroup: ${RESOURCEGROUPNAME}
-          location: ${LOCATION}
+          subscriptionId: <YourSubscriptionId>
+          resourceGroupName: ${RESOURCEGROUPNAME}
+          region: ${LOCATION}
           deploymentName: aml-deployment
-          templateFile: workspaces/templates/deploy.json
-          templateVersion: 1.0
-          parametersFile: workspaces/${env}/deploy.parameters.json
-          secureParameters: computeAdminUserName=${{ secrets.computeAdminUserName }} computeAdminUserPassword=${{ secrets.computeAdminUserPassword }} datasetsClientId=${{ secrets.datasetsClientId }} datasetsClientSecret=${{ secrets.datasetsClientSecret }}
+          template: workspaces/templates/deploy.json
+          parameters: workspaces/${env}/deploy.parameters.json computeAdminUserName=${{ secrets.computeAdminUserName }} computeAdminUserPassword=${{ secrets.computeAdminUserPassword }} datasetsClientId=${{ secrets.datasetsClientId }} datasetsClientSecret=${{ secrets.datasetsClientSecret }}
 
       - id: datasets_init
         name: Datasets - Initialization
