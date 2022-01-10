@@ -60,7 +60,7 @@ class HateDetectionClassifier:
         if isinstance(data, pd.DataFrame) or isinstance(data, pd.Series):
             data = data["text"]
         else:
-            data = pd.DataFrame(data, columns=["text"])
+            data = pd.Series(data)
         data = data.apply(split_to_sequences).explode()
         
         inputs = self.tokenizer(list(data), padding=True, truncation=True, return_tensors='pt')
@@ -77,10 +77,10 @@ class HateDetectionClassifier:
         return scores
     
     def predict_proba(self, data: Union[list, pd.DataFrame]):
-        if isinstance(data, pd.DataFrame):
+        if isinstance(data, pd.DataFrame) or isinstance(data, pd.Series):
             data = data["text"]
         else:
-            data = pd.DataFrame(data, columns=["text"])
+            data = pd.Series(data)
         data = data.apply(split_to_sequences).explode()
         
         inputs = self.tokenizer(list(data), padding=True, truncation=True, return_tensors='pt')
