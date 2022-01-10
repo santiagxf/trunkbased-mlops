@@ -152,9 +152,9 @@ stages:
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)
                 name: ${{ variables.modelName }}
-                modelVersion: ${{ variables['deployment.deployedVersion'] }}
+                modelVersion: $(deployment.deployedVersion)
                 property: stage
-                value: champion
+                value: production
                 exclusive: true
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)
@@ -162,7 +162,7 @@ stages:
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)
                 name: ${{ variables.modelName }}
-                modelVersion: ${{ variables['deployment.deployedVersion'] }}
+                modelVersion: $(deployment.deployedVersion)
                 property: inference
                 value: $(Build.SourceVersion)
                 exclusive: true

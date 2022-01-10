@@ -44,4 +44,5 @@ steps:
         MODEL_VERSION=${{ parameters.modelVersion }}
       fi
       
+      echo "##[debug]Applying tag ${{ parameters.property }}=${{ parameters.value }} to model ${{ parameters.name }}:$MODEL_VERSION"
       az ml model update -n ${{ parameters.name }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} --version $MODEL_VERSION --set tags.${{ parameters.property }}=${{ parameters.value }}
