@@ -1,0 +1,84 @@
+name: 'Ensuring environment'
+description: 'Ensures or checks that a given Azure ML Environment exists on Azure.'
+
+inputs:
+  envFile:
+    description: 'Path to the environment file to build. Note that this is not the conda_dependencies.yml file. Wildcards paths are supported.'
+    required: true
+  validateOnly:
+    description: 'Indicates if only validations should be performed. If true, no environment will be created in Azure ML if environment or environment version is not deployed yet.'
+    required: true
+    default: 'false'
+  failOnMissing:
+    description: 'Indicates if the job should fail if an environment is missing on Azure ML Workspace but it will be successfuly deployed if validateOnly is false.'
+    required: true
+    default: 'true'
+  workspaceName:
+    description: 'Name of the workspace to work against.'
+    required: true
+  resourceGroup:
+    description: 'Name of the resource group where the workspace is placed.'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: 'Ensuring environment'
+      shell: bash
+      run: |
+        echo "::debug::Looking for environment definition at '${{ inputs.envFile }}'"
+        ENV_FILES=$(find ${{ inputs.envFile }})
+        VALIDATION_PASS=true
+
+        for ENV_FILE in $ENV_FILES
+        do
+          ENV_FOLDER=$(dirname $ENV_FILE)
+          ENV_VERSION=$(yq ".version" $ENV_FILE)
+          ENV_CONDA_FILE=$(yq -r ".conda_file" $ENV_FILE)
+          ENV_NAME=$(yq -r ".name" $ENV_FILE)
+          
+          echo "::debug::Looking for environment $ENV_NAME in workspace."
+          if [[ $(az ml environment list --name $ENV_NAME --workspace-name ${{ inputs.workspaceName }} --resource-group ${{ inputs.resourceGroup }}) ]]; then
+            echo "::debug::Environments $ENV_NAME already in target workspace. Retrieving details..."
+            echo "::debug::Environment version is $ENV_VERSION."
+            
+            if [[ $(az ml environment show --name $ENV_NAME --workspace-name ${{ inputs.workspaceName }} --resource-group ${{ inputs.resourceGroup }} --version $ENV_VERSION) ]]; then
+              echo "::debug::Verifying environment specification and checking for differences with given"
+              az ml environment show --name $ENV_NAME --workspace-name ${{ inputs.workspaceName }} --resource-group ${{ inputs.resourceGroup }} --version $ENV_VERSION | jq ".conda_file | del(.name)" | yq -y > conda.yml
+              if cmp -s conda.yml $ENV_FOLDER/$ENV_CONDA_FILE; then
+                echo "::debug::Environments validation passed"
+              else
+                echo "::error::$file=$ENV_FILE::Environment file definition doesn't match the one registered. Please increase version to get it created"
+                VALIDATION_PASS=false
+              fi
+            else
+              if ${{ lower(inputs.validateOnly) }} ; then
+                if ${{ lower(inputs.failOnMissing) }} ; then
+                  echo "::error::$file=$ENV_FILE::Environment '$ENV_NAME' exists, but not in the required version ($ENV_VERSION)."
+                  VALIDATION_PASS=false
+                else
+                  echo "::debug::Environment $ENV_NAME needs to be deployed in target workspace with version $ENV_VERSION"
+                fi
+              else
+                echo "::debug::Creating new version of the environment"
+                az ml environment create --name $ENV_NAME --workspace-name ${{ inputs.workspaceName }} --resource-group ${{ inputs.resourceGroup }} --version $ENV_VERSION --file $ENV_FILE
+              fi
+            fi
+          else
+            if ${{ lower(inputs.validateOnly) }}; then
+              if ${{ lower(inputs.failOnMissing) }} ; then
+                echo "::error::$file=$ENV_FILE::Environment '$ENV_NAME' doesn't exist in the workspace."
+                VALIDATION_PASS=false
+              else
+                echo "::debug::Environment $ENV_NAME needs to be deployed in target workspace with version $ENV_VERSION"
+              fi
+            else
+              echo "::debug::Creating new environment"
+              az ml environment create --name $ENV_NAME --workspace-name ${{ inputs.workspaceName }} --resource-group ${{ inputs.resourceGroup }} --file $ENV_FILE
+            fi
+          fi
+        done
+
+        if ! $VALIDATION_PASS ; then
+          exit -1
+        fi
