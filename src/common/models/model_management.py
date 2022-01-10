@@ -74,6 +74,8 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
 
     if version is None or version == "latest":
         model_version = None
+    elif version == "current":
+        raise ValueError("Model version 'current' is not support using this SDK right now.")
     elif '=' in version:
         model_tag_name, model_tag_value = version.split('=')
         model_version = None
@@ -88,10 +90,10 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
                           tags=tags)
         return model
     except ModelNotFoundException:
-        logging.warning("[WARN] Unable to find a model with the given specification")
+        logging.warning(f"[WARN] Unable to find a model with the given specification. Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
         return None
     except WebserviceException:
-        logging.warning("[WARN] Unable to find a model with the given specification")
+        logging.warning(f"[WARN] Unable to find a model with the given specification. Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
         return None
 
 def get_metric_for_model(workspace: aml.Workspace,
