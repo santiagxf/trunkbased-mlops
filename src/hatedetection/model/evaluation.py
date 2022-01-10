@@ -77,8 +77,8 @@ def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_da
     Dict[str, float]
        A dictionary containing the keys `f1_score`, `precision`, `recall`, `specificity` and `accuracy` as the results of the run.
     """
-    champion_path = amlmodels.resolve_model_from_context(model_name, verion=champion)
-    challenger_path = amlmodels.resolve_model_from_context(model_name, verion=challenger)
+    champion_path = amlmodels.resolve_model_from_context(model_name, version=champion)
+    challenger_path = amlmodels.resolve_model_from_context(model_name, version=challenger)
 
     return compare(champion_path, challenger_path, eval_dataset, confidence)
 

@@ -8,7 +8,7 @@ on:
       - environments/**
 
 jobs:
-  deployment:
+  integration:
     environment: dev
     runs-on: ubuntu-latest
 

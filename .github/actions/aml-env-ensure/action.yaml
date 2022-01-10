@@ -52,8 +52,8 @@ runs:
                 VALIDATION_PASS=false
               fi
             else
-              if ${{ lower(inputs.validateOnly) }} ; then
-                if ${{ lower(inputs.failOnMissing) }} ; then
+              if ${{ inputs.validateOnly }} ; then
+                if ${{ inputs.failOnMissing }} ; then
                   echo "::error::$file=$ENV_FILE::Environment '$ENV_NAME' exists, but not in the required version ($ENV_VERSION)."
                   VALIDATION_PASS=false
                 else
@@ -65,8 +65,8 @@ runs:
               fi
             fi
           else
-            if ${{ lower(inputs.validateOnly) }}; then
-              if ${{ lower(inputs.failOnMissing) }} ; then
+            if ${{ inputs.validateOnly }}; then
+              if ${{ inputs.failOnMissing }} ; then
                 echo "::error::$file=$ENV_FILE::Environment '$ENV_NAME' doesn't exist in the workspace."
                 VALIDATION_PASS=false
               else

@@ -36,7 +36,7 @@ def resolve_model_from_context(model_name: str, version: str = None, **tags) -> 
 
     model = get_model(workspace, model_name, version, **tags)
     if model:
-        return model.download(exists_ok=True)
+        return model.download(exist_ok=True)
     else:
         return None
 
