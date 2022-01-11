@@ -12,7 +12,8 @@ from azureml.exceptions import RunEnvironmentException, ModelNotFoundException, 
 from azureml.core.authentication import AzureCliAuthentication
 from common.datasets.dataset_management import get_dataset
 
-def resolve_model_from_context(model_name: str, version: str = None, target_path: PathLike = '.', **tags) -> os.PathLike:
+def resolve_model_from_context(model_name: str, version: str = None,
+                               target_path: PathLike = '.', **tags) -> os.PathLike:
     """
     Resolves the name of a given model registered in Azure ML and downloads it in a local
     directory ready to be used. This method can resolve the model either when working inside
@@ -41,8 +42,8 @@ def resolve_model_from_context(model_name: str, version: str = None, target_path
     if model:
         os.makedirs(target_path, exist_ok=True)
         return model.download(target_dir=target_path, exist_ok=True)
-    else:
-        return None
+
+    return None
 
 def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **tags) -> aml.Model:
     """
@@ -90,10 +91,12 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
                           tags=tags)
         return model
     except ModelNotFoundException:
-        logging.warning(f"[WARN] Unable to find a model with the given specification. Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
+        logging.warning(f"[WARN] Unable to find a model with the given specification. \
+            Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
         return None
     except WebserviceException:
-        logging.warning(f"[WARN] Unable to find a model with the given specification. Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
+        logging.warning(f"[WARN] Unable to find a model with the given specification. \
+            Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
         return None
 
 def get_metric_for_model(workspace: aml.Workspace,
