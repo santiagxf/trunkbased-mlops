@@ -29,8 +29,14 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Running PyLint
+    - name: Preparing conda
       shell: bash
+      run: |
+        echo "${HOME}/$CONDA/bin" >> $GITHUB_PATH
+        conda init --all --dry-run --verbose
+
+    - name: Running PyLint
+      shell: bash -l {0}
       run: |
         if ${{ inputs.useConda }}; then
           echo "::debug::Activating conda environment ${{ inputs.condaEnvName }}"

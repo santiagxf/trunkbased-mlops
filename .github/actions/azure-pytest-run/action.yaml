@@ -12,7 +12,7 @@ inputs:
   configuration:
     description: 'PyTest configuration file path (.ini).'
     required: false
-    default: 
+    default: ''
   useConda:
     description: 'Indicates if the tests will run using an specific conda environment.'
     required: false
@@ -20,7 +20,7 @@ inputs:
   condaEnvName:
     description: 'Name of the conda environment to use. Required if useConda is true.'
     required: false
-    default: 
+    default: ''
   testFolder:
     description: 'Folder where test are placed. Defaults to tests.'
     required: true
@@ -34,7 +34,7 @@ runs:
   using: "composite"
   steps:
     - name: 'Running PyTest'
-      shell: bash
+      shell: bash -l {0}
       run: |
         if ${{ inputs.useConda }}; then
           echo "::debug::Activating conda environment ${{ inputs.condaEnvName }}"
