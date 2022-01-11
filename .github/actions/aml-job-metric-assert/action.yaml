@@ -45,9 +45,6 @@ runs:
       id: jobMetricAssert
       shell: bash
       run: |
-        pip install azureml-core==1.37.0
-        pip install azure-cli-core==2.30.0
-        
         echo "::debug::Looking for metric ${{ inputs.metric }} at job ${{ inputs.jobName }}."
         echo "::debug::Expecting value ${{ inputs.expecting }} (of type ${{ inputs.dataType }}). Greater values are better? ${{ inputs.greaterIsBetter }}"
 

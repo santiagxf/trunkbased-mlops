@@ -40,9 +40,6 @@ runs:
     - name: Registering model
       shell: bash
       run: |
-        pip install azureml-core==1.37.0
-        pip install azure-cli-core==2.30.0
-        
         python ${{ github.action_path }}/register.py \
           --ws-config ${{ inputs.workspaceConfig }} \
           --name ${{ inputs.name }} \

@@ -79,7 +79,7 @@ In the folder `.azure-pipelines` (for Azure DevOps) and in the folder `.github` 
             - Builds the model and compute metrics.
         - Stage 2: Model source control
             - Registers model in the repository and associates it with the run that originated the model.
-            - Requires approval in order to registration to happen. This prevents the registration of an unwanted model.
+            - **Approvals:** This stage requires approval. This prevents the registration of an unwanted model.
 
                 ![](docs/assets/model-cd-stages-registry.png)
         - Stage 3: Model evaluation
@@ -88,10 +88,17 @@ In the folder `.azure-pipelines` (for Azure DevOps) and in the folder `.github` 
                 ![](docs/assets/model-cd-stages-eval.png)
         - Stage 4: Model deployment
             - Deploys the new version of the model and updates the online endpoint.
-            - Requires approval in order to deployment to happen.
+            - **Approvals:** This stage requires approval.
 
                 ![](docs/assets/model-cd-stages-deploy.png)
 
+### Endpoints
+- **endpoint-CD:** Ensures that the last serving code for the model is deployed along with the last promoted model. This pipelines can update the serving code without updating the model.
+    - **Trigges on:** `main` for changes in path `src/*/scoring` and `endpoints`.
+    - **Actions:**
+        - Deploys the last version of `main` in the current deployment of the model. No models are trained nor replaced.
+        - Updates the references to know which version of the serving code is being installed on the endpoint. For this purpose we tag the commit SHA of the `main` by the time the deployed was done.
+    - **Approvals:** This stage requires approval.
 
 For a detail of the actions used to implement this pipelines see [Custom Actions](docs/actions.md).
 

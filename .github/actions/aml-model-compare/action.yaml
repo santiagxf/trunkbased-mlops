@@ -49,10 +49,7 @@ runs:
     - name: Comparing models
       id: compare
       shell: bash
-      run: |
-        pip install azureml-core==1.37.0
-        pip install azure-cli-core==2.30.0
-        
+      run: |        
         if [[ "${{ inputs.champion }}" == "current" ]]; then
           echo "::debug::Resolving current champion version from endpoint"
           ENDPOINT_NAME=$(yq -r ".name" ${{ inputs.endpoint }})

@@ -9,7 +9,6 @@ on:
     - src/*/score/*
 
 env:
-  SERVICECONNECTION: rg-dataplatform-dev
   WORKSPACENAME: mlw-trunkbased-dev
   RESOURCEGROUPNAME: mlops-trunkbased-dev
   STORAGEACCOUNTNAME: aamldatalake

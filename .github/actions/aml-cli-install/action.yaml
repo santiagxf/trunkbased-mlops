@@ -56,9 +56,7 @@ runs:
       shell: bash
       run: |
         sudo apt install jq
-        pip install yq
-        pip install azureml-core==1.37.0
-        pip install azure-cli-core==2.30.0
+        pip install -r ${{ github.action_path }}/requirements.txt
 
     - name: Preparing conda
       shell: bash
