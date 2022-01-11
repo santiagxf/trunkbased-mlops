@@ -1,5 +1,5 @@
 import logging
-from typing import Dict
+from typing import Dict, Any
 import torch
 from sklearn.metrics import f1_score, precision_score, confusion_matrix
 from sklearn.metrics import accuracy_score, recall_score, precision_recall_fscore_support
@@ -82,7 +82,7 @@ def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_da
 
     return compare(champion_path, challenger_path, eval_dataset, confidence)
 
-def compare(champion_path: str, challenger_path: str, eval_dataset: str, confidence: float = 0.05) -> Dict[str, Dict[str, float]]:
+def compare(champion_path: str, challenger_path: str, eval_dataset: str, confidence: float = 0.05) -> Dict[str, Dict[str, Any]]:
     """
     Compares two hate detection models and decides if the two models make the same mistakes or not.
     Note that this method doesn't tell if challenger is better that champion but if the models are
@@ -96,7 +96,7 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
         Path to the challenger model.
     eval_dataset: str
         Path to the evaluation dataset.
-    confidente: float
+    confidence: float
         The condifidence level of the test (p-value). Defaults to 95% (0.05)
 
     Returns
@@ -109,7 +109,7 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
         text, _ = load_examples(eval_dataset)
         champion_model = HateDetectionClassifier()
         champion_model.load(champion_path)
-        champion_scores = champion_model.predict_proba(data=text)
+        champion_scores = champion_model.predict(data=text)
 
         logging.info("[INFO] Unloading champion object from memory")
         del champion_model
@@ -117,7 +117,7 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
 
         challenger_model = HateDetectionClassifier()
         challenger_model.load(challenger_path)
-        challenger_scores = challenger_model.predict_proba(data=text)
+        challenger_scores = challenger_model.predict(data=text)
 
         logging.info("[INFO] Unloading challenger object from memory")
         del challenger_model
