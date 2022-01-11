@@ -3,7 +3,7 @@ description: 'Creates and submit a new job to Azure ML based on a job configurat
 
 inputs:
   name:
-    description: 'Name of the job to be created. Note that the final name of the job will be the given name followed by the number of the build run `${{ github.run_id }}`. Thhis value is provided as an output.'
+    description: 'Name of the job to be created. Note that the final name of the job will be the given name followed by the number of the build run `github.run_id`. Thhis value is provided as an output.'
     required: true
   jobFile:
     description: 'Path to the job file.'
@@ -18,9 +18,6 @@ inputs:
     description: 'Indicates if the action should not wait for the job to finish.'
     required: false
     default: 'false'
-  GITHUB_RUN_ID:
-    description: 'test'
-    required: true
 
 outputs:
   jobName:
@@ -34,7 +31,7 @@ runs:
       id: jobRun
       shell: bash
       run: |
-        JOB_NAME="${{ inputs.name }}-${{ inputs.GITHUB_RUN_ID }}"
+        JOB_NAME="${{ inputs.name }}-${{ github.run_id }}"
         echo "::debug::Creating job with name: $JOB_NAME" 
         echo "::set-output name=jobName::$JOB_NAME"
 
