@@ -1,0 +1,65 @@
+name: endpoint-CD
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+    - endpoints/*
+    - src/*/score/*
+
+env:
+  SERVICECONNECTION: rg-dataplatform-dev
+  WORKSPACENAME: mlw-trunkbased-dev
+  RESOURCEGROUPNAME: mlops-trunkbased-dev
+  STORAGEACCOUNTNAME: aamldatalake
+  LOCATION: eastus2
+  KEYVAULTNAME: kv-trunkbased-dev
+  env: dev
+  modelName: hate-pt-speech
+  description: 'A hate detection model for tweets in portuguese'
+  condaEnvName: transformers-torch-19
+
+jobs:
+  deployment:
+    environment: amlworkspace_dev
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: job_preparation
+        name: Installing dependencies
+        uses: ./.github/actions/aml-cli-install
+        with:
+          componentSupport: false
+          minVersion: 2.0
+
+      - name: Logining in into Azure
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Deploying models
+        id: deployment
+        uses: ./.github/actions/aml-endpoint-deploy
+        with:
+          endpointFile: endpoints/*/endpoint.yml
+          deploymentFile: deployments/*.yml
+          workspaceName: ${WORKSPACENAME}
+          resourceGroup: ${RESOURCEGROUPNAME}
+          secretsToKeyVault: true
+          keyVaultName: ${KEYVAULTNAME}
+
+      - name: Configuring model inference
+        uses: ./.github/actions/aml-model-set
+        with:
+          modelName: ${modelName}
+          modelVersion: ${{ steps.deployment.outputs.deployedVersion }}
+          property: inference
+          value: ${GITHUB_SHA}
+          replaceExistingWith: surpassed
+          workspaceName: ${WORKSPACENAME}
+          resourceGroup: ${RESOURCEGROUPNAME}
+  
+      

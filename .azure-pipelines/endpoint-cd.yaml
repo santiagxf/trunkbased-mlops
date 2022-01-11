@@ -16,7 +16,6 @@ variables:
 stages:
 - stage: aml_model_deployment
   displayName: Model - Deployment
-  dependsOn: aml_model_evaluate
   jobs:
   - deployment: model_deployment
     displayName: Model deployment

@@ -115,6 +115,7 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       
       - name: Computing McNemar statistic
+        id: jobRun
         uses: ./.github/actions/aml-job-create
         with:
           name: ${modelName}-eval
