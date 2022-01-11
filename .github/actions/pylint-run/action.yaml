@@ -1,0 +1,50 @@
+name: Running PyLint
+description: 'Runs `PyLint` for code in folder `src`. All the code is evaluated.'
+
+inputs:
+  source:
+    description: 'Directory where the source code is located.'
+    required: true
+    default: .
+  moduleOrPackage:
+    description: 'Module or package over which to run lintering.'
+    required: true
+    default: '*'
+  useConda:
+    description: 'Indicates if the tests will run using an specific conda environment.'
+    required: true
+    default: 'false'
+  condaEnvName:
+    description: 'Name of the conda environment to use. Required if `useConda` is `true`.'
+    required: false
+  disable:
+    description: 'Indicates which rules should not be checked. Coma separeted values are possible.'
+    required: false
+    default: None
+  pkgWhitelist:
+    description: 'Indicates which packages should not be checked for lintering.'
+    required: false
+    default: None
+
+runs:
+  using: "composite"
+  steps:
+    - name: Running PyLint
+      shell: bash
+      run: |
+        if ${{ inputs.useConda }}; then
+          echo "::debug::Activating conda environment ${{ inputs.condaEnvName }}"
+          source activate ${{ inputs.condaEnvName }}
+
+          if ! [[ $(conda list --json | jq -r '.[] | select(.name=="pylint")') ]]; then
+            echo "::debug::Environment doesn't contain PyLint. Installing"
+            pip install pylint==2.12.1
+          fi
+        fi
+
+        for PACKAGE_FOLDER in ${{ inputs.source }}/${{ inputs.moduleOrPackage }}/
+        do
+          PACKAGE=$(basename $PACKAGE_FOLDER)
+          echo "::debug::>pylint $PACKAGE --disable=${{ inputs.disable}} --extension-pkg-whitelist=${{ inputs.pkgWhitelist }}"
+          (cd ${{ inputs.source }} && python -m pylint $PACKAGE --disable=${{ inputs.disable}} --extension-pkg-whitelist=${{ inputs.pkgWhitelist }})
+        done

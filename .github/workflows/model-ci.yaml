@@ -1,11 +1,12 @@
-name: environment-CI
+name: model-CI
 
 on:
   workflow_dispatch:
   pull_request:
     branches: [ main ]
     paths:
-      - environments/**
+    - jobs/**
+    - src/**
 
 jobs:
   integration:
@@ -39,12 +40,41 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       
+      - name: Building environment
+        uses: ./.github/actions/aml-env-build
+        with:
+          envFile: environments/${condaEnvName}/environment.yml
+      
+      - name: Running PyLint
+        uses: ./.github/actions/pylint-run
+        with:
+          source: src
+          useConda: true
+          condaEnvName: ${condaEnvName}
+          disable: W1203,C0103,W0603,R0801,R0913
+      
+      - name: Running unit tests
+        uses: ./.github/actions/azure-pytest-run
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          source: src
+          useConda: true
+          condaEnvName: ${condaEnvName}
+      
       - name: Ensuring environment
         uses: ./.github/actions/aml-env-ensure
         with:
-          envFile: environments/*/environment.yml
+          envFile: environments/${condaEnvName}/environment.yml
           validateOnly: true
-          failOnMissing: false
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
+      
+      - name: Running training job
+        uses: ./.github/actions/aml-job-create
+        with:
+          name: ${modelName}
+          jobFile: jobs/hatedetection/train.job.yml
+          workspaceName: ${WORKSPACENAME}
+          resourceGroup: ${RESOURCEGROUPNAME}
+          noWait: false
       
