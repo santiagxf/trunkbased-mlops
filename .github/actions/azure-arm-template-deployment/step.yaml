@@ -1,0 +1,50 @@
+name: Deploying ARM templates
+description: 'Deploys resources using ARM templates at the resource group level.'
+
+inputs:
+  resourceGroup:
+    description: 'Resource group where resources will be placed.'
+    required: true
+  location:
+    description: 'Location where resources will be placed. See Azure supported regions for a list of possibe values.'
+    required: true
+  deploymentName:
+    description: 'Display name for the deployment.'
+    required: true
+  templateFile:
+    description: 'JSON ARM template. This template will be created as a Template resource in the resource group mentioned.'
+    required: true
+  templateVersion:
+    description: 'Version of the template your are creating.'
+    required: false
+    default: 1.0
+  parameters:
+    description: 'JSON ARM template parameters file. If parameters of type secureString are specified, pass them here. Use the format parameter1=value1 parameter2=value2.'
+    required: false
+    default: ''
+  
+runs:
+  using: "composite"
+  steps:
+    - name: Deploying ARM templates
+      shell: bash
+      run: |
+        az ts create --name ${{ inputs.deploymentName }} \
+                     --version "${{ inputs.templateVersion }}" \
+                     --resource-group ${{ inputs.resourceGroup }} \
+                     --location ${{ inputs.location }} \
+                     --template-file ${{ inputs.templateFile }} \
+                     --yes
+
+        SPECIFICATION_ID=$(az ts list --resource-group ${{ inputs.resourceGroup }} | jq -r '.[0].id')
+        
+        if [[ "${{ inputs.parameters }}" == "" ]]; then
+          az deployment group create --resource-group ${{ inputs.resourceGroup }} \
+                                     --name deployment01 \
+                                     --template-spec $SPECIFICATION_ID/versions/${{ inputs.templateVersion }}
+        else
+          az deployment group create --resource-group ${{ inputs.resourceGroup }} \
+                                    --name deployment01 \
+                                    --template-spec $SPECIFICATION_ID/versions/${{ inputs.templateVersion }} \
+                                    --parameters ${{ inputs.parameters }}
+        fi

@@ -40,12 +40,13 @@ jobs:
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
       
-      - uses: azure/arm-deploy@v1
+      - uses: ./.github/actions/azure-arm-template-deployment
         name: Workspaces - Deploying resources
         with:
-          resourceGroupName: ${RESOURCEGROUPNAME}
+          resourceGroup: ${RESOURCEGROUPNAME}
+          location: ${LOCATION}
           deploymentName: aml-deployment
-          template: workspaces/templates/deploy.json
+          templateFile: workspaces/templates/deploy.json
           parameters: workspaces/${env}/deploy.parameters.json computeAdminUserName=${{ secrets.COMPUTEADMINUSERNAME }} computeAdminUserPassword=${{ secrets.COMPUTEADMINUSERPASSWORD }} datasetsClientId=${{ secrets.DATASETSCLIENTID }} datasetsClientSecret=${{ secrets.DATASETSCLIENTSECRET }}
 
       - id: datasets_init
