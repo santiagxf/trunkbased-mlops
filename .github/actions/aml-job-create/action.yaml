@@ -29,8 +29,10 @@ runs:
     - name: Deploying endpoint
       id: jobRun
       shell: bash
+      env:
+        GITHUB_RUN_ID: ${{ github.run_id }}
       run: |
-        JOB_NAME="${{ inputs.name }}-${{ github.run_id }}"
+        JOB_NAME="${{ inputs.name }}-$GITHUB_RUN_ID"
         echo "::debug::Creating job with name: $JOB_NAME" 
         echo "::set-output name=jobName::$JOB_NAME"
 
