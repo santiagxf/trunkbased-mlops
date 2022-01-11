@@ -51,7 +51,7 @@ runs:
         echo "::debug::Looking for metric ${{ inputs.metric }} at job ${{ inputs.jobName }}."
         echo "::debug::Expecting value ${{ inputs.expecting }} (of type ${{ inputs.dataType }}). Greater values are better? ${{ inputs.greaterIsBetter }}"
 
-        python .github/actions/aml-job-metric-assert/assert.py \
+        python ${{ github.action_path }}/assert.py \
           --ws-config ${{ inputs.workspaceConfig }} \
           --job-name ${{ inputs.jobName }} \
           --metric ${{ inputs.metric }} \

@@ -85,7 +85,7 @@ runs:
         echo "::debug::CHALLENGER is version:$CHALLENGER"
 
         echo "::debug::Comparing models by ${{ inputs.compareBy }}"
-        python .github/actions/aml-model-compare/compare.py \
+        python ${{ github.action_path }}/compare.py \
           --ws-config ${{ inputs.workspaceConfig }} \
           --model-name ${{ inputs.modelName }} \
           --champion $CHAMPION \

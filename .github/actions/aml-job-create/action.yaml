@@ -18,6 +18,10 @@ inputs:
     description: 'Indicates if the action should not wait for the job to finish.'
     required: false
     default: 'false'
+  GITHUB_RUN_ID:
+    description: 'test'
+    required: true
+
 outputs:
   jobName:
     description: Name of the job name created in the workspace.
@@ -29,10 +33,8 @@ runs:
     - name: Deploying endpoint
       id: jobRun
       shell: bash
-      env:
-        GITHUB_RUN_ID: ${{ github.run_id }}
       run: |
-        JOB_NAME="${{ inputs.name }}-$GITHUB_RUN_ID"
+        JOB_NAME="${{ inputs.name }}-${{ inputs.GITHUB_RUN_ID }}"
         echo "::debug::Creating job with name: $JOB_NAME" 
         echo "::set-output name=jobName::$JOB_NAME"
 

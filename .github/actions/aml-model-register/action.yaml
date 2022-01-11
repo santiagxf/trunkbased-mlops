@@ -43,7 +43,7 @@ runs:
         pip install azureml-core==1.37.0
         pip install azure-cli-core==2.30.0
         
-        python .github/actions/aml-model-register/register.py \
+        python ${{ github.action_path }}/register.py \
           --ws-config ${{ inputs.workspaceConfig }} \
           --name ${{ inputs.name }} \
           --version ${{ inputs.modelVersion }} \
