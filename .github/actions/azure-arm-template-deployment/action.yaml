@@ -17,7 +17,7 @@ inputs:
   templateVersion:
     description: 'Version of the template your are creating.'
     required: false
-    default: 1.0
+    default: '1.0'
   parameters:
     description: 'JSON ARM template parameters file. If parameters of type secureString are specified, pass them here. Use the format parameter1=value1 parameter2=value2.'
     required: false
