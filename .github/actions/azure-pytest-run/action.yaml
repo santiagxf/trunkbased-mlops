@@ -36,6 +36,7 @@ runs:
     - name: 'Running PyTest'
       shell: bash -l {0}
       run: |
+        set -e
         if ${{ inputs.useConda }}; then
           echo "::debug::Activating conda environment ${{ inputs.condaEnvName }}"
           source $CONDA/etc/profile.d/conda.sh
