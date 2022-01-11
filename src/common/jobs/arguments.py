@@ -126,7 +126,7 @@ class TaskArguments():
         fullargs = inspect.getfullargspec(method)
         args_annotations = dict(filter(lambda key: key[0] != 'return',
                                 fullargs.annotations.items()))
-        parsed_args = dict()
+        parsed_args = {}
 
         required_args_idxs = len(args_annotations) \
             - len(fullargs.defaults if fullargs.defaults else [])
