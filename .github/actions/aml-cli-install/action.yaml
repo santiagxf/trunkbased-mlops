@@ -65,4 +65,4 @@ runs:
       run: |
         echo "${HOME}/$CONDA/bin" >> $GITHUB_PATH
         conda init bash
-        source ~/.bashrc
+        eval "$(command conda 'shell.bash' 'hook' 2> /dev/null)"
