@@ -11,30 +11,30 @@ parameters:
     type: string
     default:
   
-  steps:
-    - task: AzureCLI@2
-      name: endpointtest
-      displayName: Testing endpoints
-      inputs:
-        scriptType: bash
-        scriptLocation: inlineScript
-        azureSubscription: ${{ parameters.azureServiceConnectionName }}
-        inlineScript: |
-          az configure --defaults workspace=$(WORKSPACENAME) group=$(RESOURCEGROUPNAME)
-  
-          ENDPOINT_FILES=$(find ${{ parameters.endpointFile }})
-          for ENDPOINT_FILE in $ENDPOINT_FILES
-          do
-            ENDPOINT_FOLDER=$(dirname $ENDPOINT_FILE)
-            ENDPOINT_NAME=$(yq -r ".name" $ENDPOINT_FILE)
-  
-            echo "##[debug]Retrieving URL and credentials for endpoint $ENDPOINT_NAME"
-            SCORING_URI=$(az ml online-endpoint show -n $ENDPOINT_NAME | jq -r ".scoring_uri")
-            SCORING_KEY=$(az ml online-endpoint get-credentials -n $ENDPOINT_NAME -o tsv --query primaryKey)
-              
-            echo "##[debug]Evaluating endpoint $ENDPOINT_NAME/$DEPLOYMENT_NAME"
-            BODY="${{ parameters.sampleRequest }}"
-            curl --fail --data "$BODY" -H "Content-Type: application/json" -H "Authorization: Bearer $SCORING_KEY" $SCORING_URI
-  
-            echo "##[debug]Endpoint evaluation completed"
-          done
+steps:
+  - task: AzureCLI@2
+    name: endpointtest
+    displayName: Testing endpoints
+    inputs:
+      scriptType: bash
+      scriptLocation: inlineScript
+      azureSubscription: ${{ parameters.azureServiceConnectionName }}
+      inlineScript: |
+        az configure --defaults workspace=$(WORKSPACENAME) group=$(RESOURCEGROUPNAME)
+
+        ENDPOINT_FILES=$(find ${{ parameters.endpointFile }})
+        for ENDPOINT_FILE in $ENDPOINT_FILES
+        do
+          ENDPOINT_FOLDER=$(dirname $ENDPOINT_FILE)
+          ENDPOINT_NAME=$(yq -r ".name" $ENDPOINT_FILE)
+
+          echo "##[debug]Retrieving URL and credentials for endpoint $ENDPOINT_NAME"
+          SCORING_URI=$(az ml online-endpoint show -n $ENDPOINT_NAME | jq -r ".scoring_uri")
+          SCORING_KEY=$(az ml online-endpoint get-credentials -n $ENDPOINT_NAME -o tsv --query primaryKey)
+            
+          echo "##[debug]Evaluating endpoint $ENDPOINT_NAME/$DEPLOYMENT_NAME"
+          BODY="${{ parameters.sampleRequest }}"
+          curl --fail --data "$BODY" -H "Content-Type: application/json" -H "Authorization: Bearer $SCORING_KEY" $SCORING_URI
+
+          echo "##[debug]Endpoint evaluation completed"
+        done

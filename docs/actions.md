@@ -147,8 +147,9 @@ Creates and submit a new job to Azure ML based on a job configuration. Jobs are 
 | Parameter                  | Description | Required |
 |----------------------------|-------------|----------|
 | azureServiceConnectionName | Service connection used to connect with Azure. | Yes | 
-| name                       | Name of the job to be created. Note that the final name of the job will be the given name followed by the number of the build run `$(Build.BuildId)`. THhis value is provided as an output.  | Yes | 
+| name                       | Name of the job to be created. Note that the final name of the job will be the given name followed by the number of the build run `$(Build.BuildId)` or `${{ github.run_id }}`. This value is provided as an output.  | Yes | 
 | jobFile                    | Path to the job file. | No |
+| stepDisplayName            | Display name of the training job on Azure DevOps. This parameters is not present on GHA. | No |
 | noWait                     | Indicates if the pipeline should wait for the job to finish. If `false`, then the job will capture the output of the job and publish the logs as an asset in the pipeline run. Defaults to `false`. | No |
 | workspaceName              | Name of the workspace to work against. | Yes |
 | resourceGroup              | Name of the resource group where the workspace is placed. | Yes |
@@ -290,9 +291,10 @@ Deploys a model endpoint in Azure Machine Learning Services all along with all t
 | azureServiceConnectionName | Service connection used to connect with Azure. | Yes | 
 | endpointFile               | Path to the endpoint YAML file. Wildcard paths are supported which means that all matched endpoints will be deployed  | Yes | 
 | deploymentFile             | Path to the deployment YAML files for the given endpoints. This path is relative to the path where the endpoints are located. Model versions in these YAML files can be indicated as supported by Azure ML using the version number (ej: `azureml:hate-pt-speech:22`) or by using an enhanced schema with tokens `latest` (`azureml:hate-pt-speech:latest`) and `current` (`azureml:hate-pt-speech:current`). `latest` resolves to the latest version of the model registered and `current` resolves to the current version of the model deployed in the given endpoint/deployment. Note that this schema is not supported OOTB by Azure ML. Wildcard paths are supported. | Yes |
+| modelVersion               | Model version you want to deploy. If this specified, it will overwrite the version indicated in the deployment file. Otherwise, the one indicated there will be used. | No |
 | workspaceName              | Name of the workspace to work against. | Yes |
 | resourceGroup              | Name of the resource group where the workspace is placed. | Yes |
-| noWait                     | Indicates if the action should not wait for the deployment to finish. If `true`, logs are not captured. | Yes |
+| noWait                     | Indicates if the action should not wait for the deployment to finish. If `true`, logs are not captured. Default to `false`. | No |
 | secretsToKeyVault          | Indicates if the `scoring url` and the `scoring key` should be uploaded to Azure Key Vault. Secrets naming convention is `<ENDPOINT_NAME>_scoringUrl` and `<ENDPOINT_NAME>_scoringKey` | No |
 | keyVaultName               | The name of the key vault to use. Required if `secretsToKeyVault` is `true`. | No | 
 

@@ -5,7 +5,6 @@ parameters:
   type: string
 - name: jobFile
   type: string
-  default: false
 - name: workspaceName
   type: string
 - name: resourceGroup
