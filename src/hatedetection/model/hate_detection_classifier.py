@@ -2,6 +2,8 @@
 
 import logging
 import shutil
+import math
+import numpy as np
 from typing import Union
 from os import PathLike
 
@@ -94,4 +96,16 @@ class HateDetectionClassifier:
         data['hate'] = hate.detach().numpy()
         scores = data[['index', 'hate']].groupby('index').agg('mean')['hate']
 
+        return scores
+
+    def predict_batch(self, data: Union[list, pd.Series, pd.DataFrame], batch_size: int = 64):
+        sample_size = len(data)
+        batches_idx = range(0, math.ceil(sample_size / batch_size))
+        scores = np.zeros(sample_size)
+
+        for batch_idx in batches_idx:
+            batch_from = batch_idx * batch_size
+            batch_to = batch_from + batch_size
+            scores[batch_from:batch_to] = self.predict(data.iloc[batch_from:batch_to])
+        
         return scores

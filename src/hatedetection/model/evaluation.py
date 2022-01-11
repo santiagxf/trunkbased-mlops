@@ -109,7 +109,7 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
         text, _ = load_examples(eval_dataset)
         champion_model = HateDetectionClassifier()
         champion_model.load(champion_path)
-        champion_scores = champion_model.predict(data=text)
+        champion_scores = champion_model.predict_batch(data=text)
 
         logging.info("[INFO] Unloading champion object from memory")
         del champion_model
@@ -117,7 +117,7 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
 
         challenger_model = HateDetectionClassifier()
         challenger_model.load(challenger_path)
-        challenger_scores = challenger_model.predict(data=text)
+        challenger_scores = challenger_model.predict_batch(data=text)
 
         logging.info("[INFO] Unloading challenger object from memory")
         del challenger_model
