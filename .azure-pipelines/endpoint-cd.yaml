@@ -43,7 +43,7 @@ stages:
             - template: templates/aml-model-set/step.yaml
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)
-                name: ${{ variables.modelName }}
+                modelName: ${{ variables.modelName }}
                 modelVersion: ${{ variables['deployment.deployedVersion'] }}
                 property: inference
                 value: $(Build.SourceVersion)

@@ -31,12 +31,12 @@ runs:
           # since some output is being sent to STDERR. The command grep then looks for an exception CondaEnvException.
 
           if conda env create -n $ENV_NAME -f $ENV_FOLDER/$ENV_CONDA_FILE 2>&1 | grep -q CondaEnvException ; then
-            echo "::error::$file=$ENV_FOLDER/$ENV_CONDA_FILE::Failed to build the environment indicated using conda. CondaEnvException happened"
+            echo "::error file=$ENV_FOLDER/$ENV_CONDA_FILE::Failed to build the environment indicated using conda. CondaEnvException happened"
             BUILD_OK=false
           fi
 
           if ! [[ $(conda env list --json | jq -r --arg ENV_NAME $ENV_NAME '.envs[] | select(endswith($ENV_NAME))') ]]; then
-            echo "::error::$file=$ENV_FOLDER/$ENV_CONDA_FILE::Failed to build the environment indicated using conda"
+            echo "::error file=$ENV_FOLDER/$ENV_CONDA_FILE::Failed to build the environment indicated using conda"
             BUILD_OK=false
           fi
         done

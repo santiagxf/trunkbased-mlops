@@ -151,17 +151,18 @@ stages:
             - template: templates/aml-model-set/step.yaml
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)
-                name: ${{ variables.modelName }}
+                modelName: ${{ variables.modelName }}
                 modelVersion: $(deployment.deployedVersion)
                 property: stage
                 value: production
                 exclusive: true
+                replaceExistingWith: surpassed
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)
             - template: templates/aml-model-set/step.yaml
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)
-                name: ${{ variables.modelName }}
+                modelName: ${{ variables.modelName }}
                 modelVersion: $(deployment.deployedVersion)
                 property: inference
                 value: $(Build.SourceVersion)

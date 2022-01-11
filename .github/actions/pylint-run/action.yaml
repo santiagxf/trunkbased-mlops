@@ -34,7 +34,7 @@ runs:
       run: |
         if ${{ inputs.useConda }}; then
           echo "::debug::Activating conda environment ${{ inputs.condaEnvName }}"
-          source activate ${{ inputs.condaEnvName }}
+          conda activate ${{ inputs.condaEnvName }}
 
           if ! [[ $(conda list --json | jq -r '.[] | select(.name=="pylint")') ]]; then
             echo "::debug::Environment doesn't contain PyLint. Installing"
@@ -48,3 +48,8 @@ runs:
           echo "::debug::>pylint $PACKAGE --disable=${{ inputs.disable}} --extension-pkg-whitelist=${{ inputs.pkgWhitelist }}"
           (cd ${{ inputs.source }} && python -m pylint $PACKAGE --disable=${{ inputs.disable}} --extension-pkg-whitelist=${{ inputs.pkgWhitelist }})
         done
+
+        if ${{ inputs.useConda }}; then
+          echo "::debug::Deactivating conda environment ${{ inputs.condaEnvName }}"
+          conda deactivate
+        fi

@@ -1,0 +1,103 @@
+name: Comparing models
+description: 'Compares two model versions, a champion and a challenger, based on a given metric and indicates if the challenger model, acting a the new model, is better than the current champion, acting as the current deployed model. This method is usually called champion/challenger comparison. Metrics of the models should be logged in the run that generated them. This implies that model registration should always indicate the Run ID that generated the model.'
+
+inputs:
+  modelName:
+    description: 'Name of the model to compare'
+    required: true
+  champion:
+    description: 'Version of the model that is acting as the champion. It can be indicated using a given model version, like 22, or using tokens like `current` indicating the current deployed version in a given endpoint/deployment. If indicated with `current`, then `endpoint` parameter should be specified. If `current` is indicated and there is no model deployed in `endpoint` then the comparison will always vote for challenger.'
+    required: true
+  challenger:
+    description: 'Version of the model that is acting as the challenger. It can be indicated using a given model version, like 22, or using tokens like `latest` indicating the latest version of the model in the registry.'
+    required: true
+    default: 'latest'
+  endpoint:
+    description: 'The path of the endpoint `YAML` file. This is used to infer which is the current version of the model. The first deployment will be used if `deployment` is not indicated. This parameter is required if `champion` is `current`.'
+    required: false
+    default: ''
+  deployment:
+    description: 'The name of the deployment inside the given endpoint to get the model from. If this parameter is not indicated but an endpoint has been specified, then the first available endpoint is used inside the endpoint.'
+    required: true
+  compareBy:
+    description: 'The name of the metric used to compare the models. This metric should be logged in the runs that generated the given models. Defaults to `accuracy`.'
+    required: true
+    default: 'accuracy'
+  greaterIsBetter:
+    description: 'Indicates if greater values of the metric `compareBy` are better.'
+    required: true
+    default: 'true'
+  workspaceName:
+    description: 'Name of the workspace to work against.'
+    required: true
+  resourceGroup:
+    description: 'Name of the resource group where the workspace is placed.'
+    required: true
+  workspaceConfig:
+    description: 'Configuration file of the workspace where to register the model'
+    required: true
+
+outputs:
+  result:
+    description: ' Either `true` or `false` depending if the comparison favored `challenger` over `champion`.'
+    value: ${{ steps.compare.outputs.result }}
+
+
+runs:
+  using: "composite"
+  steps:
+    - name: Comparing models
+      id: compare
+      shell: bash
+      run: |
+        pip install azureml-core==1.37.0
+        pip install azure-cli-core==2.30.0
+        
+        if [[ "${{ inputs.champion }}" == "current" ]]; then
+          echo "::debug::Resolving current champion version from endpoint"
+          ENDPOINT_NAME=$(yq -r ".name" ${{ inputs.endpoint }})
+          
+          if [[ "${{ inputs.deployment }}" == "" ]]; then
+            echo "::debug::Querying champion version from endpoint with name $ENDPOINT_NAME"
+            CHAMPION_MODEL=$(az ml online-deployment list --endpoint-name $ENDPOINT_NAME -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} | jq -r ".[].model")
+          else
+            echo "::debug::Querying champion version from endpoint/deployment with name $ENDPOINT_NAME/${{ inputs.deployment }}"
+            CHAMPION_MODEL=$(az ml online-deployment show --endpoint-name $ENDPOINT_NAME --name ${{ inputs.deployment }} -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} | jq -r ".[].model")
+          fi
+          if [[ $CHAMPION_MODEL ]]; then
+            CHAMPION=$(basename $CHAMPION_MODEL)
+          else
+            echo "::warning::There are no models deployed at endpoint $ENDPOINT_NAME. Model will be deployed without compare."
+            echo "::set-output name=result::true"
+            exit 0
+          fi
+        else
+          CHAMPION=${{ inputs.champion }}
+        fi
+        echo "::debug::CHAMPION is version:$CHAMPION"
+
+        if [[ "${{ inputs.challenger }}" == "latest" ]]; then
+          echo "::debug::Resolving challenger version from latest available"
+          CHALLENGER=$(az ml model list --name ${{ inputs.modelName }} -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} | jq -r '.[0].version')
+        else
+          CHALLENGER=${{ inputs.champion }}
+        fi
+        echo "::debug::CHALLENGER is version:$CHALLENGER"
+
+        echo "::debug::Comparing models by ${{ inputs.compareBy }}"
+        python .github/actions/aml-model-compare/compare.py \
+          --ws-config ${{ inputs.workspaceConfig }} \
+          --model-name ${{ inputs.modelName }} \
+          --champion $CHAMPION \
+          --challenger $CHALLENGER \
+          --compare-by ${{ inputs.compareBy }} \
+          --greater-is-better ${{ inputs.greaterIsBetter }}
+
+        # compare.py will return true or false depending if challenger is better. false is encoded as 0 en bash and any other value is true.
+        if [[ $? == 0 ]]; then
+          echo "::warning::Challenger model is not better than the current champion."
+          echo "::set-output name=result::false"
+        else
+          echo "::debug::Challenger model won the compare and will be deployed."
+          echo "::set-output name=result::true"
+        fi

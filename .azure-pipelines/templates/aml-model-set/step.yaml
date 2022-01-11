@@ -1,7 +1,7 @@
 parameters:
 - name: azureServiceConnectionName
   type: string
-- name: name
+- name: modelName
   type: string
 - name: modelVersion
   type: string
@@ -13,6 +13,9 @@ parameters:
 - name: exclusive
   type: boolean
   default: false
+- name: replaceExistingWith
+  type: string
+  default:
 - name: workspaceName
   type: string 
 - name: resourceGroup
@@ -29,20 +32,25 @@ steps:
       set -e
       
       if ${{ lower(parameters.exclusive) }}; then
-        VERSION_RESET=$(az ml model list -n ${{ parameters.name }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r --arg PROP_VALUE ${{ parameters.value }} '.[] | select(.tags.${{ parameters.property }} == $PROP_VALUE) | .version')
+        VERSION_RESET=$(az ml model list -n ${{ parameters.modelName }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r --arg PROP_VALUE ${{ parameters.value }} '.[] | select(.tags.${{ parameters.property }} == $PROP_VALUE) | .version')
 
         if [[ "$VERSION_RESET" != "" ]]; then
-          echo "##[debug]Removing tag ${{ parameters.property }} from model ${{ parameters.name }}:$VERSION_REST"
-          az ml model update -n ${{ parameters.name }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} --version $VERSION_RESET --set tags={}
+          echo "##[debug]Removing or replacing tag ${{ parameters.property }} from model ${{ parameters.modelName }}:$VERSION_REST"
+          if [[ "${{ parameters.replaceExistingWith }}" == "" ]]; then
+            az ml model update -n ${{ parameters.modelName }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} --version $VERSION_RESET --set tags={}
+          else
+            echo "##[debug]Replacing tag ${{ parameters.property }} from model ${{ parameters.modelName }}:$VERSION_REST with value ${{ parameters.replaceExistingWith }}"
+            az ml model update -n ${{ parameters.modelName }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} --version $VERSION_RESET --set tags.${{ parameters.property }}=${{ parameters.replaceExistingWith }}
+          fi
         fi
       fi
 
       if [[ "${{ parameters.modelVersion }}" == "latest" ]]; then
-        echo "##[debug]Identifying latest version of the model ${{ parameters.name }}"
-        MODEL_VERSION=$(az ml model list --name ${{ parameters.name }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r '.[0].version')
+        echo "##[debug]Identifying latest version of the model ${{ parameters.modelName }}"
+        MODEL_VERSION=$(az ml model list --name ${{ parameters.modelName }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r '.[0].version')
       else
         MODEL_VERSION=${{ parameters.modelVersion }}
       fi
       
-      echo "##[debug]Applying tag ${{ parameters.property }}=${{ parameters.value }} to model ${{ parameters.name }}:$MODEL_VERSION"
-      az ml model update -n ${{ parameters.name }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} --version $MODEL_VERSION --set tags.${{ parameters.property }}=${{ parameters.value }}
+      echo "##[debug]Applying tag ${{ parameters.property }}=${{ parameters.value }} to model ${{ parameters.modelName }}:$MODEL_VERSION"
+      az ml model update -n ${{ parameters.modelName }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} --version $MODEL_VERSION --set tags.${{ parameters.property }}=${{ parameters.value }}

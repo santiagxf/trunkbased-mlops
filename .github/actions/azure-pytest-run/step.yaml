@@ -38,7 +38,7 @@ runs:
       run: |
         if ${{ inputs.useConda }}; then
           echo "::debug::Activating conda environment ${{ inputs.condaEnvName }}"
-          source activate ${{ inputs.condaEnvName }}
+          conda activate ${{ inputs.condaEnvName }}
 
           if ! [[ $(conda list --json | jq -r '.[] | select(.name=="pytest")') ]]; then
             echo "::debug::Environment doesn't contain PyTest. Installing"

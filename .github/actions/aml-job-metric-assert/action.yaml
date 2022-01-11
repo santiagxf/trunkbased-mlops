@@ -1,0 +1,69 @@
+name: Evaluating metrics
+description: 'Asserts that a given metric in a job contains a given value.'
+
+inputs:
+  jobName:
+    description: 'Name of the job where the metric is.'
+    required: true
+  metric:
+    description: 'The name of the metric used to compare the models. This metric should be logged in the runs that generated the given models.'
+    required: true
+  expecting:
+    description: 'Value that you are expecting to have.'
+    required: true
+  dataType:
+    description: 'Data type of the expecting value. Possible options are [ `bool`, `boolean`, `numeric`, `float`, `int`, `str`, `string` ]'
+    required: true
+  greaterIsBetter:
+    description: 'Indicates if greater values of the metric `metric` are better.'
+    required: true
+    default: 'true'
+  failureMessage:
+    description: 'Message to display in case the assertion fails.'
+    required: false
+    default: 'Assertion for metric has failed.'
+  workspaceName:
+    description: 'Name of the workspace to work against.'
+    required: true
+  resourceGroup:
+    description: 'Name of the resource group where the workspace is placed.'
+    required: true
+  workspaceConfig:
+    description: 'Configuration file of the workspace where to register the model'
+    required: true
+
+outputs:
+  result:
+    description: 'Either `true` or `false` depending if the assertion successed.'
+    value: ${{ steps.jobMetricAssert.outputs.result }}
+
+
+runs:
+  using: "composite"
+  steps:
+    - name: Evaluating metrics
+      id: jobMetricAssert
+      shell: bash
+      run: |
+        pip install azureml-core==1.37.0
+        pip install azure-cli-core==2.30.0
+        
+        echo "::debug::Looking for metric ${{ inputs.metric }} at job ${{ inputs.jobName }}."
+        echo "::debug::Expecting value ${{ inputs.expecting }} (of type ${{ inputs.dataType }}). Greater values are better? ${{ inputs.greaterIsBetter }}"
+
+        python .github/actions/aml-job-metric-assert/assert.py \
+          --ws-config ${{ inputs.workspaceConfig }} \
+          --job-name ${{ inputs.jobName }} \
+          --metric ${{ inputs.metric }} \
+          --expected ${{ inputs.expecting }} \
+          --data-type ${{ inputs.dataType }} \
+          --greater-is-better ${{ inputs.greaterIsBetter }}
+        
+        # assert.py will return true or false. false is encoded as 0 en bash and any other value is true.
+        if [[ $? == 0 ]]; then
+          echo "::warning::${{ inputs.failureMessage }}."
+          echo "::set-output name=result::false"
+        else
+          echo "::debug::Assertion returned true."
+          echo "::set-output name=result::true"
+        fi

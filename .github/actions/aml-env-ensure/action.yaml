@@ -48,13 +48,13 @@ runs:
               if cmp -s conda.yml $ENV_FOLDER/$ENV_CONDA_FILE; then
                 echo "::debug::Environments validation passed"
               else
-                echo "::error::$file=$ENV_FILE::Environment file definition doesn't match the one registered. Please increase version to get it created"
+                echo "::error file=$ENV_FILE::Environment file definition doesn't match the one registered. Please increase version to get it created"
                 VALIDATION_PASS=false
               fi
             else
               if ${{ inputs.validateOnly }} ; then
                 if ${{ inputs.failOnMissing }} ; then
-                  echo "::error::$file=$ENV_FILE::Environment '$ENV_NAME' exists, but not in the required version ($ENV_VERSION)."
+                  echo "::error file=$ENV_FILE::Environment '$ENV_NAME' exists, but not in the required version ($ENV_VERSION)."
                   VALIDATION_PASS=false
                 else
                   echo "::debug::Environment $ENV_NAME needs to be deployed in target workspace with version $ENV_VERSION"
@@ -67,7 +67,7 @@ runs:
           else
             if ${{ inputs.validateOnly }}; then
               if ${{ inputs.failOnMissing }} ; then
-                echo "::error::$file=$ENV_FILE::Environment '$ENV_NAME' doesn't exist in the workspace."
+                echo "::error file=$ENV_FILE::Environment '$ENV_NAME' doesn't exist in the workspace."
                 VALIDATION_PASS=false
               else
                 echo "::debug::Environment $ENV_NAME needs to be deployed in target workspace with version $ENV_VERSION"
