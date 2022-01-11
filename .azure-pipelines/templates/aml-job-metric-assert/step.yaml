@@ -36,6 +36,9 @@ steps:
         pip install azureml-core==1.37.0
         pip install azure-cli-core==2.30.0
         
+        echo "##[debug] Looking for metric ${{ parameters.metric }} at job ${{ parameters.jobName }}."
+        echo "##[debug] Expecting value ${{ parameters.expecting }} (of type ${{ parameters.dataType }}). Greater values are better? ${{ parameters.greaterIsBetter }}"
+
         python $(Build.SourcesDirectory)/.azure-pipelines/templates/aml-job-metric-assert/assert.py \
           --ws-config ${{ parameters.workspaceConfig }} \
           --job-name ${{ parameters.jobName }} \

@@ -382,10 +382,9 @@ Deploys resources using ARM templates at the resource group level.
 | resourceGroup              | Resource group where resources will be placed.  | Yes | 
 | location                   | Location where resources will be placed. See Azure supported regions for a list of possibe values | Yes |
 | deploymentName             | Display name for the deployment. | Yes |
-| templateFile               | `JSON` ARM template. This template will be created as a Template resource in the resource group mentioned. | Yes |
-| templateVersion            | Version of the template your are creating. Defaults to `1.0`. | No |
-| parametersFile             | `JSON` ARM template parameters file. | Yes |
-| secureParameters           | If parameters of type `secureString` are specified, pass them here. Use the format `parameter1=value1 parameter2=value2`. | No | 
+| template                   | `JSON` ARM template. This template will be created as a Template resource in the resource group mentioned. | Yes |
+| Version                    | Version of the template your are creating. Defaults to `1.0`. | No |
+| parameters                 | `JSON` ARM template parameters file. If parameters of type `secureString` are specified, pass them here. Use the format `parameter1=value1 parameter2=value2`. | No |
 
 **Sample usage**
 
@@ -398,8 +397,7 @@ Deploys resources using ARM templates at the resource group level.
     resourceGroup: my-resourcegroup-dev
     location: eastus2
     deploymentName: mydeployment
-    templateFile: workspaces/templates/deploy.json
-    templateVersion: 1.0
-    parametersFile: workspaces/dev/deploy.parameters.json
-    secureParameters: computeAdminUserName=$(computeAdminUserName) computeAdminUserPassword=$(computeAdminUserPassword)
+    template: workspaces/templates/deploy.json
+    version: 1.0
+    parameters: workspaces/dev/deploy.parameters.json computeAdminUserName=$(computeAdminUserName) computeAdminUserPassword=$(computeAdminUserPassword)
 ```

@@ -7,14 +7,12 @@ parameters:
     type: string
   - name: deploymentName
     type: string
-  - name: templateFile
+  - name: template
     type: string
-  - name: templateVersion
+  - name: version
     type: string
     default: 1.0
-  - name: parametersFile
-    type: string
-  - name: secureParameters
+  - name: parameters
     type: string
     default: 
   
@@ -27,23 +25,21 @@ steps:
       azureSubscription: ${{ parameters.azureServiceConnectionName }}
       inlineScript: |
         az ts create --name ${{ parameters.deploymentName }} \
-                     --version "${{ parameters.templateVersion }}" \
+                     --version "${{ parameters.version }}" \
                      --resource-group ${{ parameters.resourceGroup }} \
                      --location ${{ parameters.location }} \
-                     --template-file ${{ parameters.templateFile }} \
+                     --template-file ${{ parameters.template }} \
                      --yes
 
         SPECIFICATION_ID=$(az ts list --resource-group ${{ parameters.resourceGroup }} | jq -r '.[0].id')
         
-        if [[ "${{ parameters.secureParameters }}" == "" ]]; then
+        if [[ "${{ parameters.parameters }}" == "" ]]; then
           az deployment group create --resource-group ${{ parameters.resourceGroup }} \
                                      --name deployment01 \
-                                     --template-spec $SPECIFICATION_ID/versions/${{ parameters.templateVersion }} \
-                                     --parameters ${{ parameters.parametersFile }}
+                                     --template-spec $SPECIFICATION_ID/versions/${{ parameters.version }}
         else
           az deployment group create --resource-group ${{ parameters.resourceGroup }} \
                                     --name deployment01 \
-                                    --template-spec $SPECIFICATION_ID/versions/${{ parameters.templateVersion }} \
-                                    --parameters ${{ parameters.parametersFile }} \
-                                    --parameters ${{ parameters.secureParameters }}
+                                    --template-spec $SPECIFICATION_ID/versions/${{ parameters.version }} \
+                                    --parameters ${{ parameters.parameters }}
         fi
