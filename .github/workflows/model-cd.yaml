@@ -83,7 +83,7 @@ jobs:
       - name: Registering trained model
         uses: ./.github/actions/aml-model-register
         with:
-          name: ${{ variables.modelName }}
+          name: ${modelName}
           fromJob: true
           jobName: ${{ needs.build.outputs.jobName }}
           description: ${description}
