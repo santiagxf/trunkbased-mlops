@@ -62,6 +62,8 @@ steps:
         pip install azureml-core==1.37.0
         pip install azure-cli-core==2.30.0
 
-  - bash: echo "##vso[task.prependpath]$CONDA/bin"
+  - bash: |
+      echo "##vso[task.prependpath]$CONDA/bin"
+      conda init bash
     displayName: Preparing conda
     condition: and(succeeded(), eq(${{ parameters.initConda }}, 'true'))
