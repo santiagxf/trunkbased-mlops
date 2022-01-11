@@ -65,3 +65,4 @@ runs:
       run: |
         echo "${HOME}/$CONDA/bin" >> $GITHUB_PATH
         conda init bash
+        source ~/.bashrc
