@@ -2,6 +2,21 @@
 
 The following actions are available in this repository and allows to build CI/CD pipelines for automation.
 
+Index:
+- [aml-cli-install](#aml-cli-install)
+- [aml-dataset-create](#aml-dataset-create)
+- [aml-env-build](#aml-env-build)
+- [aml-env-ensure](#aml-env-ensure)
+- [aml-job-create](#aml-job-create)
+- [aml-job-metric-assert](#aml-job-metric-assert)
+- [aml-model-register](#aml-model-register)
+- [aml-model-compare](#aml-model-compare)
+- [aml-model-set](#aml-model-set)
+- [aml-endpoint-deploy](#aml-endpoint-deploy)
+- [azure-pytest-run](#azure-pytest-run)
+- [azure-arm-template-deployment](#azure-arm-template-deployment)
+- [pylint-run](#pylint-run)
+
 ## aml-cli-install
 
 Install the Azure CLI, Azure Machine Learning CLI, and all the required tools. It also configured conda if indicated.
@@ -432,34 +447,6 @@ Run `pytest` tests that may rely on Azure and hence they are executed in the con
     condaEnvName: cicd
 ```
 
-## pylint-run
-
-Run lintering over the source code. 
-
-**Inputs**
-
-| Parameter                  | Description | Required |
-|----------------------------|-------------|----------|
-| source                     | Directory where the source code is located. Defaults to current directory `.` | Yes |
-| moduleOrPackage            | Module or package over which to run lintering. Defaults to `*`, meaning all the modules will be evaluated.  | Yes | 
-| useConda                   | Indicates if the tests will run using an specific conda environment. Defaults to `false`. | No |
-| condaEnvName               | Name of the conda environment to use. Required if `useConda` is `true`. | No |
-| disable                    | Indicates which rules should not be checked. Coma separeted values are possible. Defaults to empty. | No |
-| pkgWhitelist               | Indicates which packages should not be checked for lintering. | No |
-
-**Sample usage**
-
-> Runs `PyLint` for code in folder `src`. All the code is evaluated. Rules `W1023` and `C0103` are not validated. Uses a conda environment named `cicd`. This environment should be created beforehand.
-
-```yml
-- template: templates/pylint-run/step.yaml
-  parameters:
-    source: src
-    useConda: true
-    condaEnvName: cicd
-    disable: W1203,C0103
-```
-
 
 ## azure-arm-template-deployment
 
@@ -491,4 +478,32 @@ Deploys resources using ARM templates at the resource group level.
     template: workspaces/templates/deploy.json
     version: 1.0
     parameters: workspaces/dev/deploy.parameters.json computeAdminUserName=$(computeAdminUserName) computeAdminUserPassword=$(computeAdminUserPassword)
+```
+
+## pylint-run
+
+Run lintering over the source code. 
+
+**Inputs**
+
+| Parameter                  | Description | Required |
+|----------------------------|-------------|----------|
+| source                     | Directory where the source code is located. Defaults to current directory `.` | Yes |
+| moduleOrPackage            | Module or package over which to run lintering. Defaults to `*`, meaning all the modules will be evaluated.  | Yes | 
+| useConda                   | Indicates if the tests will run using an specific conda environment. Defaults to `false`. | No |
+| condaEnvName               | Name of the conda environment to use. Required if `useConda` is `true`. | No |
+| disable                    | Indicates which rules should not be checked. Coma separeted values are possible. Defaults to empty. | No |
+| pkgWhitelist               | Indicates which packages should not be checked for lintering. | No |
+
+**Sample usage**
+
+> Runs `PyLint` for code in folder `src`. All the code is evaluated. Rules `W1023` and `C0103` are not validated. Uses a conda environment named `cicd`. This environment should be created beforehand.
+
+```yml
+- template: templates/pylint-run/step.yaml
+  parameters:
+    source: src
+    useConda: true
+    condaEnvName: cicd
+    disable: W1203,C0103
 ```
