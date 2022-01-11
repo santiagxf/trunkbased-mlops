@@ -1,6 +1,6 @@
 import logging
-from typing import Dict, Any
-import pandas as pd
+from typing import Dict
+import torch
 from sklearn.metrics import f1_score, precision_score, confusion_matrix
 from sklearn.metrics import accuracy_score, recall_score, precision_recall_fscore_support
 from statsmodels.stats.contingency_tables import mcnemar
@@ -111,9 +111,17 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
         champion_model.load(champion_path)
         champion_scores = champion_model.predict_proba(data=text)
 
+        logging.info("[INFO] Unloading champion object from memory")
+        del champion_model
+        torch.cuda.synchronize()
+
         challenger_model = HateDetectionClassifier()
         challenger_model.load(challenger_path)
         challenger_scores = challenger_model.predict_proba(data=text)
+
+        logging.info("[INFO] Unloading challenger object from memory")
+        del challenger_model
+        torch.cuda.synchronize()
 
         cont_table = confusion_matrix(champion_scores, challenger_scores)
         results = mcnemar(cont_table, exact=False)
