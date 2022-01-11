@@ -70,7 +70,7 @@ stages:
                 modelVersion: latest
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)
-                workspaceConfig: workspaces/dev/workspace.json
+                workspaceConfig: workspaces/$(env)/workspace.json
 
 - stage: aml_model_evaluate
   displayName: Model - Evaluation
@@ -82,13 +82,6 @@ stages:
         parameters:
           componentSupport: false
           minVersion: 2.0
-      - template: templates/aml-env-ensure/step.yaml
-        parameters:
-          azureServiceConnectionName: $(SERVICECONNECTION)
-          envFile: environments/${{ variables.condaEnvName}}/environment.yml
-          validateOnly: true
-          workspaceName: $(WORKSPACENAME)
-          resourceGroup: $(RESOURCEGROUPNAME)
       - template: templates/aml-job-create/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
@@ -108,7 +101,7 @@ stages:
           dataType: boolean
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
-          workspaceConfig: workspaces/dev/workspace.json
+          workspaceConfig: workspaces//$(env)//workspace.json
           failureMessage: Unable to conclude if challenger is better than champion.
       - template: templates/aml-model-compare/step.yaml
         parameters:
@@ -120,7 +113,7 @@ stages:
           compareBy: eval_recall
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
-          workspaceConfig: workspaces/dev/workspace.json
+          workspaceConfig: workspaces//$(env)//workspace.json
 
 - stage: aml_model_deployment
   displayName: Model - Deployment
@@ -166,6 +159,5 @@ stages:
                 modelVersion: $(deployment.deployedVersion)
                 property: inference
                 value: $(Build.SourceVersion)
-                exclusive: true
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)

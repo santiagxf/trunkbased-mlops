@@ -8,22 +8,22 @@ on:
     - jobs/**
     - src/**
 
+env:
+  SERVICECONNECTION: rg-dataplatform-dev
+  WORKSPACENAME: mlw-trunkbased-dev
+  RESOURCEGROUPNAME: mlops-trunkbased-dev
+  STORAGEACCOUNTNAME: aamldatalake
+  LOCATION: eastus2
+  KEYVAULTNAME: kv-trunkbased-dev
+  env: dev
+  modelName: hate-pt-speech
+  description: 'A hate detection model for tweets in portuguese'
+  condaEnvName: transformers-torch-19
+
 jobs:
-  deployment:
+  build:
     environment: dev
     runs-on: ubuntu-latest
-
-    env:
-      SERVICECONNECTION: rg-dataplatform-dev
-      WORKSPACENAME: mlw-trunkbased-dev
-      RESOURCEGROUPNAME: mlops-trunkbased-dev
-      STORAGEACCOUNTNAME: aamldatalake
-      LOCATION: eastus2
-      KEYVAULTNAME: kv-trunkbased-dev
-      env: dev
-      modelName: hate-pt-speech
-      description: 'A hate detection model for tweets in portuguese'
-      condaEnvName: transformers-torch-19
 
     steps:
       - uses: actions/checkout@v2
@@ -39,27 +39,6 @@ jobs:
         uses: Azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
-      
-      - name: Building environment
-        uses: ./.github/actions/aml-env-build
-        with:
-          envFile: environments/${condaEnvName}/environment.yml
-      
-      - name: Running PyLint
-        uses: ./.github/actions/pylint-run
-        with:
-          source: src
-          useConda: true
-          condaEnvName: ${condaEnvName}
-          disable: W1203,C0103,W0603,R0801,R0913
-      
-      - name: Running unit tests
-        uses: ./.github/actions/azure-pytest-run
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-          source: src
-          useConda: true
-          condaEnvName: ${condaEnvName}
       
       - name: Ensuring environment
         uses: ./.github/actions/aml-env-ensure
@@ -77,4 +56,152 @@ jobs:
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
           noWait: false
+      
+    outputs:
+      jobName: ${{ steps.jobRun.outputs.jobName }}
+
+  registry:
+    environment: amlworkspace_dev
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: job_preparation
+        name: Installing dependencies
+        uses: ./.github/actions/aml-cli-install
+        with:
+          componentSupport: false
+          minVersion: 2.0
+
+      - name: Logining in into Azure
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Registering trained model
+        uses: ./.github/actions/aml-model-register
+        with:
+          name: ${{ variables.modelName }}
+          fromJob: true
+          jobName: ${{ needs.build.outputs.jobName }}
+          description: ${description}
+          modelPath: outputs/hate-pt-speech.zip
+          modelVersion: latest
+          workspaceName: ${WORKSPACENAME}
+          resourceGroup: ${RESOURCEGROUPNAME}
+          workspaceConfig: workspaces/${env}/workspace.json
+
+  evaluation:
+    environment: dev
+    runs-on: ubuntu-latest
+    needs: registry
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: job_preparation
+        name: Installing dependencies
+        uses: ./.github/actions/aml-cli-install
+        with:
+          componentSupport: false
+          minVersion: 2.0
+
+      - name: Logining in into Azure
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Computing McNemar statistic
+        uses: ./.github/actions/aml-job-create
+        with:
+          name: ${modelName}-eval
+          jobFile: jobs/hatedetection/evaluate.job.yml
+          workspaceName: ${WORKSPACENAME}
+          resourceGroup: ${RESOURCEGROUPNAME}
+          noWait: false
+      
+      - name: Verifying evaluation
+        uses: ./.github/actions/aml-job-metric-assert
+        with:
+          jobName: ${{ steps.jobRun.outputs.jobName }}
+          metric: test
+          expecting: true
+          dataType: boolean
+          workspaceName: ${WORKSPACENAME}
+          resourceGroup: ${RESOURCEGROUPNAME}
+          workspaceConfig: workspaces//${env}//workspace.json
+          failureMessage: Unable to conclude if challenger is better than champion.
+      
+      - name: Comparing models
+        uses: ./.github/actions/aml-model-compare
+        if: ${{ steps.jobMetricAssert.outputs.result == 'true' }}
+        with:
+          modelName: ${modelName}
+          champion: current
+          challenger: latest
+          endpoint: endpoints/${modelName}/endpoint.yml
+          compareBy: eval_recall
+          workspaceName: ${WORKSPACENAME}
+          resourceGroup: ${RESOURCEGROUPNAME}
+          workspaceConfig: workspaces//${env}//workspace.json
+
+    outputs:
+      result: ${{ steps.compare.outputs.result }}
+
+  deployment:
+    environment: amlworkspace_dev
+    runs-on: ubuntu-latest
+    needs: evaluation
+    if: ${{ needs.evaluation.outputs.result == 'true' }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: job_preparation
+        name: Installing dependencies
+        uses: ./.github/actions/aml-cli-install
+        with:
+          componentSupport: false
+          minVersion: 2.0
+
+      - name: Logining in into Azure
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+      
+      - name: Deploying models
+        uses: ./.github/actions/aml-endpoint-deploy
+        with:
+          endpointFile: endpoints/*/endpoint.yml
+          deploymentFile: deployments/*.yml
+          workspaceName: ${WORKSPACENAME}
+          resourceGroup: ${RESOURCEGROUPNAME}
+          secretsToKeyVault: true
+          keyVaultName: ${KEYVAULTNAME}
+
+      - name: Configuring model stage
+        uses: ./.github/actions/aml-model-set
+        with:
+          modelName: ${modelName}
+          modelVersion: ${{ steps.deployment.outputs.deployedVersion }}
+          property: stage
+          value: production
+          exclusive: true
+          replaceExistingWith: surpassed
+          workspaceName: ${WORKSPACENAME}
+          resourceGroup: ${RESOURCEGROUPNAME}
+
+      - name: Configuring model inference
+        uses: ./.github/actions/aml-model-set
+        with:
+          modelName: ${modelName}
+          modelVersion: ${{ steps.deployment.outputs.deployedVersion }}
+          property: inference
+          value: ${GITHUB_SHA}
+          replaceExistingWith: surpassed
+          workspaceName: ${WORKSPACENAME}
+          resourceGroup: ${RESOURCEGROUPNAME}
+  
       

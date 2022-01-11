@@ -31,10 +31,16 @@ inputs:
     required: false
     default: ''
 
+outputs:
+  deployedVersion:
+    description: 'Deployed version of the model'
+    value: ${{ steps.deployment.outputs.deployedVersion }}
+
 runs:
   using: "composite"
   steps:
     - name: Deploying endpoint
+      id: deployment
       shell: bash
       run: |
         set -e #Fail on errors
@@ -112,7 +118,7 @@ runs:
 
           echo "::debug::Getting deployed version for model at file $DEPLOYMENT_FILE"
           DEPLOYED_VERSION=$(yq -r ".model" $DEPLOYMENT_FILE | cut -d: -f3)
-          echo "##vso[task.setvariable variable=deployedVersion;isOutput=true]$DEPLOYED_VERSION" 
+          echo "::set-output name=deployedVersion::$DEPLOYED_VERSION"
           echo "::debug::Deployed version is: $DEPLOYED_VERSION"
 
           echo "::debug::Endpoint evaluation completed"
