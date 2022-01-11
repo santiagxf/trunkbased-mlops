@@ -55,7 +55,7 @@ def get_metric_for_job(workspace: aml.Workspace, job_name: str, metric_name: str
     job_run = workspace.get_run(job_name)
     job_metric = job_run.get_metrics(name=metric_name)
 
-    if job_metric not in job_metric.keys():
+    if metric_name not in job_metric.keys():
         raise ValueError(f"Metric with name {metric_name} is not present in job {job_name}. Avalilable metrics are {job_run.get_metrics().keys()}")
 
     return job_metric[metric_name]
