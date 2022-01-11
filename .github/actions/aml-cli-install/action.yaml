@@ -62,4 +62,6 @@ runs:
 
     - name: Preparing conda
       shell: bash
-      run: echo "${HOME}/$CONDA/bin" >> $GITHUB_PATH
+      run: |
+        echo "${HOME}/$CONDA/bin" >> $GITHUB_PATH
+        conda init bash

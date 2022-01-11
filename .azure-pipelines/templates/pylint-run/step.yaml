@@ -26,7 +26,7 @@ steps:
       script: |
         if ${{ lower(parameters.useConda) }}; then
           echo "##[debug]Activating conda environment ${{ parameters.condaEnvName }}"
-          source activate ${{ parameters.condaEnvName }}
+          conda activate ${{ parameters.condaEnvName }}
 
           if ! [[ $(conda list --json | jq -r '.[] | select(.name=="pylint")') ]]; then
             echo "##[debug]Environment doesn't contain PyLint. Installing"
@@ -40,3 +40,8 @@ steps:
           echo "##[debug]>pylint $PACKAGE --disable=${{ parameters.disable}} --extension-pkg-whitelist=${{ parameters.pkgWhitelist }}"
           (cd ${{ parameters.source }} && python -m pylint $PACKAGE --disable=${{ parameters.disable}} --extension-pkg-whitelist=${{ parameters.pkgWhitelist }})
         done
+
+        if ${{ lower(parameters.useConda) }}; then
+          echo "##[debug]Deactivating conda environment ${{ parameters.condaEnvName }}"
+          conda deactivate
+        fi

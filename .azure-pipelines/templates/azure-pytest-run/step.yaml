@@ -30,7 +30,7 @@ steps:
       inlineScript: |
         if ${{ lower(parameters.useConda) }}; then
           echo "##[debug]Activating conda environment ${{ parameters.condaEnvName }}"
-          source activate ${{ parameters.condaEnvName }}
+          conda activate ${{ parameters.condaEnvName }}
 
           if ! [[ $(conda list --json | jq -r '.[] | select(.name=="pytest")') ]]; then
             echo "##[debug]Environment doesn't contain PyTest. Installing"
@@ -48,6 +48,7 @@ steps:
 
         if ${{ lower(parameters.useConda) }}; then
           echo "##[debug]Deactivating conda environment ${{ parameters.condaEnvName }}"
+          conda deactivate
         fi
   - task: PublishTestResults@2
     displayName: Publish test results
