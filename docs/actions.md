@@ -16,6 +16,7 @@ Index:
 - [azure-pytest-run](#azure-pytest-run)
 - [azure-arm-template-deployment](#azure-arm-template-deployment)
 - [pylint-run](#pylint-run)
+- [conda-setup](#conda-setup)
 
 ## aml-cli-install
 
@@ -27,7 +28,6 @@ Install the Azure CLI, Azure Machine Learning CLI, and all the required tools. I
 |------------------------|-------------|----------|
 | componentSupport       | Indicates if components (aka modules) support should be enabled in the CLI. Defaults to `false` | Yes |
 | minVersion             | Minimum version of Azure CLI to install. Defaults to `2.0`.   | Yes |
-| initConda              | Indicates if conda should be initialized. Defaults to `true`. | Yes |
 
 
 **Sample usage**
@@ -39,7 +39,6 @@ Install the Azure CLI, Azure Machine Learning CLI, and all the required tools. I
   parameters:
     componentSupport: false
     minVersion: 2.0
-    condaInit: true
 ```
 
 ## aml-env-build
@@ -506,4 +505,38 @@ Run lintering over the source code.
     useConda: true
     condaEnvName: cicd
     disable: W1203,C0103
+```
+
+# conda-setup
+
+Installs and setup conda to work in the agent.
+
+| Parameter                  | Description | Required |
+|----------------------------|-------------|----------|
+| condaFile                  | Conda file with an environment definition. If no provided, no environment will be created. | No |
+| activate                   | Indicates if either `base` or the provided environment should be activated. Defaults to `false` | No | 
+| envName                    | Inidcates the name of the environment to create, if any. If provided along with `condaFile`, then the name indicated here is used. | No |
+| pythonVersion              | Version of `Python` to use. If a `conda file` is provided, then the one indicated there is used. Defaults to `3.8` | No |
+
+**Remarks**
+
+On Github Actions, agents execute bash without a profile and hence, if you try to run `conda activate` you will recieve the error `conda is not initialized`. To workaround this problem, if you want to use later `conda activate` run `source $CONDA/etc/profile.d/conda.sh` before to ensure proper initialization of `conda` in your shell.
+
+**Sample usage**
+
+**#1**
+> Initialize conda but no environment is created.
+
+```yml
+- template: templates/conda-setup/step.yaml
+```
+
+**#2**
+> Initialize conda and create an environment from a file.
+
+```yml
+- template: templates/conda-setup/step.yaml
+  parameters:
+    condaFile: conda_dependencies.yml
+    activate: true
 ```
