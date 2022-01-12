@@ -86,3 +86,5 @@ Run pipelines in the following order:
 1. workspace-CD
 2. environment-CD
 3. model-CD
+
+![](assets/github-model-cd-stages-deploy.png)

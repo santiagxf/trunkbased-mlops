@@ -88,6 +88,9 @@ In the folder `.azure-pipelines` (for `Azure DevOps`) and in the folder `.github
             - Builds the model and compute metrics.
         - Stage 2: Model source control
             - Registers model in the repository and associates it with the run that originated the model.
+
+                ![](docs/assets/model-registry-tags.png)
+
             - **Approvals:** This stage requires approval. This prevents the registration of an unwanted model.
 
                 ![](docs/assets/model-cd-stages-registry.png)
