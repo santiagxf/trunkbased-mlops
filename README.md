@@ -9,19 +9,23 @@
 
 # Trunk-based development for Machine Learning models with Azure Machine Learning
 
-This repository contains an example about how to use trunk-based development in a Machine Learning project. It demostrates how apply the workflow in a sample machine learning project. The model we implemented here is a hate detection model for tweets in the portuguese language. The repository also contains implementations of CI/CD pipelines to do continuous integration and deployment off all the assets required for the solution using Azure Machine Learning as the ML platform and Azure DevOps as the CI/CD solution. An implementation using GitHub Actions will be posted soon.
+This repository contains an example about how to use trunk-based development workflow in a Machine Learning project. It demostrates how apply the workflow in a sample project along with a CI/CD implementation in `Azure` cloud. The model we implemented here is a hate detection model for tweets in the portuguese language. The implementations of CI/CD pipelines doing continuous integration and deployment off all the assets required for the solution are provided for both `Azure DevOps` and `GitHub Acitions`. The implementations are equally capable and you can use whichever resonates more with you.
+
+The resources deployed in `Azure` rely on `Azure Machine Learning`, which is a comprehensive set of tools to boost your work with machine learning projects in `Azure`. To know more about the components of this service you can visit [Get started with Azure Machine Learning](https://azure.microsoft.com/en-us/get-started/services/machine-learning/).
 
 ## Motivation
 
 As always, technology is applied in the context of people and processes and there are no exceptions to this rule. A common pitfall when trying to use a git repository in a new ML project is to do so without any clear rules about how the repository should be used or how changes should be posted (committed). In the software development world, this is know as a workflow.
 
-For a more in depth introduction an explanation about the need of a git workflow and how trunk-based development works please visit the following post: [Put git to work for a Machine Learning projects: How to implement trunk-based development for Machine Learning models projects](https://santiagof.medium.com/put-git-to-work-for-a-machine-learning-projects-8ab79939b88d)
+A lot of projects in ML start with a `git` repository, but without a clear strategy about how the repository will serve the goals of the team, and more importantly, how the resitory will allow to realise models faster and more reliably. For more details about this topic read the blog: [Put git to work for a Machine Learning projects: How to implement trunk-based development for Machine Learning models projects](https://santiagof.medium.com/put-git-to-work-for-a-machine-learning-projects-8ab79939b88d)
+
+This repository contains all the required elements to deliver a model for hate detection in portuguese. The teams using this model works with the trunk-based development workflow to collaborate with others. The MLOps teams, uses either `GitHub Actions` or `Azure DevOps` to ensure that the workflow is followed, and the quality of the code is the expected. This allows to implement continuous delivery of the model using a method `champion/challenger` for deciding when to deploy a new version of the model.
 
 ## Landing trunk-based development in ML projects
 
 Machine Learning models are a combination of data and code. As a consecuence, versioning the code is not enought nor versioning the data. In git workflow, `main` represents the official history of the solution, in our case the model, and should always be deployable. How can we make `main` always deployable considering that what we want to deploy is not the source code but the model? The model itself, which is the output of the training process, is the result of combining the model source code with the data.
 
-Models are usually version controlled in a registry, in this case on Azure Machine Learning model registry. If we want to deploy a model from the registry, then according to trunk-based development it should be on main. This means that each model version corresponds to a version of main at same point in time.
+Models are usually version controlled in a registry, in this case on `Azure Machine Learning` model registry. If we want to deploy a model from the registry, then according to trunk-based development it should be on main. This means that each model version corresponds to a version of main at same point in time.
 
 ![](docs/assets/main_and_model_version.png)
 
@@ -37,7 +41,7 @@ To ilustrate the use of this repository, we are including a sample project that 
 
 ## CI/CD
 
-In the folder `.azure-pipelines` (for Azure DevOps) and in the folder `.github` (for GitHub Actions) you will find the following pipelines available:
+In the folder `.azure-pipelines` (for `Azure DevOps`) and in the folder `.github` (for `GitHub Actions`) you will find the following pipelines available:
 
 ### Workspaces
 
