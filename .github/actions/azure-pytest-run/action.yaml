@@ -65,5 +65,4 @@ runs:
       uses: EnricoMi/publish-unit-test-result-action/composite@v1
       with:
         files: ${{ github.workspace }}/test-results/*.xml 
-        mergeTestResults: true
         fail_on: "test failures"
