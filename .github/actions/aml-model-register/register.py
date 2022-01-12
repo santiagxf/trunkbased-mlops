@@ -1,37 +1,9 @@
 import logging
-import argparse
-import inspect
+import jobtools
 import azureml.core as aml
 
-from os import PathLike
-from typing import Dict, Any, List, Callable, Union
+from typing import List, Dict, Any
 from azureml.core.authentication import AzureCliAuthentication
-
-def get_args_from_signature(method: Callable) -> argparse.Namespace:
-    """
-    Automatically parses all the arguments to match an specific method. The method should implement type hinting in order for this to work.
-    All arguments required by the method will be also required by the parser. To match bash conventions, arguments with underscore will be
-    parsed as arguments with upperscore. For instance `from_path` will be requested as `--from-path`.
-
-    Parameters
-    ----------
-    method: Callable
-        The method the arguments should be extracted from.
-
-    Returns
-    -------
-    argparse.Namespace
-        The arguments parsed. You can call `method` with `**vars(...)` then
-    """
-    parser = argparse.ArgumentParser()
-    fullargs = inspect.getfullargspec(method)
-    num_args_with_defaults = 0 if fullargs.defaults == None else len(fullargs.defaults)
-    required_args_idxs = len(fullargs.annotations) - num_args_with_defaults
-    for idx, (arg, arg_type) in enumerate(fullargs.annotations.items()):
-        is_required = idx < required_args_idxs
-        parser.add_argument(f"--{arg.replace('_','-')}", dest=arg, type=arg_type, required=is_required)
-
-    return parser.parse_args()
 
 def get_dataset(workspace: aml.Workspace, name: str) -> aml.Dataset:
     """
@@ -93,5 +65,5 @@ def register(ws_config: str, name: str, version: str, model_path: str,
                            datasets=datasets)
 
 if __name__ == "__main__":
-    args = get_args_from_signature(register)
-    register(**vars(args))
+    tr = jobtools.runner.TaskRunner()
+    tr.run(register)
