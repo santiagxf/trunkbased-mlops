@@ -19,7 +19,7 @@ jobs:
       - name: Load environment from YAML
         uses: doughepi/yaml-env-action@v1.0.0
         with:
-            files: .github/workflows/variables.yaml
+            files: .github/variables.yaml
 
       - id: job_preparation
         name: Installing dependencies
@@ -27,6 +27,9 @@ jobs:
         with:
           componentSupport: false
           minVersion: 2.0
+
+      - name: Preparing conda
+        uses: ./.github/actions/conda-setup
 
       - name: Logining in into Azure
         uses: Azure/login@v1

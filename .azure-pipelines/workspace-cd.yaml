@@ -31,6 +31,7 @@ stages:
           templateVersion: 1.0
           parametersFile: workspaces/$(env)/deploy.parameters.json
           secureParameters: computeAdminUserName=$(computeAdminUserName) computeAdminUserPassword=$(computeAdminUserPassword) datasetsClientId=$(datasetsClientId) datasetsClientSecret=$(datasetsClientSecret)
+
   - job: datasets_init
     displayName: Datasets - Initialization
     steps:
@@ -38,6 +39,7 @@ stages:
         parameters:
           componentSupport: false
           minVersion: 2.0
+
       - template: templates/aml-dataset-create/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)

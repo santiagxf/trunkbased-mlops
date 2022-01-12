@@ -57,9 +57,3 @@ runs:
       run: |
         sudo apt install jq
         pip install -r ${{ github.action_path }}/requirements.txt
-
-    - name: Preparing conda
-      shell: bash
-      run: |
-        echo "${HOME}/$CONDA/bin" >> $GITHUB_PATH
-        conda init --all --dry-run --verbose

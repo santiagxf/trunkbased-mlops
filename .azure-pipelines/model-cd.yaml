@@ -132,6 +132,7 @@ stages:
               parameters:
                 componentSupport: false
                 minVersion: 2.0
+
             - template: templates/aml-endpoint-deploy/step.yaml
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)
@@ -141,6 +142,7 @@ stages:
                 resourceGroup: $(RESOURCEGROUPNAME)
                 secretsToKeyVault: true
                 keyVaultName: $(KEYVAULTNAME)
+
             - template: templates/aml-model-set/step.yaml
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)
@@ -152,6 +154,7 @@ stages:
                 replaceExistingWith: surpassed
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)
+
             - template: templates/aml-model-set/step.yaml
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)

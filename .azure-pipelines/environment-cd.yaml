@@ -23,6 +23,9 @@ stages:
         parameters:
           componentSupport: false
           minVersion: 2.0
+
+      - template: templates/conda-setup/step.yaml
+
       - template: templates/aml-env-ensure/step.yaml
         parameters:
           envFile: environments/*/environment.yml

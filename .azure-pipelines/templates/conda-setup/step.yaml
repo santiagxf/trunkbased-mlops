@@ -1,0 +1,6 @@
+steps:
+  - bash: |
+      echo "##vso[task.prependpath]$CONDA/bin"
+      conda init bash
+      source $CONDA/etc/profile.d/conda.sh
+    displayName: Preparing conda

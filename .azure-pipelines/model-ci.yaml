@@ -17,21 +17,27 @@ stages:
         parameters:
           componentSupport: false
           minVersion: 2.0
+
+      - template: templates/conda-setup/step.yaml
+
       - template: templates/aml-env-build/step.yaml
         parameters:
           envFile: environments/${{ variables.condaEnvName}}/environment.yml
+
       - template: templates/pylint-run/step.yaml
         parameters:
           source: src
           useConda: true
           condaEnvName: ${{ variables.condaEnvName }}
           disable: W1203,C0103,W0603,R0801,R0913
+
       - template: templates/azure-pytest-run/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
           source: src
           useConda: true
           condaEnvName: ${{ variables.condaEnvName }}
+
       - template: templates/aml-env-ensure/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
@@ -39,6 +45,7 @@ stages:
           validateOnly: true
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
+
       - template: templates/aml-job-create/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
