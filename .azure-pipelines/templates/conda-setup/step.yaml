@@ -1,6 +1,58 @@
+parameters:
+- name: condaFile
+  type: string
+  default: ''
+- name: envName
+  type: string
+  default: ''
+- name: activate
+  type: boolean
+  default: false
+- name: pythonVersion
+  type: string
+  default: 3.8
+
 steps:
   - bash: |
       echo "##vso[task.prependpath]$CONDA/bin"
       conda init bash
       source $CONDA/etc/profile.d/conda.sh
+
+      if [[ "${{ parameters.condaFile }}" != "" ]]; then
+        echo "##[debug]Building environment conda file ${{ parameters.condaFile }}"
+
+        if [[ "${{ parameters.envName }}" == "" ]]; then
+          ENV_NAME=$(yq -r ".conda_file" ${{ parameters.condaFile }})
+        else
+          ENV_NAME="${{ parameters.envName }}"
+        fi
+        
+        # Note: According to https://github.com/conda/conda/issues/8537, conda will create the environment even if it fails when requirements are indicated with pip. This
+        # is problematic since any error will not be noticed. To fix it, we will redict any output happening in the conda command and capture it. This is what 2>&1 is for
+        # since some output is being sent to STDERR. The command grep then looks for an exception CondaEnvException.
+
+        if conda env create -n $ENV_NAME -f ${{ parameters.condaFile }} 2>&1 | grep -q CondaEnvException ; then
+          echo "##vso[task.logissue type=error;sourcepath=${{ parameters.condaFile }};]Failed to build the environment indicated using conda. CondaEnvException happened"
+          exit 1
+        fi
+
+        if ! [[ $(conda env list --json | jq -r --arg ENV_NAME $ENV_NAME '.envs[] | select(endswith($ENV_NAME))') ]]; then
+          echo "##vso[task.logissue type=error;sourcepath=${{ parameters.condaFile }};]Failed to build the environment indicated using conda"
+          exit 1
+        fi
+      else
+        if [[ "${{ parameters.envName }}" == "" ]]; then
+          ENV_NAME="base"
+        else
+          ENV_NAME="${{ parameters.envName }}"
+          echo "##[debug]Creating environment $ENV_NAME"
+          conda create -n $ENV_NAME python=${{ parameters.pythonVersion }}
+        fi
+      fi
+
+      if ${{ lower(parameters.activate) }}; then
+        echo "##[debug]Activating $ENV_NAME"
+        conda activate $ENV_NAME
+      fi
+
     displayName: Preparing conda

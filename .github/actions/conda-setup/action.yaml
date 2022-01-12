@@ -1,12 +1,69 @@
 name: 'Preparing conda'
 description: 'Installs and prepares conda.'
 
+inputs:
+  condaFile:
+    description: 'Conda file for the environment to create, if any'
+    required: false
+    default: ''
+  envName:
+    description: 'Name of the environemnt to create, if any. This name is used if a name is also indicated in `condaFile`'
+    required: false
+    default: ''
+  activate:
+    description: 'Inidicates if the environment has to be activated. If no environment is provided, this affects the `base` environment.'
+    required: false
+    default: 'false'
+  pythonVersion:
+    description: 'Version of Python to use. If indicated at `condaFile`, then that one is used.'
+    required: false
+    default: '3.8'
+
 runs:
   using: "composite"
   steps:
     - name: Preparing conda
       shell: bash
       run: |
+        #!/bin/bash
+
         echo "${HOME}/$CONDA/bin" >> $GITHUB_PATH
         conda init --all --dry-run --verbose
         source $CONDA/etc/profile.d/conda.sh
+
+        if [[ "${{ inputs.condaFile }}" != "" ]]; then
+          echo "::debug::Building environment conda file ${{ inputs.condaFile }}"
+
+          if [[ "${{ inputs.envName }}" == "" ]]; then
+            ENV_NAME=$(yq -r ".conda_file" ${{ inputs.condaFile }})
+          else
+            ENV_NAME="${{ inputs.envName }}"
+          fi
+          
+          # Note: According to https://github.com/conda/conda/issues/8537, conda will create the environment even if it fails when requirements are indicated with pip. This
+          # is problematic since any error will not be noticed. To fix it, we will redict any output happening in the conda command and capture it. This is what 2>&1 is for
+          # since some output is being sent to STDERR. The command grep then looks for an exception CondaEnvException.
+
+          if conda env create -n $ENV_NAME -f ${{ inputs.condaFile }} 2>&1 | grep -q CondaEnvException ; then
+            echo "::error file=${{ inputs.condaFile }}::Failed to build the environment indicated using conda. CondaEnvException happened"
+            exit 1
+          fi
+
+          if ! [[ $(conda env list --json | jq -r --arg ENV_NAME $ENV_NAME '.envs[] | select(endswith($ENV_NAME))') ]]; then
+            echo "::error file=${{ inputs.condaFile }}::Failed to build the environment indicated using conda"
+            exit 1
+          fi
+        else
+          if [[ "${{ inputs.envName }}" == "" ]]; then
+            ENV_NAME="base"
+          else
+            ENV_NAME="${{ inputs.envName }}"
+            echo "::debug::Creating environment $ENV_NAME"
+            conda create -n $ENV_NAME python=${{ inputs.pythonVersion }}
+          fi
+        fi
+
+        if ${{ inputs.activate }}; then
+          echo "::debug::Activating $ENV_NAME"
+          conda activate $ENV_NAME
+        fi
