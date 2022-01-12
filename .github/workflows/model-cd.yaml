@@ -36,7 +36,7 @@ jobs:
       - name: Ensuring environment
         uses: ./.github/actions/aml-env-ensure
         with:
-          envFile: environments/${condaEnvName}/environment.yml
+          envFile: environments/${CONDAENVNAME}/environment.yml
           validateOnly: true
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
@@ -45,7 +45,7 @@ jobs:
         id: jobRun
         uses: ./.github/actions/aml-job-create
         with:
-          name: ${modelName}
+          name: ${MODELNAME}
           jobFile: jobs/hatedetection/train.job.yml
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
@@ -82,10 +82,10 @@ jobs:
       - name: Registering trained model
         uses: ./.github/actions/aml-model-register
         with:
-          name: ${modelName}
+          name: ${MODELNAME}
           fromJob: true
           jobName: ${{ needs.build.outputs.jobName }}
-          description: ${description}
+          description: ${DESCRIPTION}
           modelPath: outputs/hate-pt-speech.zip
           modelVersion: latest
           workspaceName: ${WORKSPACENAME}
@@ -121,7 +121,7 @@ jobs:
         id: jobRun
         uses: ./.github/actions/aml-job-create
         with:
-          name: ${modelName}-eval
+          name: ${MODELNAME}-eval
           jobFile: jobs/hatedetection/evaluate.job.yml
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
@@ -145,10 +145,10 @@ jobs:
         uses: ./.github/actions/aml-model-compare
         if: ${{ steps.jobMetricAssert.outputs.result == 'true' }}
         with:
-          modelName: ${modelName}
+          modelName: ${MODELNAME}
           champion: current
           challenger: latest
-          endpoint: endpoints/${modelName}/endpoint.yml
+          endpoint: endpoints/${MODELNAME}/endpoint.yml
           compareBy: eval_recall
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
@@ -197,7 +197,7 @@ jobs:
       - name: Configuring model stage
         uses: ./.github/actions/aml-model-set
         with:
-          modelName: ${modelName}
+          modelName: ${MODELNAME}
           modelVersion: ${{ steps.deployment.outputs.deployedVersion }}
           property: stage
           value: production
@@ -209,7 +209,7 @@ jobs:
       - name: Configuring model inference
         uses: ./.github/actions/aml-model-set
         with:
-          modelName: ${modelName}
+          modelName: ${MODELNAME}
           modelVersion: ${{ steps.deployment.outputs.deployedVersion }}
           property: inference
           value: ${GITHUB_SHA}

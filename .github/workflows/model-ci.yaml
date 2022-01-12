@@ -39,14 +39,14 @@ jobs:
       - name: Building environment
         uses: ./.github/actions/aml-env-build
         with:
-          envFile: environments/${condaEnvName}/environment.yml
+          envFile: environments/${CONDAENVNAME}/environment.yml
       
       - name: Running PyLint
         uses: ./.github/actions/pylint-run
         with:
           source: src
           useConda: true
-          condaEnvName: ${condaEnvName}
+          condaEnvName: ${CONDAENVNAME}
           disable: W1203,C0103,W0603,R0801,R0913
       
       - name: Running unit tests
@@ -55,12 +55,12 @@ jobs:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
           source: src
           useConda: true
-          condaEnvName: ${condaEnvName}
+          condaEnvName: ${CONDAENVNAME}
       
       - name: Ensuring environment
         uses: ./.github/actions/aml-env-ensure
         with:
-          envFile: environments/${condaEnvName}/environment.yml
+          envFile: environments/${CONDAENVNAME}/environment.yml
           validateOnly: true
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
@@ -68,7 +68,7 @@ jobs:
       - name: Running training job
         uses: ./.github/actions/aml-job-create
         with:
-          name: ${modelName}
+          name: ${MODELNAME}
           jobFile: jobs/hatedetection/train.job.yml
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}

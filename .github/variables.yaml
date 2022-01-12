@@ -4,6 +4,6 @@
   LOCATION: eastus2
   KEYVAULTNAME: kv-trunkbased-dev
   ENVPREFIX: dev
-  modelName: hate-pt-speech
-  description: 'A hate detection model for tweets in portuguese'
-  condaEnvName: transformers-torch-19
+  MODELNAME: hate-pt-speech
+  DESCRIPTION: 'A hate detection model for tweets in portuguese'
+  CONDAENVNAME: transformers-torch-19
