@@ -513,10 +513,10 @@ Installs and setup conda to work in the agent.
 
 | Parameter                  | Description | Required |
 |----------------------------|-------------|----------|
-| condaFile                  | Conda file with an environment definition. If no provided, no environment will be created. | No |
-| activate                   | Indicates if either `base` or the provided environment should be activated. Defaults to `false` | No | 
-| envName                    | Inidcates the name of the environment to create, if any. If provided along with `condaFile`, then the name indicated here is used. | No |
-| pythonVersion              | Version of `Python` to use. If a `conda file` is provided, then the one indicated there is used. Defaults to `3.8` | No |
+| condaFile                  | Conda file for the environment to create, if any. | No |
+| activate                   | Inidicates if the environment has to be activated. If no environment is provided, this affects the `base` environment. Defaults to `false` | No | 
+| envName                    | Name of the environemnt to create, if any. This name is used if a name is also indicated in `condaFile`. | No |
+| python                     | Version of `Python` to use. If a `conda file` is provided, then the one indicated there is used. Defaults to `3.8` | No |
 
 **Remarks**
 
@@ -539,4 +539,15 @@ On Github Actions, agents execute bash without a profile and hence, if you try t
   parameters:
     condaFile: conda_dependencies.yml
     activate: true
+```
+
+**#3**
+> Initialize conda and create an environment from scratch with `Python` version `3.8`.
+
+```yml
+- template: templates/conda-setup/step.yaml
+  parameters:
+    envName: myproject
+    activate: true
+    python: 3.9
 ```

@@ -3,7 +3,7 @@ description: 'Installs and prepares conda.'
 
 inputs:
   condaFile:
-    description: 'Conda file for the environment to create, if any'
+    description: 'Conda file for the environment to create, if any.'
     required: false
     default: ''
   envName:
@@ -14,7 +14,7 @@ inputs:
     description: 'Inidicates if the environment has to be activated. If no environment is provided, this affects the `base` environment.'
     required: false
     default: 'false'
-  pythonVersion:
+  python:
     description: 'Version of Python to use. If indicated at `condaFile`, then that one is used.'
     required: false
     default: '3.8'
@@ -59,7 +59,7 @@ runs:
           else
             ENV_NAME="${{ inputs.envName }}"
             echo "::debug::Creating environment $ENV_NAME"
-            conda create -n $ENV_NAME python=${{ inputs.pythonVersion }}
+            conda create -n $ENV_NAME python=${{ inputs.python }}
           fi
         fi
 

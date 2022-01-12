@@ -14,11 +14,11 @@ To do that:
 
 ## Configure your environment variables
 
-The automated pipelines in this repository will use a set of variables to configure how the deployment should be done and where. Those variables are located in a `YAML` file of each workflow.
+The automated pipelines in this repository will use a set of variables to configure how the deployment should be done and where. Those variables are located in a `YAML` file at `.github/variables.yaml`.
 
 > Note: Placing configuration inside the a `YAML` file in the repository may not be the best choice in an enterprise setting. In this repository is used to reduce the amount of configuration needed.
 
-Open each of the workflows at `.github/workflows` and review the values of the following variables. Save the changes in this file and commit the changes to the repo.
+Open the file and review the values of the following variables. Save the changes in this file and commit the changes to the repo.
 
 - `WORKSPACENAME`: The name of the Azure Machine Learning workspace you want to use.
 - `RESOURCEGROUPNAME`: The name of the resource group where the resources are located.
@@ -28,7 +28,7 @@ Open each of the workflows at `.github/workflows` and review the values of the f
 
 The following variables are also present, but are specific to the project you are working on.
 
-- `env`: Name of the environment. By default its `dev` reffering to `development`. Possible values can be `qa`, `stg` and `prd`.
+- `ENVPREFIX`: Name of the environment. By default its `dev` reffering to `development`. Possible values can be `qa`, `stg` and `prd`.
 - `modelName`: The name of the model you are building. 
 - `description`: Description of the model you are building.
 - `condaEnvName`: Name of the environment that the model uses for training. This environment should match any of the environments that are available under the folder `environments`.

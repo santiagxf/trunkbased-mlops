@@ -8,7 +8,7 @@ parameters:
 - name: activate
   type: boolean
   default: false
-- name: pythonVersion
+- name: python
   type: string
   default: 3.8
 
@@ -46,7 +46,7 @@ steps:
         else
           ENV_NAME="${{ parameters.envName }}"
           echo "##[debug]Creating environment $ENV_NAME"
-          conda create -n $ENV_NAME python=${{ parameters.pythonVersion }}
+          conda create -n $ENV_NAME python=${{ parameters.python }}
         fi
       fi
 
