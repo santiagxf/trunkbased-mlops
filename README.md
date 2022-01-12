@@ -2,6 +2,11 @@
 [![Build Status](https://santiagxf.visualstudio.com/trunkbased-mlops/_apis/build/status/environment-CD?branchName=main)](https://santiagxf.visualstudio.com/trunkbased-mlops/_build/latest?definitionId=12&branchName=main)
 [![Build Status](https://santiagxf.visualstudio.com/trunkbased-mlops/_apis/build/status/model-CD?branchName=main)](https://santiagxf.visualstudio.com/trunkbased-mlops/_build/latest?definitionId=14&branchName=main)
 
+[![environment-CD](https://github.com/csu-devsquad-latam/trunkbased-mlops/actions/workflows/workspace-cd.yaml/badge.svg)](https://github.com/csu-devsquad-latam/trunkbased-mlops/actions/workflows/environment-cd.yaml)
+[![environment-CD](https://github.com/csu-devsquad-latam/trunkbased-mlops/actions/workflows/environment-cd.yaml/badge.svg)](https://github.com/csu-devsquad-latam/trunkbased-mlops/actions/workflows/environment-cd.yaml)
+[![model-CD](https://github.com/csu-devsquad-latam/trunkbased-mlops/actions/workflows/model-cd.yaml/badge.svg)](https://github.com/csu-devsquad-latam/trunkbased-mlops/actions/workflows/model-cd.yaml)
+
+
 # Trunk-based development for Machine Learning models with Azure Machine Learning
 
 This repository contains an example about how to use trunk-based development in a Machine Learning project. It demostrates how apply the workflow in a sample machine learning project. The model we implemented here is a hate detection model for tweets in the portuguese language. The repository also contains implementations of CI/CD pipelines to do continuous integration and deployment off all the assets required for the solution using Azure Machine Learning as the ML platform and Azure DevOps as the CI/CD solution. An implementation using GitHub Actions will be posted soon.
