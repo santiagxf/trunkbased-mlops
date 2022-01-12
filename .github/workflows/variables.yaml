@@ -1,0 +1,9 @@
+  WORKSPACENAME: mlw-trunkbased-dev
+  RESOURCEGROUPNAME: mlops-trunkbased-dev
+  STORAGEACCOUNTNAME: aamldatalake
+  LOCATION: eastus2
+  KEYVAULTNAME: kv-trunkbased-dev
+  env: dev
+  modelName: hate-pt-speech
+  description: 'A hate detection model for tweets in portuguese'
+  condaEnvName: transformers-torch-19

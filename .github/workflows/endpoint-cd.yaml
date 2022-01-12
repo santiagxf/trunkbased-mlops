@@ -8,17 +8,6 @@ on:
     - endpoints/*
     - src/*/score/*
 
-env:
-  WORKSPACENAME: mlw-trunkbased-dev
-  RESOURCEGROUPNAME: mlops-trunkbased-dev
-  STORAGEACCOUNTNAME: aamldatalake
-  LOCATION: eastus2
-  KEYVAULTNAME: kv-trunkbased-dev
-  env: dev
-  modelName: hate-pt-speech
-  description: 'A hate detection model for tweets in portuguese'
-  condaEnvName: transformers-torch-19
-
 jobs:
   deployment:
     environment: amlworkspace_dev
@@ -26,6 +15,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
+      - name: Load environment from YAML
+        uses: doughepi/yaml-env-action
+        with:
+            files: variables.yaml
 
       - id: job_preparation
         name: Installing dependencies
