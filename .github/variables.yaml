@@ -3,7 +3,7 @@
   STORAGEACCOUNTNAME: aamldatalake
   LOCATION: eastus2
   KEYVAULTNAME: kv-trunkbased-dev
-  env: dev
+  ENVPREFIX: dev
   modelName: hate-pt-speech
   description: 'A hate detection model for tweets in portuguese'
   condaEnvName: transformers-torch-19

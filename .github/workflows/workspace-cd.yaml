@@ -40,7 +40,7 @@ jobs:
           location: ${LOCATION}
           deploymentName: aml-deployment
           templateFile: workspaces/templates/deploy.json
-          parameters: workspaces/${env}/deploy.parameters.json computeAdminUserName=${{ secrets.COMPUTEADMINUSERNAME }} computeAdminUserPassword=${{ secrets.COMPUTEADMINUSERPASSWORD }} datasetsClientId=${{ secrets.DATASETSCLIENTID }} datasetsClientSecret=${{ secrets.DATASETSCLIENTSECRET }}
+          parameters: workspaces/${ENVPREFIX}/deploy.parameters.json computeAdminUserName=${{ secrets.COMPUTEADMINUSERNAME }} computeAdminUserPassword=${{ secrets.COMPUTEADMINUSERPASSWORD }} datasetsClientId=${{ secrets.DATASETSCLIENTID }} datasetsClientSecret=${{ secrets.DATASETSCLIENTSECRET }}
 
       - id: datasets_init
         name: Workspaces - Datasets initialization
