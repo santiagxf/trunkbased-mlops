@@ -2,7 +2,6 @@
 
 The following actions are available in this repository and allows to build CI/CD pipelines for automation.
 
-Index:
 - [aml-cli-install](#aml-cli-install)
 - [aml-dataset-create](#aml-dataset-create)
 - [aml-env-build](#aml-env-build)
@@ -17,6 +16,8 @@ Index:
 - [azure-arm-template-deployment](#azure-arm-template-deployment)
 - [pylint-run](#pylint-run)
 - [conda-setup](#conda-setup)
+
+> **Note:** On `GitHub Actions` implementation, the parameter `azureServiceConnectionName` is not present as it is only used by `Azure DevOps`. Ignore it from all the actions.
 
 ## aml-cli-install
 
