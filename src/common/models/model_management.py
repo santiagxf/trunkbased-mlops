@@ -101,7 +101,7 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
 
 def get_metric_for_model(workspace: aml.Workspace,
                          model_name: str,
-                         version: int,
+                         version: str,
                          metric_name: str,
                          model_hint: str = None) -> Any:
     """
@@ -113,8 +113,8 @@ def get_metric_for_model(workspace: aml.Workspace,
         The workspace where the model is stored.
     model_name: str
         The name of the model registered
-    version: int
-        The version of the model
+    version: str
+        The version of the model. It can be a number like "22" or a token like "latest" or a tag.
     metric_name: str
         The name of the metric you want to retrieve from the run
     model_hint: str | None
@@ -126,20 +126,40 @@ def get_metric_for_model(workspace: aml.Workspace,
     ------
         The value of the given metric if present. Otherwise an exception is raised.
     """
-    model = aml.Model(workspace=workspace, name=model_name, version=version)
-    if not model.run_id:
-        raise ValueError(f"The model {model_name} has not a run associated with it. \
-            Unable to retrieve metrics.")
-
-    model_run = workspace.get_run(model.run_id)
+    model_run = get_run_for_model(workspace, model_name, version)
     model_metric = model_run.get_metrics(name=metric_name)
 
     if metric_name not in model_metric.keys():
         raise ValueError(f"Metric with name {metric_name} is not present in \
-            run {model.run_id} for model {model_name} ({model_hint}). Avalilable \
+            run {model_run.id} for model {model_name} ({model_hint}). Avalilable \
             metrics are {model_run.get_metrics().keys()}")
 
     return model_metric[metric_name]
+
+def get_run_for_model(workspace: aml.Workspace,
+                      model_name: str, version: str = 'latest', **tags) -> aml.Run:
+    """
+    Gets a the run that generated a given model and version.
+
+    Parameters
+    ----------
+    workspace: azureml.core.Workspace
+        The workspace where the model is stored.
+    model_name: str
+        The name of the model registered
+    version: str
+        The version of the model. It can be a number like "22" or a token like "latest" or a tag.
+
+    Return
+    ------
+        The given run.
+    """
+    model = get_model(workspace, model_name, version, **tags)
+    if not model.run_id:
+        raise ValueError(f"The model {model_name} has not a run associated with it. \
+            Unable to retrieve metrics.")
+
+    return workspace.get_run(model.run_id)
 
 def register(ws_config: str, name: str, version: str, model_path: str,
              description: str, run_id: str = None, datasets_id: List[str] = None,
