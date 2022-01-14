@@ -46,6 +46,6 @@ stages:
                 modelVersion: ${{ variables['deployment.deployedVersion'] }}
                 property: inference
                 value: $(Build.SourceVersion)
-                exclusive: true
+                exclusive: false
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)
