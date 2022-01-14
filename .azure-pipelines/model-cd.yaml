@@ -70,7 +70,6 @@ stages:
                 modelVersion: latest
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)
-                workspaceConfig: workspaces/$(env)/workspace.json
 
 - stage: aml_model_evaluate
   displayName: Model - Evaluation
@@ -101,7 +100,6 @@ stages:
           dataType: boolean
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
-          workspaceConfig: workspaces//$(env)//workspace.json
           failureMessage: Unable to conclude if challenger is better than champion.
       - template: templates/aml-model-compare/step.yaml
         parameters:
@@ -113,7 +111,6 @@ stages:
           compareBy: eval_recall
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
-          workspaceConfig: workspaces//$(env)//workspace.json
 
 - stage: aml_model_deployment
   displayName: Model - Deployment
