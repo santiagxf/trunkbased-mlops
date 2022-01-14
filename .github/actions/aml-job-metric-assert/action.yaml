@@ -28,9 +28,6 @@ inputs:
   resourceGroup:
     description: 'Name of the resource group where the workspace is placed.'
     required: true
-  workspaceConfig:
-    description: 'Configuration file of the workspace where to register the model'
-    required: true
 
 outputs:
   result:
@@ -47,9 +44,12 @@ runs:
       run: |
         echo "::debug::Looking for metric ${{ inputs.metric }} at job ${{ inputs.jobName }}."
         echo "::debug::Expecting value ${{ inputs.expecting }} (of type ${{ inputs.dataType }}). Greater values are better? ${{ inputs.greaterIsBetter }}"
+        $SUBSCRIPTION_ID=$(az account show | jq -r ".id")
 
         python ${{ github.action_path }}/assert.py \
-          --ws-config ${{ inputs.workspaceConfig }} \
+          --subscription-id $SUBSCRIPTION_ID \
+          --workspace-name ${{ inputs.workspaceName }} \
+          --resource-group ${{ inputs.resourceGroup }} \
           --job-name ${{ inputs.jobName }} \
           --metric ${{ inputs.metric }} \
           --expected ${{ inputs.expecting }} \

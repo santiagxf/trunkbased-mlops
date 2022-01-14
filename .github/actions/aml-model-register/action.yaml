@@ -30,9 +30,6 @@ inputs:
   resourceGroup:
     description: 'Name of the resource group where the workspace is placed.'
     required: true
-  workspaceConfig:
-    description: 'Configuration file of the workspace where to register the model'
-    required: true
 
 runs:
   using: "composite"
@@ -40,8 +37,12 @@ runs:
     - name: Registering model
       shell: bash
       run: |
+        $SUBSCRIPTION_ID=$(az account show | jq -r ".id")
+
         python ${{ github.action_path }}/register.py \
-          --ws-config ${{ inputs.workspaceConfig }} \
+          --subscription-id $SUBSCRIPTION_ID \
+          --workspace-name ${{ inputs.workspaceName }} \
+          --resource-group ${{ inputs.resourceGroup }} \
           --name ${{ inputs.name }} \
           --version ${{ inputs.modelVersion }} \
           --model-path ${{ inputs.modelPath }} \

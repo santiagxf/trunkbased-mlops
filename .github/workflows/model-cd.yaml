@@ -90,7 +90,6 @@ jobs:
           modelVersion: latest
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
-          workspaceConfig: workspaces/${ENVPREFIX}/workspace.json
 
   evaluation:
     environment: dev
@@ -137,7 +136,6 @@ jobs:
           dataType: boolean
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
-          workspaceConfig: workspaces/${ENVPREFIX}/workspace.json
           failureMessage: Unable to conclude if challenger is better than champion.
       
       - name: Comparing models
@@ -152,7 +150,6 @@ jobs:
           compareBy: eval_recall
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
-          workspaceConfig: workspaces/${ENVPREFIX}/workspace.json
 
     outputs:
       result: ${{ steps.compare.outputs.result }}
