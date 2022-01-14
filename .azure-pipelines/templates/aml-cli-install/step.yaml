@@ -7,6 +7,11 @@ parameters:
   default: '2.0'
 
 steps:
+  - task: UsePythonVersion@0
+    displayName: Configuring Python
+    inputs:
+      versionSpec: '3.8'
+
   - task: Bash@3
     displayName: Installing Azure CLI
     inputs:
