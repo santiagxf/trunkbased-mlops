@@ -26,9 +26,6 @@ parameters:
   - name: resourceGroup
     type: string
     default:
-  - name: workspaceConfig
-    type: string
-    default: 
 
 steps:
   - task: AzureCLI@2
@@ -39,9 +36,6 @@ steps:
       scriptLocation: inlineScript
       azureSubscription: ${{ parameters.azureServiceConnectionName }}
       inlineScript: |
-        pip install azureml-core==1.37.0
-        pip install azure-cli-core==2.30.0
-        
         if [[ "${{ parameters.champion }}" == "current" ]]; then
           echo "##[debug]Resolving current champion version from endpoint"
           ENDPOINT_NAME=$(yq -r ".name" ${{ parameters.endpoint }})
@@ -74,8 +68,13 @@ steps:
         echo "##[debug]CHALLENGER is version:$CHALLENGER"
 
         echo "##[debug]Comparing models by ${{ parameters.compareBy }}"
+
+        SUBSCRIPTION_ID=$(az account show | jq -r ".id")
+
         python $(Build.SourcesDirectory)/.azure-pipelines/templates/aml-model-compare/compare.py \
-          --ws-config ${{ parameters.workspaceConfig }} \
+          --subscription-id $SUBSCRIPTION_ID \
+          --workspace-name ${{ parameters.workspaceName }} \
+          --resource-group ${{ parameters.resourceGroup }} \
           --model-name ${{ parameters.modelName }} \
           --champion $CHAMPION \
           --challenger $CHALLENGER \

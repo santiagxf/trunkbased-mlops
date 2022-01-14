@@ -1,39 +1,8 @@
-import logging
-import argparse
-import inspect
-from azureml import data
+import jobtools
 import azureml.core as aml
 
-from os import PathLike
-from typing import Dict, Any, List, Callable, Union
-from azureml.core import workspace
+from typing import Any
 from azureml.core.authentication import AzureCliAuthentication
-
-def get_args_from_signature(method: Callable) -> argparse.Namespace:
-    """
-    Automatically parses all the arguments to match an specific method. The method should implement type hinting in order for this to work.
-    All arguments required by the method will be also required by the parser. To match bash conventions, arguments with underscore will be
-    parsed as arguments with upperscore. For instance `from_path` will be requested as `--from-path`.
-
-    Parameters
-    ----------
-    method: Callable
-        The method the arguments should be extracted from.
-
-    Returns
-    -------
-    argparse.Namespace
-        The arguments parsed. You can call `method` with `**vars(...)` then
-    """
-    parser = argparse.ArgumentParser()
-    fullargs = inspect.getfullargspec(method)
-    num_args_with_defaults = 0 if fullargs.defaults == None else len(fullargs.defaults)
-    required_args_idxs = len(fullargs.annotations) - num_args_with_defaults
-    for idx, (arg, arg_type) in enumerate(fullargs.annotations.items()):
-        is_required = idx < required_args_idxs
-        parser.add_argument(f"--{arg.replace('_','-')}", dest=arg, type=arg_type, required=is_required)
-
-    return parser.parse_args()
 
 def get_metric_for_job(workspace: aml.Workspace, job_name: str, metric_name: str) -> Any:
     """
@@ -60,9 +29,37 @@ def get_metric_for_job(workspace: aml.Workspace, job_name: str, metric_name: str
 
     return job_metric[metric_name]
 
-def assert_metric(ws_config: str, job_name: str, metric: str, expected: str, data_type: str, greater_is_better: bool = True):
+def assert_metric(subscription_id: str, resource_group: str, workspace_name:str, job_name: str,
+                  metric: str, expected: str, data_type: str, greater_is_better: bool = True) -> bool:
+    """
+    Asserts that a given metric in a job has the expected value.
+
+    Parameters
+    ----------
+    subscription_id: str
+        The subscription id where the workspace is located.
+    resource_group: str
+        The resource group where the workspace is located.
+    workspace_name: str
+        Workspace name
+    job_name: str
+        The unique job name (aka run id) that logged the metric.
+    metric: str
+        Name of a metric logged in the run/job.
+    expected: str
+        Value that you are expecting the metric to have. The value would be cast to `data_type`.
+    data_type: str
+        Type of the value in `expected`. Possible values are [`boolean`, `bool`, `numeric`, `int`, `integer`, `string`, `str`]
+    greater_is_better: bool
+        Indicates if greater values that the indicated at `expected` are better. Only for types `numeric`, `int`, `integer` and `float`.
+
+    Return
+    ------
+    bool:
+        If the assertion is satisfied.
+    """
     cli_auth = AzureCliAuthentication()
-    ws = aml.Workspace.from_config(path=ws_config, auth=cli_auth)
+    ws = aml.Workspace(subscription_id, resource_group, workspace_name, auth=cli_auth)
 
     metric_value = get_metric_for_job(ws, job_name, metric)
 
@@ -76,6 +73,6 @@ def assert_metric(ws_config: str, job_name: str, metric: str, expected: str, dat
 
 
 if __name__ == "__main__":
-    args = get_args_from_signature(assert_metric)
-    result = assert_metric(**vars(args))
+    tr = jobtools.runner.TaskRunner()
+    result = tr.run(assert_metric)
     exit(result)

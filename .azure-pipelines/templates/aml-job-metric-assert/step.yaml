@@ -16,8 +16,6 @@ parameters:
   type: string
 - name: resourceGroup
   type: string
-- name: workspaceConfig
-  type: string
 - name: stepDisplayName
   type: string
   default: Validating metric
@@ -33,14 +31,14 @@ steps:
       scriptLocation: inlineScript
       azureSubscription: ${{ parameters.azureServiceConnectionName }}
       inlineScript: |
-        pip install azureml-core==1.37.0
-        pip install azure-cli-core==2.30.0
-        
         echo "##[debug] Looking for metric ${{ parameters.metric }} at job ${{ parameters.jobName }}."
         echo "##[debug] Expecting value ${{ parameters.expecting }} (of type ${{ parameters.dataType }}). Greater values are better? ${{ parameters.greaterIsBetter }}"
+        SUBSCRIPTION_ID=$(az account show | jq -r ".id")
 
         python $(Build.SourcesDirectory)/.azure-pipelines/templates/aml-job-metric-assert/assert.py \
-          --ws-config ${{ parameters.workspaceConfig }} \
+          --subscription-id $SUBSCRIPTION_ID \
+          --workspace-name ${{ parameters.workspaceName }} \
+          --resource-group ${{ parameters.resourceGroup }} \
           --job-name ${{ parameters.jobName }} \
           --metric ${{ parameters.metric }} \
           --expected ${{ parameters.expecting }} \

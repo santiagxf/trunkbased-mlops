@@ -33,9 +33,6 @@ inputs:
   resourceGroup:
     description: 'Name of the resource group where the workspace is placed.'
     required: true
-  workspaceConfig:
-    description: 'Configuration file of the workspace where to register the model'
-    required: true
 
 outputs:
   result:
@@ -82,8 +79,13 @@ runs:
         echo "::debug::CHALLENGER is version:$CHALLENGER"
 
         echo "::debug::Comparing models by ${{ inputs.compareBy }}"
+
+        SUBSCRIPTION_ID=$(az account show | jq -r ".id")
+
         python ${{ github.action_path }}/compare.py \
-          --ws-config ${{ inputs.workspaceConfig }} \
+          --subscription-id $SUBSCRIPTION_ID \
+          --workspace-name ${{ inputs.workspaceName }} \
+          --resource-group ${{ inputs.resourceGroup }} \
           --model-name ${{ inputs.modelName }} \
           --champion $CHAMPION \
           --challenger $CHALLENGER \

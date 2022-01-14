@@ -51,7 +51,6 @@ jobs:
           modelVersion: ${{ steps.deployment.outputs.deployedVersion }}
           property: inference
           value: ${GITHUB_SHA}
-          replaceExistingWith: surpassed
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
   

@@ -23,9 +23,6 @@ parameters:
 - name: resourceGroup
   type: string
   default:
-- name: workspaceConfig
-  type: string
-  default: 
 
 steps:
   - task: AzureCLI@2
@@ -36,11 +33,13 @@ steps:
       scriptLocation: inlineScript
       azureSubscription: ${{ parameters.azureServiceConnectionName }}
       inlineScript: |
-        pip install azureml-core==1.37.0
-        pip install azure-cli-core==2.30.0
+        SUBSCRIPTION_ID=$(az account show | jq -r ".id")
+        echo "##[debug]Working on subscription $SUBSCRIPTION_ID"
         
         python $(Build.SourcesDirectory)/.azure-pipelines/templates/aml-model-register/register.py \
-          --ws-config ${{ parameters.workspaceConfig }} \
+          --subscription-id $SUBSCRIPTION_ID \
+          --workspace-name ${{ parameters.workspaceName }} \
+          --resource-group ${{ parameters.resourceGroup }} \
           --name ${{ parameters.name }} \
           --version ${{ parameters.modelVersion }} \
           --model-path ${{ parameters.modelPath }} \
