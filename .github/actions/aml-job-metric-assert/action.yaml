@@ -44,7 +44,7 @@ runs:
       run: |
         echo "::debug::Looking for metric ${{ inputs.metric }} at job ${{ inputs.jobName }}."
         echo "::debug::Expecting value ${{ inputs.expecting }} (of type ${{ inputs.dataType }}). Greater values are better? ${{ inputs.greaterIsBetter }}"
-        $SUBSCRIPTION_ID=$(az account show | jq -r ".id")
+        SUBSCRIPTION_ID=$(az account show | jq -r ".id")
 
         python ${{ github.action_path }}/assert.py \
           --subscription-id $SUBSCRIPTION_ID \

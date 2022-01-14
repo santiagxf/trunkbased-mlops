@@ -69,7 +69,7 @@ steps:
 
         echo "##[debug]Comparing models by ${{ parameters.compareBy }}"
 
-        $SUBSCRIPTION_ID=$(az account show | jq -r ".id")
+        SUBSCRIPTION_ID=$(az account show | jq -r ".id")
 
         python $(Build.SourcesDirectory)/.azure-pipelines/templates/aml-model-compare/compare.py \
           --subscription-id $SUBSCRIPTION_ID \

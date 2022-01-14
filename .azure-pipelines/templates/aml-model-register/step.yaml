@@ -33,7 +33,7 @@ steps:
       scriptLocation: inlineScript
       azureSubscription: ${{ parameters.azureServiceConnectionName }}
       inlineScript: |
-        $SUBSCRIPTION_ID=$(az account show | jq -r ".id")
+        SUBSCRIPTION_ID=$(az account show | jq -r ".id")
         echo "##[debug]Working on subscription $SUBSCRIPTION_ID"
         
         python $(Build.SourcesDirectory)/.azure-pipelines/templates/aml-model-register/register.py \

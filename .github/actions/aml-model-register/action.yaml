@@ -37,7 +37,7 @@ runs:
     - name: Registering model
       shell: bash
       run: |
-        $SUBSCRIPTION_ID=$(az account show | jq -r ".id")
+        SUBSCRIPTION_ID=$(az account show | jq -r ".id")
 
         python ${{ github.action_path }}/register.py \
           --subscription-id $SUBSCRIPTION_ID \

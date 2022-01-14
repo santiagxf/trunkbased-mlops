@@ -80,7 +80,7 @@ runs:
 
         echo "::debug::Comparing models by ${{ inputs.compareBy }}"
 
-        $SUBSCRIPTION_ID=$(az account show | jq -r ".id")
+        SUBSCRIPTION_ID=$(az account show | jq -r ".id")
 
         python ${{ github.action_path }}/compare.py \
           --subscription-id $SUBSCRIPTION_ID \
