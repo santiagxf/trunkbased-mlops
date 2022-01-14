@@ -26,19 +26,6 @@ stages:
         parameters:
           componentSupport: false
           minVersion: 2.0
-
-      - template: templates/aml-model-register/step.yaml
-        parameters:
-          azureServiceConnectionName: $(SERVICECONNECTION)
-          name: ${{ variables.modelName }}
-          fromJob: true
-          jobName: "myjob"
-          description: $(description)
-          modelPath: outputs/hate-pt-speech.zip
-          modelVersion: latest
-          workspaceName: $(WORKSPACENAME)
-          resourceGroup: $(RESOURCEGROUPNAME)
-          
       - template: templates/aml-env-ensure/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
@@ -72,6 +59,7 @@ stages:
               parameters:
                 componentSupport: false
                 minVersion: 2.0
+                pythonTools: true
             - template: templates/aml-model-register/step.yaml
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)
@@ -94,6 +82,7 @@ stages:
         parameters:
           componentSupport: false
           minVersion: 2.0
+          pythonTools: true
       - template: templates/aml-job-create/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)

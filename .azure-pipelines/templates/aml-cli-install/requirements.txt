@@ -1,12 +1,7 @@
-yq
 jobtools
+azureml-core==1.37.0
 azure-cli-core==2.30.0
 pyOpenSSL==21.0.0
 PyJWT==2.3.0
 cryptography<=3.4.8
 idna==2.10
-azureml-core==1.37.0
-azureml-defaults==1.37.0
-azureml-telemetry==1.37.0
-azureml-train-restclients-hyperdrive==1.37.0
-azureml-train-core==1.37.0

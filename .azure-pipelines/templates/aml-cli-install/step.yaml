@@ -5,12 +5,26 @@ parameters:
 - name: minVersion
   type: string
   default: '2.0'
+- name: pythonTools
+  type: boolean
+  default: false
+- name: pythonVersion
+  type: string
+  default: '3.8'
 
 steps:
-  - task: UsePythonVersion@0
-    displayName: Configuring Python
-    inputs:
-      versionSpec: '3.8'
+  - ${{ if eq(parameters.pythonTools, true) }}:
+    - task: UsePythonVersion@0
+      displayName: Configuring Python ${{ parameters.pythonVersion }}
+      inputs:
+        versionSpec: ${{ parameters.pythonVersion }}
+
+    - task: Bash@3
+      displayName: Installing Python tools
+      inputs:
+        targetType: inline
+        script: |
+          pip install -r .azure-pipelines/templates/aml-cli-install/requirements.txt
 
   - task: Bash@3
     displayName: Installing Azure CLI
@@ -60,4 +74,4 @@ steps:
       targetType: inline
       script: |
         sudo apt install jq
-        pip install -r .azure-pipelines/templates/aml-cli-install/requirements.txt
+        pip install yq
