@@ -4,6 +4,7 @@ and inference type.
 """
 import os
 import glob
+import math
 from typing import List, Tuple
 
 import pandas as pd
@@ -18,11 +19,13 @@ def split_to_sequences(text: str, unique_words: int = 150, seq_len: int = 200) -
     Parameters
     ----------
     text : str
-        First number to add.
+        Text you want to split in multiple subsequences.
     unique_words : int
         Number of unique words to use on each subsequence.
     seq_len : int
-        Number of total words to output on each sequence.
+        Number of total words to output on each sequence. Each sequence would then contain
+        `seq_len - unique_words` from the previous subsequence (context) and then `unique_words`
+        from the current subsequence being generated.
 
     Returns
     -------
@@ -32,7 +35,7 @@ def split_to_sequences(text: str, unique_words: int = 150, seq_len: int = 200) -
     assert unique_words<seq_len
 
     words = text.split()
-    n_seq = len(words)//unique_words + 1
+    n_seq = math.ceil(len(words)/unique_words)
 
     seqs = [' '.join(words[seq*unique_words:seq*unique_words + seq_len]) for seq in range(n_seq)]
     return seqs

@@ -6,7 +6,7 @@ on:
     branches: [ main ]
     paths:
       - datasets/*
-      - workspaces/templates/*
+      - workspaces/*
 
 jobs:
   deployment:
@@ -39,8 +39,8 @@ jobs:
           resourceGroup: ${RESOURCEGROUPNAME}
           location: ${LOCATION}
           deploymentName: aml-deployment
-          templateFile: workspaces/templates/deploy.json
-          parameters: workspaces/${ENVPREFIX}/deploy.parameters.json computeAdminUserName=${{ secrets.COMPUTEADMINUSERNAME }} computeAdminUserPassword=${{ secrets.COMPUTEADMINUSERPASSWORD }} datasetsClientId=${{ secrets.DATASETSCLIENTID }} datasetsClientSecret=${{ secrets.DATASETSCLIENTSECRET }}
+          templateFile: infrastructure/templates/deploy.json
+          parameters: infrastructure/${ENVPREFIX}/deploy.parameters.json computeAdminUserName=${{ secrets.COMPUTEADMINUSERNAME }} computeAdminUserPassword=${{ secrets.COMPUTEADMINUSERPASSWORD }} datasetsClientId=${{ secrets.DATASETSCLIENTID }} datasetsClientSecret=${{ secrets.DATASETSCLIENTSECRET }} automationObjectId=${{ secrets.AZURE_CREDENTIALS.clientId }}
 
       - id: datasets_init
         name: Workspaces - Datasets initialization

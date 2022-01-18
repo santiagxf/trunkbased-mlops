@@ -1,12 +1,11 @@
-name: model-CI
+name: endpoint-CI
 
 on:
   workflow_dispatch:
   pull_request:
     branches: [ main ]
     paths:
-    - jobs/**
-    - src/**
+    - src/*/score/*
 
 jobs:
   integration:
@@ -64,21 +63,4 @@ jobs:
           useConda: true
           condaEnvName: ${CONDAENVNAME}
           params: -q --ws-config-file="workspace.config.json"
-      
-      - name: Ensuring environment
-        uses: ./.github/actions/aml-env-ensure
-        with:
-          envFile: environments/${CONDAENVNAME}/environment.yml
-          validateOnly: true
-          workspaceName: ${WORKSPACENAME}
-          resourceGroup: ${RESOURCEGROUPNAME}
-      
-      - name: Running training job
-        uses: ./.github/actions/aml-job-create
-        with:
-          name: ${MODELNAME}
-          jobFile: jobs/hatedetection/train.job.yml
-          workspaceName: ${WORKSPACENAME}
-          resourceGroup: ${RESOURCEGROUPNAME}
-          noWait: false
       

@@ -19,6 +19,9 @@ parameters:
 - name: version
   type: string
   default: 6.2.5
+- name: params
+  type: string
+  default: ''
 
 steps:
   - task: AzureCLI@2
@@ -41,10 +44,10 @@ steps:
 
         if [[ '${{ parameters.configuration }}' == '' ]]; then
           echo "##[debug]Running tests"
-          (cd ${{ parameters.source }} && python -m pytest ${{ parameters.testFolder }} --junit-xml=$(System.DefaultWorkingDirectory)/test-results/results.xml)
+          (cd ${{ parameters.source }} && python -m pytest ${{ parameters.testFolder }} ${{ parameters.params }} --junit-xml=$(System.DefaultWorkingDirectory)/test-results/results.xml)
         else
           echo "##[debug]Running tests with configuration from ${{ parameters.configuration }}."
-          (cd ${{ parameters.source }}; python -m pytest ${{ parameters.testFolder }} -c ${{ parameters.configuration }} --junit-xml=$(System.DefaultWorkingDirectory)/test-results/results.xml)
+          (cd ${{ parameters.source }}; python -m pytest ${{ parameters.testFolder }} ${{ parameters.params }} -c ${{ parameters.configuration }} --junit-xml=$(System.DefaultWorkingDirectory)/test-results/results.xml)
         fi
 
         if ${{ lower(parameters.useConda) }}; then

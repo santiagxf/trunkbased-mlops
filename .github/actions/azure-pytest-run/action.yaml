@@ -29,6 +29,10 @@ inputs:
     description: 'PyTest library version.'
     required: true
     default: 6.2.5
+  params:
+    description: 'Parameters, if any, to provide to the test. Provide them starting with -q, for instance `-q --param1=value1 --param2=value2`'
+    required: false
+    default: ''
 
 runs:
   using: "composite"
@@ -50,10 +54,10 @@ runs:
 
         if [[ '${{ inputs.configuration }}' == '' ]]; then
           echo "::debug::Running tests"
-          (cd ${{ inputs.source }} && python -m pytest ${{ inputs.testFolder }} --junit-xml=${{ github.workspace }}/test-results/results.xml)
+          (cd ${{ inputs.source }} && python -m pytest ${{ inputs.testFolder }} ${{ inputs.configuration }} --junit-xml=${{ github.workspace }}/test-results/results.xml)
         else
           echo "::debug::Running tests with configuration from ${{ inputs.configuration }}."
-          (cd ${{ inputs.source }}; python -m pytest ${{ inputs.testFolder }} -c ${{ inputs.configuration }} --junit-xml=${{ github.workspace }}/test-results/results.xml)
+          (cd ${{ inputs.source }}; python -m pytest ${{ inputs.testFolder }} ${{ inputs.configuration }} -c ${{ inputs.configuration }} --junit-xml=${{ github.workspace }}/test-results/results.xml)
         fi
 
         if ${{ inputs.useConda }}; then

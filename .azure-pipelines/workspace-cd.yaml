@@ -5,7 +5,7 @@ trigger:
   paths:
     include:
     - datasets/*
-    - workspaces/templates/*
+    - infrastructure/*
 
 pool:
   vmImage: ubuntu-latest
@@ -27,9 +27,9 @@ stages:
           resourceGroup: $(RESOURCEGROUPNAME)
           location: $(LOCATION)
           deploymentName: aml-deployment
-          templateFile: workspaces/templates/deploy.json
+          templateFile: infrastructure/templates/deploy.json
           templateVersion: 1.0
-          parametersFile: workspaces/$(env)/deploy.parameters.json
+          parametersFile: infrastructure/$(env)/deploy.parameters.json
           secureParameters: computeAdminUserName=$(computeAdminUserName) computeAdminUserPassword=$(computeAdminUserPassword) datasetsClientId=$(datasetsClientId) datasetsClientSecret=$(datasetsClientSecret)
 
   - job: datasets_init

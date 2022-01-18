@@ -1,0 +1,26 @@
+parameters:
+- name: azureServiceConnectionName
+  type: string
+- name: workspaceName
+  type: string 
+- name: resourceGroup
+  type: string
+- name: outputFile
+  type: string
+  default: 'workspace.json'
+
+steps:
+- task: AzureCLI@2
+  displayName: Generating workspace config
+  inputs:
+    scriptType: bash
+    scriptLocation: inlineScript
+    azureSubscription: ${{ parameters.azureServiceConnectionName }}
+    inlineScript: |
+        echo "##[debug]Generating file at ${{ parameters.outputFile }}" 
+
+        SUBSCRIPTION_ID=$(az account show | jq -r ".id")
+        jq -n \
+          --arg WORKSPACE_NAME ${{ parameters.workspaceName }} RESOURCE_GROUP ${{ parameters.resourceGroup }} SUBSCRIPTION_ID $SUBSCRIPTION_ID \
+          '{ "subscription_id": $SUBSCRIPTION_ID, "resource_group": $RESOURCE_GROUP, "workspace_name": $WORKSPACE_NAME }' > ${{ parameters.outputFile }}
+
