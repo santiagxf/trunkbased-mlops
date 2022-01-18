@@ -62,7 +62,7 @@ runs:
           (cd ${{ inputs.source }} && python -m pytest ${{ inputs.testFolder }} ${{ inputs.configuration }} --junit-xml=${{ inputs.outputFile }})
         else
           echo "::debug::Running tests with configuration from ${{ inputs.configuration }}."
-          (cd ${{ inputs.source }}; python -m pytest ${{ inputs.testFolder }} ${{ inputs.configuration }} -c ${{ inputs.configuration }} --junit-xml=${{ inputs.outputFile }}))
+          (cd ${{ inputs.source }}; python -m pytest ${{ inputs.testFolder }} ${{ inputs.configuration }} -c ${{ inputs.configuration }} --junit-xml=${{ inputs.outputFile }})
         fi
 
         if ${{ inputs.useConda }}; then
