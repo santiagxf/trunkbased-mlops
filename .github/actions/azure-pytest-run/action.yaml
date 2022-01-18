@@ -49,6 +49,7 @@ runs:
           if ! [[ $(conda list --json | jq -r '.[] | select(.name=="pytest")') ]]; then
             echo "::debug::Environment doesn't contain PyTest. Installing"
             pip install pytest==${{ inputs.version }}
+            pip install pytest-cov
           fi
         fi
 
