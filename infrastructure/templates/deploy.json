@@ -86,7 +86,7 @@
                 "description": "Client secret used to query data from the account"
             }
         },
-        "automationObjectId": {
+        "secretsManagementObjectId": {
             "type": "securestring",
             "metadata": {
                 "description": "Object ID used for managing secrets in Key Vault"
@@ -119,7 +119,7 @@
                         "value": "[parameters('workspaceName')]"
                     },
                     "servicePrincipalObjectId": {
-                        "value": "[parameters('automationObjectId')]"
+                        "value": "[parameters('secretsManagementObjectId')]"
                     },
                     "tagValues": {
                         "value": {
