@@ -13,6 +13,10 @@ To do that:
 4. Create the GitHub secrets to access your Azure environment. All the jobs in this repository will try to pull the credentials to access Azure using a secret called `AZURE_CREDENTIALS`. You should create this secret and populate it with the information of the Service Principal that you want to use for deployment. If you don't have Service Principal created, [you can create one following this steps](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal). The secrets have to be stored JSON format. [Check this guide to know how](https://github.com/marketplace/actions/azure-login#configure-deployment-credentials).
 5. Create another secret named `AUTOMATION_OBJECT_ID` with the object ID of the service principal used for `AZURE_CREDENTIALS`.
 
+    > To get the Object ID of a service principal follow this steps: [Find service principal object ID](https://docs.microsoft.com/en-us/azure/healthcare-apis/azure-api-for-fhir/find-identity-object-ids#find-service-principal-object-id)
+
+    `az ad sp show --id XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX --query objectId`
+
 ## Configure your environment variables
 
 The automated pipelines in this repository will use a set of variables to configure how the deployment should be done and where. Those variables are located in a `YAML` file at `.github/variables.yaml`.

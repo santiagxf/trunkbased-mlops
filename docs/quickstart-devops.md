@@ -50,6 +50,10 @@ Infrastructure is deployed automatically by IaC pipelines. However, some secrets
     - `computeAdminUserPassword`: The password used for compute instances. For instance `Pass@word1`.
     - `AUTOMATION_OBJECT_ID`: The object id of the service principal used in the azure service connection.
 
+        > To get the Object ID of a service principal follow this steps: [Find service principal object ID](https://docs.microsoft.com/en-us/azure/healthcare-apis/azure-api-for-fhir/find-identity-object-ids#find-service-principal-object-id)
+
+        `az ad sp show --id XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX --query objectId`
+
 It should look like something like this:
 
 ![](assets/devops-secrets.png)
