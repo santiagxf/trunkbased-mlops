@@ -48,6 +48,7 @@ Infrastructure is deployed automatically by IaC pipelines. However, some secrets
     - `datasetsClientSecret`: The Client Secret of the service principal created before.
     - `computeAdminUserName`: The user name of the compute instances you want to use. For instance `mladmin`.
     - `computeAdminUserPassword`: The password used for compute instances. For instance `Pass@word1`.
+    - `AUTOMATION_OBJECT_ID`: The object id of the service principal used in the azure service connection.
 
 It should look like something like this:
 
