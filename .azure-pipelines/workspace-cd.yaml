@@ -30,7 +30,7 @@ stages:
           templateFile: infrastructure/templates/deploy.json
           templateVersion: 1.0
           parametersFile: infrastructure/$(env)/deploy.parameters.json
-          secureParameters: computeAdminUserName=$(computeAdminUserName) computeAdminUserPassword=$(computeAdminUserPassword) datasetsClientId=$(datasetsClientId) datasetsClientSecret=$(datasetsClientSecret)
+          secureParameters: computeAdminUserName=$(computeAdminUserName) computeAdminUserPassword=$(computeAdminUserPassword) datasetsClientId=$(datasetsClientId) datasetsClientSecret=$(datasetsClientSecret) secretsManagementObjectId=$(datasetsClientId)
 
   - job: datasets_init
     displayName: Datasets - Initialization
