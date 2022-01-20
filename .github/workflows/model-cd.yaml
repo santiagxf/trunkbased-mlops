@@ -73,6 +73,7 @@ jobs:
         with:
           componentSupport: false
           minVersion: 2.0
+          pythonTools: true
 
       - name: Logining in into Azure
         uses: Azure/login@v1
@@ -110,6 +111,7 @@ jobs:
         with:
           componentSupport: false
           minVersion: 2.0
+          pythonTools: true
 
       - name: Logining in into Azure
         uses: Azure/login@v1

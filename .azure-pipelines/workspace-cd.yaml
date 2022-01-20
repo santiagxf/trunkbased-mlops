@@ -29,7 +29,7 @@ stages:
           deploymentName: aml-deployment
           template: infrastructure/templates/deploy.json
           version: 1.0
-          parameters: infrastructure/$(env)/deploy.parameters.json computeAdminUserName=$(computeAdminUserName) computeAdminUserPassword=$(computeAdminUserPassword) datasetsClientId=$(datasetsClientId) datasetsClientSecret=$(datasetsClientSecret) secretsManagementObjectId=$(AUTOMATION_OBJECT_ID)
+          parameters: .cloud/$(env)/deploy.parameters.json computeAdminUserName=$(computeAdminUserName) computeAdminUserPassword=$(computeAdminUserPassword) datasetsClientId=$(datasetsClientId) datasetsClientSecret=$(datasetsClientSecret) secretsManagementObjectId=$(AUTOMATION_OBJECT_ID)
 
   - job: datasets_init
     displayName: Datasets - Initialization
