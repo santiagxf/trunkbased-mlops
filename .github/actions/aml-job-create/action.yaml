@@ -43,7 +43,7 @@ runs:
 
     - name: Uploading job logs
       uses: actions/upload-artifact@v2
-      if: ${{ (failure() || success()) && '${{ inputs.noWait }}' == 'false' }}
+      if: ${{ (failure() || success()) && inputs.noWait == 'false' }}
       with:
         name: ${{ inputs.name }}-log
         path: ${{ inputs.name }}.log

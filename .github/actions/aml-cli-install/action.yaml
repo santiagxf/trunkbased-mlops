@@ -23,15 +23,15 @@ runs:
   using: "composite"
   steps:
     - uses: actions/setup-python@v2
-      if: ${{ '${{ inputs.pythonTools }}' == 'true' }}
+      if: ${{ inputs.pythonTools == 'true' }}
       with:
         python-version: ${{ inputs.pythonVersion }}
 
     - name: Installing Python tools
-      if: ${{ '${{ inputs.pythonTools }}' == 'true' }}
+      if: ${{ inputs.pythonTools == 'true' }}
       shell: bash
       run: |
-          pip install -r .azure-pipelines/templates/aml-cli-install/requirements.txt
+          pip install -r ${{ github.action_path }}/requirements.txt
 
     - name: Installing Azure CLI
       shell: bash
