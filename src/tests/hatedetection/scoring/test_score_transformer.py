@@ -1,12 +1,13 @@
 """Unit tests for score_transformer
 """
+import pandas as pd
+import pytest
 from azureml.core import Workspace
 from azureml.core.authentication import AzureCliAuthentication
-import pandas as pd
 from hatedetection.score import score_transformer
 from hatedetection.prep.text_preparation import split_to_sequences
 
-ws_config_file = "../workspaces/dev/workspace.json"
+#ws_config_file = "../workspaces/dev/workspace.json"
 
 text = "Mude seus pensamentos e você pode mudar seu mundo. \
         Quando você não pode mudar a direção do vento, mude a direção de sua vela."
@@ -16,8 +17,9 @@ raw_data = pd.DataFrame(data=[
     {"text": "Mude seus pensamentos e você pode mudar seu mundo."},
     {"text": "Quando você não pode mudar a direção do vento, mude a direção de sua vela."}])
 
-def test_split_to_sequence_len():
-    """ Unit test for score_transformer.split_to_sequences()
+@pytest.mark.parametrize("text", text)
+def test_split_to_sequence_len(text):
+    """ Unit test for hatedetection.prep.text_preparation.split_to_sequences()
     """
     sequences = split_to_sequences(
         text=text,
@@ -26,7 +28,7 @@ def test_split_to_sequence_len():
     n_words = [len(seq.split()) for seq in sequences]
     assert all(n <= seq_len for n in n_words)
 
-def test_init_from_aml_workspace():
+def test_init_from_aml_workspace(ws_config_file):
     """ Unit test for score_transformer.init()
     """
     # Authenticate
@@ -38,7 +40,7 @@ def test_init_from_aml_workspace():
     score_transformer.init(from_workspace=True, workspace=ws)
     assert score_transformer.MODEL is not None
 
-def test_run_scores():
+def test_run_scores(ws_config_file):
     """Unit test for score_transformer.run()
     """
     # Authenticate

@@ -1,0 +1,30 @@
+name: Generating workspace config
+description: 'Generates the workspace configuration file for a given resource.'
+
+inputs:
+  workspaceName:
+    description: 'Name of the workspace to work against.'
+    required: true
+  resourceGroup:
+    description: 'Name of the resource group where the workspace is placed.'
+    required: true
+  outputFile:
+    description: 'File path of the generated JSON file'
+    required: true
+    default: 'workspace.json'
+
+runs:
+  using: "composite"
+  steps:
+    - name: Writing config file
+      shell: bash
+      run: |
+        echo "::debug::Generating file at ${{ inputs.outputFile }}" 
+
+        SUBSCRIPTION_ID=$(az account show | jq -r ".id")
+        jq -n \
+          --arg WORKSPACE_NAME ${{ inputs.workspaceName }} \
+          --arg RESOURCE_GROUP ${{ inputs.resourceGroup }} \
+          --arg SUBSCRIPTION_ID $SUBSCRIPTION_ID \
+          '{ "subscription_id": $SUBSCRIPTION_ID, "resource_group": $RESOURCE_GROUP, "workspace_name": $WORKSPACE_NAME }' > ${{ inputs.outputFile }}
+

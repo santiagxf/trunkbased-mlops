@@ -85,6 +85,12 @@
             "metadata": {
                 "description": "Client secret used to query data from the account"
             }
+        },
+        "secretsManagementObjectId": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Object ID used for managing secrets in Key Vault"
+            }
         }
     },
     "functions": [],
@@ -112,6 +118,9 @@
                     "workspaceName": {
                         "value": "[parameters('workspaceName')]"
                     },
+                    "servicePrincipalObjectId": {
+                        "value": "[parameters('secretsManagementObjectId')]"
+                    },
                     "tagValues": {
                         "value": {
                             "workspace": "[parameters('workspaceName')]"
@@ -128,7 +137,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "relativePath": "workspace/compute/cluster-cpu.json"
+                    "relativePath": "workspace/compute/cluster.json"
                 },
                 "parameters": {
                     "workspaceName": {
@@ -164,7 +173,7 @@
             "properties": {
                 "mode": "Incremental",
                 "templateLink": {
-                    "relativePath": "workspace/compute/cluster-gpu.json"
+                    "relativePath": "workspace/compute/cluster.json"
                 },
                 "parameters": {
                     "workspaceName": {

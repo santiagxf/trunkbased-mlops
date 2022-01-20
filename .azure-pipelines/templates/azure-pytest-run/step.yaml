@@ -19,6 +19,12 @@ parameters:
 - name: version
   type: string
   default: 6.2.5
+- name: params
+  type: string
+  default: ''
+- name: outputFile
+  type: string
+  default: '$(System.DefaultWorkingDirectory)/test-results/results.xml'
 
 steps:
   - task: AzureCLI@2
@@ -34,17 +40,18 @@ steps:
           conda activate ${{ parameters.condaEnvName }}
 
           if ! [[ $(conda list --json | jq -r '.[] | select(.name=="pytest")') ]]; then
-            echo "##[debug]Environment doesn't contain PyTest. Installing"
+            echo "##[debug]Environment doesn't contain PyTest. Installing..."
             pip install pytest==${{ parameters.version }}
+            pip install pytest-cov
           fi
         fi
 
         if [[ '${{ parameters.configuration }}' == '' ]]; then
           echo "##[debug]Running tests"
-          (cd ${{ parameters.source }} && python -m pytest ${{ parameters.testFolder }} --junit-xml=$(System.DefaultWorkingDirectory)/test-results/results.xml)
+          (cd ${{ parameters.source }} && python -m pytest ${{ parameters.testFolder }} ${{ parameters.params }} --junit-xml=${{ parameters.outputFile }})
         else
           echo "##[debug]Running tests with configuration from ${{ parameters.configuration }}."
-          (cd ${{ parameters.source }}; python -m pytest ${{ parameters.testFolder }} -c ${{ parameters.configuration }} --junit-xml=$(System.DefaultWorkingDirectory)/test-results/results.xml)
+          (cd ${{ parameters.source }}; python -m pytest ${{ parameters.testFolder }} ${{ parameters.params }} -c ${{ parameters.configuration }} --junit-xml=${{ parameters.outputFile }})
         fi
 
         if ${{ lower(parameters.useConda) }}; then
@@ -55,7 +62,7 @@ steps:
     displayName: Publish test results
     inputs:
       testResultsFormat: 'JUnit'
-      testResultsFiles: test-results/*.xml 
+      testResultsFiles: ${{ parameters.outputFile }}
       searchFolder: '$(System.DefaultWorkingDirectory)'
       mergeTestResults: true
       failTaskOnFailedTests: true

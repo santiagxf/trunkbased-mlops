@@ -11,6 +11,11 @@ To do that:
 2. Click on `Secrets`.
 3. Select `New repository secret`.
 4. Create the GitHub secrets to access your Azure environment. All the jobs in this repository will try to pull the credentials to access Azure using a secret called `AZURE_CREDENTIALS`. You should create this secret and populate it with the information of the Service Principal that you want to use for deployment. If you don't have Service Principal created, [you can create one following this steps](https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-create-service-principal-portal). The secrets have to be stored JSON format. [Check this guide to know how](https://github.com/marketplace/actions/azure-login#configure-deployment-credentials).
+5. Create another secret named `AUTOMATION_OBJECT_ID` with the object ID of the service principal used for `AZURE_CREDENTIALS`.
+
+    > To get the Object ID of a service principal follow this steps: [Find service principal object ID](https://docs.microsoft.com/en-us/azure/healthcare-apis/azure-api-for-fhir/find-identity-object-ids#find-service-principal-object-id)
+
+    `az ad sp show --id XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX --query objectId`
 
 ## Configure your environment variables
 
@@ -29,9 +34,9 @@ Open the file and review the values of the following variables. Save the changes
 The following variables are also present, but are specific to the project you are working on.
 
 - `ENVPREFIX`: Name of the environment. By default its `dev` reffering to `development`. Possible values can be `qa`, `stg` and `prd`.
-- `modelName`: The name of the model you are building. 
-- `description`: Description of the model you are building.
-- `condaEnvName`: Name of the environment that the model uses for training. This environment should match any of the environments that are available under the folder `environments`.
+- `MODELNAME`: The name of the model you are building. 
+- `DESCRIPTION`: Description of the model you are building.
+- `CONDAENVNAME`: Name of the environment that the model uses for training. This environment should match any of the environments that are available under the folder `environments`.
 
 ## Configure secrets
 
@@ -42,10 +47,11 @@ Infrastructure is deployed automatically by IaC pipelines. However, some secrets
 3. Select `New repository secret`.
 3. Name secrets and configure the following secrets:
 
-    - `datasetsClientId`: The Client ID of the service principal created before.
-    - `datasetsClientSecret`: The Client Secret of the service principal created before.
-    - `computeAdminUserName`: The user name of the compute instances you want to use. For instance `mladmin`.
-    - `computeAdminUserPassword`: The password used for compute instances. For instance `Pass@word1`.
+    - `DATASETSCLIENTID`: The Client ID of the service principal created before.
+    - `DATASETSCLIENTSECRET`: The Client Secret of the service principal created before.
+    - `COMPUTEADMINUSERNAME`: The user name of the compute instances you want to use. For instance `mladmin`.
+    - `COMPUTEADMINUSERPASSWORD`: The password used for compute instances. For instance `Pass@word1`.
+
 
 It should look like something like this:
 

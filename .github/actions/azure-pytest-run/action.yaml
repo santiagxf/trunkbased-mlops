@@ -29,6 +29,14 @@ inputs:
     description: 'PyTest library version.'
     required: true
     default: 6.2.5
+  params:
+    description: 'Parameters, if any, to provide to the test. Provide them starting with -q, for instance `-q --param1=value1 --param2=value2`'
+    required: false
+    default: ''
+  outputFile:
+    description: 'File name where the results will be generated. File is XML.'
+    required: false
+    default: '${{ github.workspace }}/test-results/results.xml'
 
 runs:
   using: "composite"
@@ -43,17 +51,18 @@ runs:
           conda activate ${{ inputs.condaEnvName }}
 
           if ! [[ $(conda list --json | jq -r '.[] | select(.name=="pytest")') ]]; then
-            echo "::debug::Environment doesn't contain PyTest. Installing"
+            echo "::debug::Environment doesn't contain PyTest. Installing..."
             pip install pytest==${{ inputs.version }}
+            pip install pytest-cov
           fi
         fi
 
         if [[ '${{ inputs.configuration }}' == '' ]]; then
           echo "::debug::Running tests"
-          (cd ${{ inputs.source }} && python -m pytest ${{ inputs.testFolder }} --junit-xml=${{ github.workspace }}/test-results/results.xml)
+          (cd ${{ inputs.source }} && python -m pytest ${{ inputs.testFolder }} ${{ inputs.configuration }} --junit-xml=${{ inputs.outputFile }})
         else
           echo "::debug::Running tests with configuration from ${{ inputs.configuration }}."
-          (cd ${{ inputs.source }}; python -m pytest ${{ inputs.testFolder }} -c ${{ inputs.configuration }} --junit-xml=${{ github.workspace }}/test-results/results.xml)
+          (cd ${{ inputs.source }}; python -m pytest ${{ inputs.testFolder }} ${{ inputs.configuration }} -c ${{ inputs.configuration }} --junit-xml=${{ inputs.outputFile }})
         fi
 
         if ${{ inputs.useConda }}; then
@@ -64,5 +73,5 @@ runs:
     - name: Publish test results
       uses: EnricoMi/publish-unit-test-result-action/composite@v1
       with:
-        files: ${{ github.workspace }}/test-results/*.xml 
+        files: ${{ inputs.outputFile }} 
         fail_on: "test failures"

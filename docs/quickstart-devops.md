@@ -48,6 +48,11 @@ Infrastructure is deployed automatically by IaC pipelines. However, some secrets
     - `datasetsClientSecret`: The Client Secret of the service principal created before.
     - `computeAdminUserName`: The user name of the compute instances you want to use. For instance `mladmin`.
     - `computeAdminUserPassword`: The password used for compute instances. For instance `Pass@word1`.
+    - `AUTOMATION_OBJECT_ID`: The object id of the service principal used in the azure service connection.
+
+        > To get the Object ID of a service principal follow this steps: [Find service principal object ID](https://docs.microsoft.com/en-us/azure/healthcare-apis/azure-api-for-fhir/find-identity-object-ids#find-service-principal-object-id)
+
+        `az ad sp show --id XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX --query objectId`
 
 It should look like something like this:
 

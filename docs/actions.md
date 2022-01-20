@@ -4,6 +4,7 @@ The following actions are available in this repository and allows to build CI/CD
 
 - [aml-cli-install](#aml-cli-install)
 - [aml-dataset-create](#aml-dataset-create)
+- [aml-workspace-get-config](#aml-workspace-get-config)
 - [aml-env-build](#aml-env-build)
 - [aml-env-ensure](#aml-env-ensure)
 - [aml-job-create](#aml-job-create)
@@ -119,6 +120,33 @@ Ensures or checks that a given Azure ML Environment exists on Azure. Checks if i
     validateOnly: false
     workspaceName: $(WORKSPACENAME)
     resourceGroup: $(RESOURCEGROUPNAME)
+```
+
+
+
+## aml-workspace-get-config
+
+Generates the workspace configuration file (`JSON`) for a given Azure Machine Learning Workspace.
+
+**Inputs**
+
+| Parameter     | Description | Required |
+|---------------|-------------|----------|
+| workspaceName | Name of the workspace to work against. | Yes |
+| resourceGroup | Name of the resource group where the workspace is placed. | Yes |
+| outputFile    | The path of the `JSON` file to generate. Defaults to `workspace.json`. | No |
+
+**Sample usage**
+
+> Generates the workspace configuration file and names it `workspace.dev.json`.
+
+```yml
+- template: templates/aml-workspace-get-config/step.yaml
+  parameters:
+    azureServiceConnectionName: $(SERVICECONNECTION)
+    workspaceName: $(WORKSPACENAME)
+    resourceGroup: $(RESOURCEGROUPNAME)
+    outputFile: workspace.config.json
 ```
 
 ## aml-dataset-create
@@ -337,10 +365,6 @@ Compares two model versions, a champion and a challenger, based on a given metri
     workspaceConfig: workspaces/dev/workspace.json
 ```
 
-
-
-
-
 ## aml-model-set
 
 Sets a property in an Azure ML Model
@@ -433,9 +457,11 @@ Run `pytest` tests that may rely on Azure and hence they are executed in the con
 | condaEnvName               | Name of the conda environment to use. Required if `useConda` is `true`. | No |
 | testFolder                 | Folder where test are placed. Defaults to `tests`. | No |
 | version                    | PyTest library version. Defaults to `6.2.5`. | Yes |
+| params                     | Parameters, if any, to provide to the execution. For instance, to provide test parameters you can use `-q --param1=value1 --param2=value2` | No |
 
 **Sample usage**
 
+**#1**
 > Runs `PyTest` for code in folder `src`. Uses a conda environment named `cicd`. This environment should be created beforehand.
 
 ```yml
@@ -447,6 +473,16 @@ Run `pytest` tests that may rely on Azure and hence they are executed in the con
     condaEnvName: cicd
 ```
 
+**#2**
+> Runs `PyTest` for code in folder `src`. Tests recieves a parameter named `input-file`.
+
+```yml
+- template: templates/azure-pytest-run/step.yaml
+  parameters:
+    azureServiceConnectionName: $(SERVICECONNECTION)
+    source: src
+    params: -q --input-file=mydata.json
+```
 
 ## azure-arm-template-deployment
 
