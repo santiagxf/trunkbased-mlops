@@ -21,7 +21,7 @@ stages:
   - job: iac_deployment
     displayName: IaC - Deployment
     steps:
-      - template: templates/azure-arm-template-deployment/action.yaml
+      - template: templates/azure-arm-template-deployment/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
           resourceGroup: $(RESOURCEGROUPNAME)
