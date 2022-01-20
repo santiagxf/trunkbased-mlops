@@ -5,7 +5,7 @@ trigger:
   paths:
     include:
     - datasets/*
-    - infrastructure/*
+    - .cloud/*
 
 pool:
   vmImage: ubuntu-latest
