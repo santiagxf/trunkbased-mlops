@@ -75,4 +75,5 @@ def assert_metric(subscription_id: str, resource_group: str, workspace_name:str,
 if __name__ == "__main__":
     tr = jobtools.runner.TaskRunner()
     result = tr.run(assert_metric)
-    exit(result)
+    print(result)
+    exit(0)

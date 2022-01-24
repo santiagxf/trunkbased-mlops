@@ -81,4 +81,5 @@ def compare(subscription_id: str, resource_group: str, workspace_name:str, model
 if __name__ == "__main__":
     tr = jobtools.runner.TaskRunner()
     result = tr.run(compare)
-    exit(result)
+    print(result)
+    exit(0)
