@@ -44,9 +44,10 @@ class ExperimentRunner(TaskRunner):
         Initializes the TaskRunner. If `args` is indicated, then the argument's won't be parsed
         from the command line. Otherwise they will.
         """
+        super(ExperimentRunner, self).__init__(args)
+
         self.run = None
         self.experiment = None
-        self.task_arguments = args
         try:
             if Run is not None:
                 self.run = Run.get_context()
@@ -169,7 +170,7 @@ class ExperimentRunner(TaskRunner):
             demanded from the command line or have to be indicated in the constructor of the
             `TaskRunner` object.
         """
-        outputs = self.run(task)
+        outputs = super().run(task)
         self.to_azureml(outputs)
 
         if self.experiment:
