@@ -145,7 +145,6 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
             }
         }
 
-
 def evaluate(model_path: str, eval_dataset: str, threshold: float = 0.5) -> Dict[str, Dict[str, float]]:
     """
     Evaluation routine for the model

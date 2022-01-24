@@ -5,7 +5,8 @@ import os
 import logging
 from typing import Callable, Dict, Any
 from enum import Enum
-from common.jobs.arguments import TaskArguments, get_args_from_signature
+from jobtools.runner import TaskRunner
+from jobtools.arguments import TaskArguments
 
 try:
     from azureml.core import Run, Experiment, Workspace
@@ -32,7 +33,7 @@ class TaskResultKey(StringEnum):
     ARTIFACTS = 'artifacts'
     ARGUMENTS = 'arguments'
 
-class TaskRunner():
+class ExperimentRunner(TaskRunner):
     """
     Allows an easy way to run a task in Azure ML and log any input into the run. Tasks are specified
     as a callable with arguments that are automatically parsed from the signature. The method should
@@ -168,12 +169,7 @@ class TaskRunner():
             demanded from the command line or have to be indicated in the constructor of the
             `TaskRunner` object.
         """
-        if self.task_arguments is None:
-            args = vars(get_args_from_signature(task))
-        else:
-            args = self.task_arguments.resolve_for_method(task)
-
-        outputs = task(**args)
+        outputs = self.run(task)
         self.to_azureml(outputs)
 
         if self.experiment:
