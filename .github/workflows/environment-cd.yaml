@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - environments/*
+    - environments/*
 
 jobs:
   deployment:
