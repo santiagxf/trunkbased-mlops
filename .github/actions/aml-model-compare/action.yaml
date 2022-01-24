@@ -82,7 +82,7 @@ runs:
 
         SUBSCRIPTION_ID=$(az account show | jq -r ".id")
 
-        python ${{ github.action_path }}/compare.py \
+        COMPARE=$(python ${{ github.action_path }}/compare.py \
           --subscription-id $SUBSCRIPTION_ID \
           --workspace-name ${{ inputs.workspaceName }} \
           --resource-group ${{ inputs.resourceGroup }} \
@@ -90,10 +90,10 @@ runs:
           --champion $CHAMPION \
           --challenger $CHALLENGER \
           --compare-by ${{ inputs.compareBy }} \
-          --greater-is-better ${{ inputs.greaterIsBetter }}
+          --greater-is-better ${{ inputs.greaterIsBetter }})
 
         # compare.py will return true or false depending if challenger is better. false is encoded as 0 en bash and any other value is true.
-        if [[ $? == 0 ]]; then
+        if [[ $COMPARE ]]; then
           echo "::warning::Challenger model is not better than the current champion."
           echo "::set-output name=result::false"
         else
