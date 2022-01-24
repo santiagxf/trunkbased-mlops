@@ -10,5 +10,5 @@ inputs:
   eval_dataset:
     dataset: azureml:portuguese-hate-speech-tweets-eval:1
 
-environment: azureml:transformers-torch-19:4
+environment: azureml:transformers-torch-19:5
 compute: azureml:gpuprdev
