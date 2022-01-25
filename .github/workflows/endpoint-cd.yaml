@@ -5,8 +5,8 @@ on:
   push:
     branches: [ main ]
     paths:
-    - endpoints/*
-    - src/*/score/*
+    - endpoints/**
+    - src/*/score/**
 
 jobs:
   deployment:
