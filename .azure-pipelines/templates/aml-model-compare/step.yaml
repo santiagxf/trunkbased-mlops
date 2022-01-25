@@ -44,8 +44,10 @@ steps:
             echo "##[debug]Querying champion version from endpoint with name $ENDPOINT_NAME"
             CHAMPION_MODEL=$(az ml online-deployment list --endpoint-name $ENDPOINT_NAME -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r ".[].model")
           else
-            echo "##[debug]Querying champion version from endpoint/deployment with name $ENDPOINT_NAME/${{ parameters.deployment }}"
-            CHAMPION_MODEL=$(az ml online-deployment show --endpoint-name $ENDPOINT_NAME --name ${{ parameters.deployment }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r ".[].model")
+            if [[ $(az ml online-endpoint show -n $ENDPOINT_NAME -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }}) ]]; then
+              echo "##[debug]Querying champion version from endpoint/deployment with name $ENDPOINT_NAME/${{ parameters.deployment }}"
+              CHAMPION_MODEL=$(az ml online-deployment show --endpoint-name $ENDPOINT_NAME --name ${{ parameters.deployment }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r ".[].model")
+            fi
           fi
           if [[ $CHAMPION_MODEL ]]; then
             CHAMPION=$(basename $CHAMPION_MODEL)
