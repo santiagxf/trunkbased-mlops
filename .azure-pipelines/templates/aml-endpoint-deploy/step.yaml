@@ -32,7 +32,7 @@ steps:
       azureSubscription: ${{ parameters.azureServiceConnectionName }}
       inlineScript: |
         set -e #Fail on errors
-        az configure --defaults workspace=$(WORKSPACENAME) group=$(RESOURCEGROUPNAME)
+        az configure --defaults workspace=${{ parameters.workspaceName }} group=${{ parameters.resourceGroup }}
 
         ENDPOINT_FILES=$(find ${{ parameters.endpointFile }})
         for ENDPOINT_FILE in $ENDPOINT_FILES

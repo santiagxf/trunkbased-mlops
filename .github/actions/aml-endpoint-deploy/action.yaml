@@ -43,8 +43,8 @@ runs:
       id: deployment
       shell: bash
       run: |
-        set -e #Fail on errors
-        az configure --defaults workspace=$(WORKSPACENAME) group=$(RESOURCEGROUPNAME)
+        set -e
+        az configure --defaults workspace=${{ inputs.workspaceName }} group=${{ inputs.resourceGroup }}
 
         ENDPOINT_FILES=$(find ${{ inputs.endpointFile }})
         for ENDPOINT_FILE in $ENDPOINT_FILES
