@@ -38,7 +38,7 @@ runs:
         if ${{ inputs.noWait }}; then
           az ml job create -n $JOB_NAME -f ${{ inputs.jobFile }} --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }}
         else
-          az ml job create -n $JOB_NAME -f ${{ inputs.jobFile }} --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} --stream >> ${{ inputs.name}}.log
+          az ml job create -n $JOB_NAME -f ${{ inputs.jobFile }} --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} --stream >> job.log
         fi
 
     - name: Uploading job logs
@@ -46,4 +46,4 @@ runs:
       if: ${{ (failure() || success()) && inputs.noWait == 'false' }}
       with:
         name: ${{ inputs.name }}-log
-        path: ${{ inputs.name }}.log
+        path: job.log

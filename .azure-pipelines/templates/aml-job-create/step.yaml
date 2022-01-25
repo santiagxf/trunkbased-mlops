@@ -32,7 +32,7 @@ steps:
         if ${{ lower(parameters.noWait) }}; then
           az ml job create -n $JOB_NAME -f ${{ parameters.jobFile }} --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }}
         else
-          az ml job create -n $JOB_NAME -f ${{ parameters.jobFile }} --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }} --stream >> ${{ parameters.name}}.log
+          az ml job create -n $JOB_NAME -f ${{ parameters.jobFile }} --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }} --stream >> job.log
         fi
     target:
       settableVariables:
@@ -42,4 +42,4 @@ steps:
     condition: and(succeededOrFailed(), and(eq('${{ parameters.noWait }}', 'false'), ne(variables['jobRun.jobName'], '')))
     inputs:
       artifactName: ${{ parameters.name }}-log
-      targetPath: ${{ parameters.name }}.log
+      targetPath: job.log
