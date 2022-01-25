@@ -104,7 +104,7 @@ runs:
 
               echo "::debug::Configuring traffic for $ENDPOINT_NAME/$DEPLOYMENT_NAME"
               TRAFFIC=$(yq --arg ENDPOINT_NAME $ENDPOINT_NAME '.traffic | select(has($ENDPOINT_NAME)) | .[] ')
-              if [[ $TRAFFIC != ""]]; then
+              if [[ $TRAFFIC != "" ]]; then
                 echo "::debug::Configuring traffic for $ENDPOINT_NAME/$DEPLOYMENT_NAME with value $TRAFFIC"
                 az ml online-endpoint update -n $ENDPOINT_NAME --traffic "$DEPLOYMENT_NAME=$TRAFFIC"
               else
