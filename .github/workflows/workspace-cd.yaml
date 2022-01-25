@@ -5,8 +5,8 @@ on:
   push:
     branches: [ main ]
     paths:
-      - datasets/*
-      - .cloud/*
+      - datasets/**
+      - .cloud/**
 
 jobs:
   deployment:

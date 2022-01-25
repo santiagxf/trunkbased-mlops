@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-    - src/*/score/*
+    - src/*/score/**
 
 jobs:
   integration:

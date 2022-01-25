@@ -52,8 +52,13 @@ runs:
           ENDPOINT_FOLDER=$(dirname $ENDPOINT_FILE)
           ENDPOINT_NAME=$(yq -r ".name" $ENDPOINT_FILE)
 
+          # We are removing traffic key since this has the chicken and the egg issue. If you place .traffic you have
+          # to deploy the deployment first. But you can't deploy deployments without an endpoint.
+          echo "::debug::Rewriting endpoint file without traffic"
+          yq -y "del(.traffic)" $ENDPOINT_FILE > $ENDPOINT_NAME.yml
+
           echo "::debug::Creating endpoint with name: $ENDPOINT_NAME"
-          az ml online-endpoint create -f $ENDPOINT_FILE
+          az ml online-endpoint create -f $ENDPOINT_NAME.yml
 
           echo "::debug::Retrieving URL and credentials"
           SCORING_URI=$(az ml online-endpoint show -n $ENDPOINT_NAME | jq -r ".scoring_uri")
