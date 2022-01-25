@@ -9,7 +9,7 @@
 
 # Trunk-based development for Machine Learning models with Azure Machine Learning
 
-This repository contains an example about how to use trunk-based development git workflow in a Machine Learning project. It demostrates how apply the workflow in a sample project along with a CI/CD implementation in `Azure` cloud. The model we implemented here is a hate detection model for tweets in the portuguese language. The implementations of CI/CD pipelines doing continuous integration and deployment off all the assets required for the solution are provided for both `Azure DevOps` and `GitHub Acitions`. The implementations are equally capable and you can use whichever resonates more with you.
+This repository contains an example about how to use trunk-based development git workflow in a Machine Learning project. It demostrates how apply the workflow in a sample project along with a CI/CD implementation in `Azure` cloud. The model we implemented here is a hate detection model for tweets in the portuguese language. The implementations of CI/CD pipelines doing continuous integration and deployment of all the assets required for the solution are provided for both `Azure DevOps` and `GitHub Acitions`. The implementations are equally capable and you can use whichever resonates more with you.
 
 The resources deployed in `Azure` rely on `Azure Machine Learning`, which is a comprehensive set of tools to boost your work with machine learning projects in `Azure`. To know more about the components of this service you can visit [Get started with Azure Machine Learning](https://azure.microsoft.com/en-us/get-started/services/machine-learning/).
 
@@ -17,9 +17,9 @@ The resources deployed in `Azure` rely on `Azure Machine Learning`, which is a c
 
 As always, technology is applied in the context of people and processes and there are no exceptions to this rule. A common pitfall when trying to use a git repository in a new ML project is to do so without any clear rules about how the repository should be used or how changes should be posted (committed). In the software development world, this is know as a workflow.
 
-A lot of projects in ML start with a `git` repository, but without a clear strategy about how the repository will serve the goals of the team, and more importantly, how the resitory will allow to release models faster and more reliably. For more details about this topic read the blog: [Put git to work for a Machine Learning projects: How to implement trunk-based development for Machine Learning models projects](https://santiagof.medium.com/put-git-to-work-for-a-machine-learning-projects-8ab79939b88d)
+A lot of projects in ML start with a `git` repository, but without a clear strategy about how the repository will serve the goals of the team, and more importantly, how the repository will allow releasing models faster and more reliably. For more details about this topic read the blog: [Put git to work for a Machine Learning projects: How to implement trunk-based development for Machine Learning models projects](https://santiagof.medium.com/put-git-to-work-for-a-machine-learning-projects-8ab79939b88d)
 
-This repository contains all the required elements to deploy a model for hate detection in portuguese based on `PyTorch` and `transformers` and serves it using a REST endpoint. The teams using this model works with the trunk-based development workflow to collaborate with others. The MLOps teams, uses either `GitHub Actions` or `Azure DevOps` to ensure that the workflow is followed, and the quality of the code is the expected. This allows to implement continuous delivery of the model using a method `champion/challenger` for deciding when to deploy a new version of the model.
+This repository contains all the required elements to deploy a model for hate detection in portuguese based on `PyTorch` and `transformers` and serve it using a REST endpoint. In this proposed scenario, the teams work with the trunk-based development workflow to collaborate with others. The MLOps teams, uses either `GitHub Actions` or `Azure DevOps` to ensure that the workflow is followed, and the quality of the code is the expected. This allows to implement continuous delivery of the model using a method `champion/challenger` for deciding when to deploy a new version of the model. To detect if a new model worth to be deployed, the model is subject to a McNemar test to identify if new proposed models (challenger) make different mistakes than the current champion.
 
 ## Landing trunk-based development in ML projects
 
@@ -48,7 +48,7 @@ In the folder `.azure-pipelines` (for `Azure DevOps`) and in the folder `.github
 - **Workspace-CD:** Performs deployments and initialization of some of the elements of the workspace.
     - **Triggers on:** `main` for changes in path `datasets/*` and `workspaces/templates/*`
     - **Actions:**
-        - **Infrastructure:** Infraestructure is automatically deployed by the pipeline using ARM tempaltes. The ARM templates are located in the folder `infrastructure`. To know more about the resources deployed see [Architecture details](docs/architecture.md).
+        - **Infrastructure:** Infraestructure is automatically deployed by the pipeline using ARM tempaltes. The ARM templates are located in the folder `.cloud`. To know more about the resources deployed see [Architecture details](docs/architecture.md).
         - **Datasets:** Ensures that datasets are created and available in the workspace. If they are not, they are initialized with data in the current git repository. For datasets that evolve over time, this pipeline will just create the initial version and the registration. You can leverage tools like Azure Data Factory to move data to the datasets and update the versions. This is outside of the scope of this repository right now but will be shared soon.
 
 
