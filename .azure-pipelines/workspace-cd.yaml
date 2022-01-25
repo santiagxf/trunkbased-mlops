@@ -27,7 +27,7 @@ stages:
           resourceGroup: $(RESOURCEGROUPNAME)
           location: $(LOCATION)
           deploymentName: aml-deployment
-          template: infrastructure/templates/deploy.json
+          template: .cloud/templates/deploy.json
           version: 1.0
           parameters: .cloud/$(env)/deploy.parameters.json computeAdminUserName=$(computeAdminUserName) computeAdminUserPassword=$(computeAdminUserPassword) datasetsClientId=$(datasetsClientId) datasetsClientSecret=$(datasetsClientSecret) secretsManagementObjectId=$(AUTOMATION_OBJECT_ID)
 
