@@ -56,11 +56,11 @@ runs:
           --data-type ${{ inputs.dataType }} \
           --greater-is-better ${{ inputs.greaterIsBetter }})
         
-        # assert.py will return true or false. false is encoded as 0 en bash and any other value is true.
-        if [[ $ASSERT ]]; then
-          echo "::warning::${{ inputs.failureMessage }}."
-          echo "::set-output name=result::false"
-        else
+        # assert.py will return True or False, but bash expects lowercase.
+        if ${ASSERT,,} ; then
           echo "::debug::Assertion returned true."
           echo "::set-output name=result::true"
+        else
+          echo "::warning::${{ inputs.failureMessage }}."
+          echo "::set-output name=result::false"
         fi

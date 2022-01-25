@@ -92,11 +92,11 @@ runs:
           --compare-by ${{ inputs.compareBy }} \
           --greater-is-better ${{ inputs.greaterIsBetter }})
 
-        # compare.py will return true or false depending if challenger is better. false is encoded as 0 en bash and any other value is true.
-        if [[ $COMPARE ]]; then
-          echo "::warning::Challenger model is not better than the current champion."
-          echo "::set-output name=result::false"
-        else
+        # compare.py will return True or False, but bash expects lowercase.
+        if ${COMPARE,,} ; then
           echo "::debug::Challenger model won the compare and will be deployed."
           echo "::set-output name=result::true"
+        else
+          echo "::warning::Challenger model is not better than the current champion."
+          echo "::set-output name=result::false"
         fi
