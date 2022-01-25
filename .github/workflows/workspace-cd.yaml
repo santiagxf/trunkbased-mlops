@@ -39,7 +39,7 @@ jobs:
           resourceGroup: ${RESOURCEGROUPNAME}
           location: ${LOCATION}
           deploymentName: aml-deployment
-          templateFile: cloud/templates/deploy.json
+          templateFile: .cloud/templates/deploy.json
           parameters: .cloud/${ENVPREFIX}/deploy.parameters.json computeAdminUserName=${{ secrets.COMPUTEADMINUSERNAME }} computeAdminUserPassword=${{ secrets.COMPUTEADMINUSERPASSWORD }} datasetsClientId=${{ secrets.DATASETSCLIENTID }} datasetsClientSecret=${{ secrets.DATASETSCLIENTSECRET }} secretsManagementObjectId=${{ secrets.AUTOMATION_OBJECT_ID }}
 
       - id: datasets_init
