@@ -10,7 +10,7 @@ You will need the following elements to work with this repository.
 2. A resource group created under the subcription where all the resources will be placed. If you want to start with a clear resource group, follow the steps [Create a resource group](https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/manage-resource-groups-portal#create-resource-groups)
 3. An storage account with hierarchical namespaces enabled (aka Azure Data Lake Gen2). This account needs to have a container named `trusted`.
 
-    > Why?: As a best practice, should datasets should not be stored in the resources associated with Azure Machine Learning. Datasets should be part of should Data Platform, not your experimentation platform. The name `trusted` is used as a convention to refer to data clean and steady.
+    > Why?: As a best practice, your datasets should not be stored in the resources associated with Azure Machine Learning. Datasets should be part of your Data Platform, not your experimentation platform. The name `trusted` is used as a convention to refer to data clean and steady.
 
 ## Create a service principal to run the automation pipelines using such credentials
 

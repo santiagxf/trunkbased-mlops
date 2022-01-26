@@ -28,7 +28,7 @@ Open the file and review the values of the following variables. Save the changes
 - `WORKSPACENAME`: The name of the Azure Machine Learning workspace you want to use.
 - `RESOURCEGROUPNAME`: The name of the resource group where the resources are located.
 - `STORAGEACCOUNTNAME`: The name of the storage account where you want datasets to be placed. This datastorage account has to have a container named `trusted` and be configured as a data source in Azure Machine Learning with the name `trusted`.
-- `LOCATION`: The location where resources are deployed by IaC
+- `LOCATION`: The location where resources are deployed by IaC.
 - `KEYVAULTNAME`: Name of the keyvault object where elements are stored. Leave the default `kv-trunkbased-dev` since it is created by IaC.
 
 The following variables are also present, but are specific to the project you are working on.
@@ -40,7 +40,7 @@ The following variables are also present, but are specific to the project you ar
 
 ## Configure secrets
 
-Infrastructure is deployed automatically by IaC pipelines. However, some secrets are required and needs to be provided in the form of Azure DevOps Variable Group. To configure that:
+Infrastructure is deployed automatically by IaC pipelines. However, some secrets are required and needs to be provided in the form of GitHub Action secrets. To configure that:
 
 1. Go to settings in your repository.
 2. Click on `Secrets`.

@@ -21,6 +21,8 @@ A lot of projects in ML start with a `git` repository, but without a clear strat
 
 This repository contains all the required elements to deploy a model for hate detection in portuguese based on `PyTorch` and `transformers` and serve it using a REST endpoint. In this proposed scenario, the teams work with the trunk-based development workflow to collaborate with others. The MLOps teams, uses either `GitHub Actions` or `Azure DevOps` to ensure that the workflow is followed, and the quality of the code is the expected. This allows to implement continuous delivery of the model using a method `champion/challenger` for deciding when to deploy a new version of the model. To detect if a new model worth to be deployed, the model is subject to a McNemar test to identify if new proposed models (challenger) make different mistakes than the current champion.
 
+> See [How git repository interacts with Azure ML workspace](docs/workflow.md) for a reference about how people is suppose to interact with the repository. 
+
 ## Landing trunk-based development in ML projects
 
 Machine Learning models are a combination of data and code. As a consecuence, versioning the code is not enought nor versioning the data. In git workflow, `main` represents the official history of the solution, in our case the model, and should always be deployable. How can we make `main` always deployable considering that what we want to deploy is not the source code but the model? The model itself, which is the output of the training process, is the result of combining the model source code with the data.
@@ -46,7 +48,7 @@ In the folder `.azure-pipelines` (for `Azure DevOps`) and in the folder `.github
 ### Workspaces
 
 - **Workspace-CD:** Performs deployments and initialization of some of the elements of the workspace.
-    - **Triggers on:** `main` for changes in path `datasets/*` and `workspaces/templates/*`
+    - **Triggers on:** `main` for changes in path `datasets/*` and `.cloud/*`
     - **Actions:**
         - **Infrastructure:** Infraestructure is automatically deployed by the pipeline using ARM tempaltes. The ARM templates are located in the folder `.cloud`. To know more about the resources deployed see [Architecture details](docs/architecture.md).
         - **Datasets:** Ensures that datasets are created and available in the workspace. If they are not, they are initialized with data in the current git repository. For datasets that evolve over time, this pipeline will just create the initial version and the registration. You can leverage tools like Azure Data Factory to move data to the datasets and update the versions. This is outside of the scope of this repository right now but will be shared soon.
@@ -118,31 +120,6 @@ For a detail of the actions used to implement this pipelines see [Custom Actions
 
 To get yourself started using this repository, please follow the steps at [Quick start](docs/quickstart.md). After you are done, you will have to follow some configuration related to the CI/CD implementation. That will depend on the tool you are using. Follow [Quick start guide for Azure DevOps](docs/quickstart-devops.md) and [Quick start guide for GitHub Actions](docs/quickstart-github.md) depending which one you are using.
 
-
-## Known issues
-
-### #1 Pipeline `workspace-CD` failed in the datasets initialization steps with the error `trusted data source not found`
-
-This issue looks to be related to a race condition in Azure Machine Learning. The data store created by ARM templates is created, but it looks that it is not ready to be used right after. The workaround to this issue is to re-run the pipeline. It will work next time.
-
-### #2 Access denied errors when trying to preview datasets right after deployment
-
-This issue, again, looks to be related to a race condition. It take same time to Azure ML to propagate permissions. Wait 15 minutes and try again.
-
-### #3 Metrics are not being logged when using the library `common` provided in this repository
-
-This issue is still under investigation. The workaround is to add an `sleep(5)` at the end of your training script to delay the execution.
-
-```python
-from time import sleep
-from common.jobs.runner import TaskRunner
-from hatedetection.train.trainer import train_and_evaluate
-
-if __name__ == "__main__":
-    tr = TaskRunner()
-    tr.run_and_log(train_and_evaluate)
-    sleep(5)
-```
 
 ## Contributing
 

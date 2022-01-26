@@ -410,7 +410,7 @@ Sets a property in an Azure ML Model
 
 ## aml-endpoint-deploy
 
-Deploys a model endpoint in Azure Machine Learning Services all along with all the deployments it contains. Logs are collected and uploaded.
+Deploys a model endpoint in Azure Machine Learning Services all along with all the deployments it contains. Logs are collected and uploaded. If traffic is indicted in the `YAML` definition, it is updated.
 
 **Inputs**
 
