@@ -7,11 +7,11 @@ variables:
   - template: variables.group.yaml
 
 stages:
-- stage: aml_model_integrate
-  displayName: Model - Integration
+- stage: aml_endpoint_integrate
+  displayName: Endpoint - Integration
   jobs:
   - job: integrate
-    displayName: Model validation
+    displayName: Endpoint validation
     steps:
       - template: templates/aml-cli-install/step.yaml
         parameters:
@@ -45,21 +45,3 @@ stages:
           useConda: true
           condaEnvName: ${{ variables.condaEnvName }}
           params: -q --ws-config-file="workspace.config.json"
-
-      - template: templates/aml-env-ensure/step.yaml
-        parameters:
-          azureServiceConnectionName: $(SERVICECONNECTION)
-          envFile: environments/${{ variables.condaEnvName}}/environment.yml
-          validateOnly: true
-          workspaceName: $(WORKSPACENAME)
-          resourceGroup: $(RESOURCEGROUPNAME)
-
-      - template: templates/aml-job-create/step.yaml
-        parameters:
-          azureServiceConnectionName: $(SERVICECONNECTION)
-          name: ${{ variables.modelName}}
-          jobFile: jobs/hatedetection/train.job.yml
-          workspaceName: $(WORKSPACENAME)
-          resourceGroup: $(RESOURCEGROUPNAME)
-          noWait: false
-

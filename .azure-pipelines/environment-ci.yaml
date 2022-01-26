@@ -10,7 +10,7 @@ stages:
 - stage: aml_ensure_env
   displayName: Environments - Integration
   jobs:
-  - job: deployment
+  - job: integrate
     displayName: Environments - Integration
     steps:
       - template: templates/aml-cli-install/step.yaml
