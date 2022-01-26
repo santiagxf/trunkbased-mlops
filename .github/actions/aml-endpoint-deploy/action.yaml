@@ -86,7 +86,7 @@ runs:
 
             if [[ "$TARGET_MODEL_VERSION" == "current" ]]; then
               echo "::debug::Identifying current version of the model at deployment $ENDPOINT_NAME/$DEPLOYMENT_NAME"
-              MODEL_CURRENT_URL=$(az ml online-deployment show --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} | jq -r ".model")
+              MODEL_CURRENT_URL=$(az ml online-deployment show --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME | jq -r ".model")
               MODEL_CURRENT=$(basename $MODEL_CURRENT_URL)
 
               echo "::debug::Updating yaml files with current model version: $MODEL_CURRENT"
@@ -95,7 +95,7 @@ runs:
 
             if [[ "$TARGET_MODEL_VERSION" == "latest" ]]; then
               echo "::debug::Identifying latest version of the model $DEPLOYMENT_MODEL"
-              MODEL_LATEST=$(az ml model list --name $DEPLOYMENT_MODEL -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} | jq -r '.[0].version')
+              MODEL_LATEST=$(az ml model list --name $DEPLOYMENT_MODEL | jq -r '.[0].version')
               
               echo "::debug::Updating yaml files with latest model version: $MODEL_LATEST"
               sed -i 's/:'$DEPLOYMENT_MODEL_VERSION'/:'$MODEL_LATEST'/' $DEPLOYMENT_FILE 
@@ -120,7 +120,12 @@ runs:
               mkdir -p logs
               az ml online-deployment get-logs --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME >> logs/$ENDPOINT_NAME_$DEPLOYMENT_NAME.log
             fi
-        
+
+            echo "::debug::Updating properties completed"
+            az ml online-deployment update --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME --set tags.'Git commit'=${GITHUB_SHA}
+            az ml online-deployment update --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME --set tags.'Git branch'=${GITHUB_REF#refs/*/}
+            az ml online-deployment update --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME --set tags.'Git repository'=${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}
+
             echo "::debug::Deployment completed"
           done
         
@@ -140,7 +145,7 @@ runs:
 
     - name: Uploading deployment logs
       uses: actions/upload-artifact@v2
-      if: ${{ (failure() || success()) && '${{ inputs.noWait }}' == 'false' }}
+      if: ${{ (failure() || success()) && inputs.noWait == 'false' }}
       with:
         name: deployment-logs
         path: logs/*

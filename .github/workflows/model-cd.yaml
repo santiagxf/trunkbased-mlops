@@ -45,7 +45,7 @@ jobs:
         id: jobRun
         uses: ./.github/actions/aml-job-create
         with:
-          name: ${MODELNAME}
+          name: ${{ env.MODELNAME }}
           jobFile: jobs/hatedetection/train.job.yml
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
@@ -122,7 +122,7 @@ jobs:
         id: jobRun
         uses: ./.github/actions/aml-job-create
         with:
-          name: ${MODELNAME}-eval
+          name: ${{ env.MODELNAME }}-eval
           jobFile: jobs/hatedetection/evaluate.job.yml
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}

@@ -108,7 +108,12 @@ steps:
               mkdir -p logs
               az ml online-deployment get-logs --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME >> logs/$ENDPOINT_NAME_$DEPLOYMENT_NAME.log
             fi
-        
+
+            echo "##[debug]Updating properties completed"
+            az ml online-deployment update --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME --set tags.'Git commit'=$(Build.SourceVersion)
+            az ml online-deployment update --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME --set tags.'Git branch'=${(Build.SourceBranch)#refs/*/}
+            az ml online-deployment update --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME --set tags.'Git repository'=$(Build.Repository.Uri)
+
             echo "##[debug]Deployment completed"
           done
         
