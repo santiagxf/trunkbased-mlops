@@ -111,7 +111,10 @@ In the folder `.azure-pipelines` (for `Azure DevOps`) and in the folder `.github
     - **Trigges on:** `main` for changes in path `src/*/scoring` and `endpoints`.
     - **Actions:**
         - Deploys the last version of `main` in the current deployment of the model. No models are trained nor replaced.
-        - Updates the references to know which version of the serving code is being installed on the endpoint. For this purpose we tag the commit SHA of the `main` by the time the deployed was done.
+        - Updates the references to know which version of the serving code is being installed on the endpoint. For this purpose we tag the commit SHA of the `main` by the time the deployed was done. The repository information is also added.
+
+        ![](docs/assets/deployment-tags.png)
+
     - **Approvals:** This stage requires approval.
 
 For a detail of the actions used to implement this pipelines see [Custom Actions](docs/actions.md).
