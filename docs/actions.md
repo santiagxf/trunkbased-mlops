@@ -410,7 +410,7 @@ Sets a property in an Azure ML Model
 
 ## aml-endpoint-deploy
 
-Deploys a model endpoint in Azure Machine Learning Services all along with all the deployments it contains. Logs are collected and uploaded. If traffic is indicted in the `YAML` definition, it is updated.
+Deploys a model endpoint in Azure Machine Learning Services all along with all the deployments it contains. Logs are collected and uploaded. If traffic is indicted in the `YAML` definition, then traffic of the endpoint is updated accordingly so there is no need to run other commands to do so. If you don't want this to happend, remove the `traffic` option from the `YAML` definition.
 
 **Inputs**
 
@@ -428,13 +428,13 @@ Deploys a model endpoint in Azure Machine Learning Services all along with all t
 
 **Sample usage**
 
-> Deploys all the endpoints in the folder `endpoints\[endpointname]` with file names `endpoint.yml`. On top of that, all the deployments for each endpoints that are in `endpoints\[endpointname]\deployments` will be deployed. Secrets will be uploaded to the key vault with name `my-keyvault`.
+> Deploys the endpoint specified in the file `endpoints\mymodel\endpoint.yml`. All the deployments that are in `endpoints\mymodel\deployments` will be deployed for the given endpoint. Secrets will be uploaded to the key vault with name `my-keyvault`.
 
 ```yml
 - template: templates/aml-endpoint-deploy/step.yaml
   parameters:
     azureServiceConnectionName: $(SERVICECONNECTION)
-    endpointFile: endpoints/*/endpoint.yml
+    endpointFile: endpoints/mymodel/endpoint.yml
     deploymentFile:  deployments/*.yml
     workspaceName: $(WORKSPACENAME)
     resourceGroup: $(RESOURCEGROUPNAME)
