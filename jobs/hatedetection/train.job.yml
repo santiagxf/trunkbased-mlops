@@ -17,5 +17,5 @@ inputs:
       local_path: train.params.yml
     mode: download
 
-environment: azureml:transformers-torch-19:6
+environment: azureml:transformers-torch-19:7
 compute: azureml:gpuprdev

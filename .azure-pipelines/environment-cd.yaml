@@ -26,6 +26,10 @@ stages:
 
       - template: templates/conda-setup/step.yaml
 
+      - template: templates/aml-env-build/step.yaml
+        parameters:
+          envFile: environments/*/environment.yml
+
       - template: templates/aml-env-ensure/step.yaml
         parameters:
           envFile: environments/*/environment.yml
