@@ -43,15 +43,3 @@ jobs:
           resourceGroup: ${RESOURCEGROUPNAME}
           secretsToKeyVault: true
           keyVaultName: ${KEYVAULTNAME}
-
-      - name: Configuring model inference
-        uses: ./.github/actions/aml-model-set
-        with:
-          modelName: ${MODELNAME}
-          modelVersion: ${{ steps.deployment.outputs.deployedVersion }}
-          property: inference
-          value: ${GITHUB_SHA}
-          workspaceName: ${WORKSPACENAME}
-          resourceGroup: ${RESOURCEGROUPNAME}
-  
-      

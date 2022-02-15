@@ -75,7 +75,7 @@ runs:
             DEPLOYMENT_MODEL_VERSION=$(yq -r ".model" $DEPLOYMENT_FILE | cut -d: -f3)
 
             # User can overwrite the version in the YAML 
-            if [[ "${{ inputs.modelVersion }}" == "" ]]; then
+            if [ -z "${{ inputs.modelVersion }}" ]; then
               TARGET_MODEL_VERSION=$DEPLOYMENT_MODEL_VERSION
             else
               echo "::debug::Model being targeted is being overwriten with version ${{ inputs.modelVersion }}"
@@ -100,6 +100,16 @@ runs:
               echo "::debug::Updating yaml files with latest model version: $MODEL_LATEST"
               sed -i 's/:'$DEPLOYMENT_MODEL_VERSION'/:'$MODEL_LATEST'/' $DEPLOYMENT_FILE 
             fi
+
+            if [[ "$TARGET_MODEL_VERSION" == *=* ]]; then
+              echo "::debug::Identifying version of the model $DEPLOYMENT_MODEL with tags $TARGET_MODEL_VERSION"
+              TARGET_MODEL_TAG=$($TARGET_MODEL_VERSION | cut -d= -f1)
+              TARGET_MODEL_TVALUE=$($TARGET_MODEL_VERSION | cut -d= -f2)
+
+              MODEL_TAGGED=$(az ml model list -n $DEPLOYMENT_MODEL | jq -r --arg TARGET_MODEL_TAG $TARGET_MODEL_TAG --arg TARGET_MODEL_TVALUE $TARGET_MODEL_TVALUE '.[] | select(.tags.$TARGET_MODEL_TAG == $TARGET_MODEL_TVALUE) | .version')
+              echo "::debug::Updating yaml files with model version: $MODEL_TAGGED"
+              sed -i 's/:'$DEPLOYMENT_MODEL_VERSION'/:'$MODEL_TAGGED'/' $DEPLOYMENT_FILE 
+            fi
         
             echo "::debug::Creating deployment with name: $ENDPOINT_NAME/$DEPLOYMENT_NAME"
             if ${{ inputs.noWait }}; then
@@ -109,7 +119,7 @@ runs:
 
               echo "::debug::Configuring traffic for $ENDPOINT_NAME/$DEPLOYMENT_NAME"
               TRAFFIC=$(yq --arg DEPLOYMENT_NAME $DEPLOYMENT_NAME '.traffic | select(has($DEPLOYMENT_NAME)) | .[]' $ENDPOINT_FILE)
-              if [[ $TRAFFIC != "" ]]; then
+              if [[ -n $TRAFFIC ]]; then
                 echo "::debug::Configuring traffic for $ENDPOINT_NAME/$DEPLOYMENT_NAME with value $TRAFFIC"
                 az ml online-endpoint update -n $ENDPOINT_NAME --traffic "$DEPLOYMENT_NAME=$TRAFFIC"
               else

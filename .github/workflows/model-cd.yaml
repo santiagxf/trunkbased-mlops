@@ -2,100 +2,16 @@ name: model-CD
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
-    paths:
-    - jobs/**
-    - src/**
+  workflow_run:
+    workflows: ["model-ct"]
+    branches: [main]
+    types:
+      - completed
 
 jobs:
-  build:
-    environment: dev
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Load environment from YAML
-        uses: doughepi/yaml-env-action@v1.0.0
-        with:
-            files: .github/variables.yaml
-
-      - id: job_preparation
-        name: Installing dependencies
-        uses: ./.github/actions/aml-cli-install
-        with:
-          componentSupport: false
-          minVersion: 2.0
-
-      - name: Logining in into Azure
-        uses: Azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      
-      - name: Ensuring environment
-        uses: ./.github/actions/aml-env-ensure
-        with:
-          envFile: environments/${CONDAENVNAME}/environment.yml
-          validateOnly: true
-          workspaceName: ${WORKSPACENAME}
-          resourceGroup: ${RESOURCEGROUPNAME}
-      
-      - name: Running training job
-        id: jobRun
-        uses: ./.github/actions/aml-job-create
-        with:
-          name: ${{ env.MODELNAME }}
-          jobFile: jobs/hatedetection/train.job.yml
-          workspaceName: ${WORKSPACENAME}
-          resourceGroup: ${RESOURCEGROUPNAME}
-          noWait: false
-      
-    outputs:
-      jobName: ${{ steps.jobRun.outputs.jobName }}
-
-  registry:
-    environment: amlworkspace_dev
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: Load environment from YAML
-        uses: doughepi/yaml-env-action@v1.0.0
-        with:
-            files: .github/variables.yaml
-
-      - id: job_preparation
-        name: Installing dependencies
-        uses: ./.github/actions/aml-cli-install
-        with:
-          componentSupport: false
-          minVersion: 2.0
-          pythonTools: true
-
-      - name: Logining in into Azure
-        uses: Azure/login@v1
-        with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
-      
-      - name: Registering trained model
-        uses: ./.github/actions/aml-model-register
-        with:
-          name: ${MODELNAME}
-          fromJob: true
-          jobName: ${{ needs.build.outputs.jobName }}
-          description: ${DESCRIPTION}
-          modelPath: outputs/hate-pt-speech.zip
-          modelVersion: latest
-          workspaceName: ${WORKSPACENAME}
-          resourceGroup: ${RESOURCEGROUPNAME}
-
   evaluation:
     environment: dev
     runs-on: ubuntu-latest
-    needs: registry
 
     steps:
       - uses: actions/checkout@v2
@@ -153,6 +69,19 @@ jobs:
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
 
+      - name: Moving model's stage
+        uses: ./.github/actions/aml-model-set
+        if: ${{ steps.evaluation.outputs.result == 'true' }}
+        with:
+          modelName: ${MODELNAME}
+          modelVersion: latest
+          property: stage
+          value: staged
+          exclusive: true
+          replaceExistingWith: unstaged
+          workspaceName: ${WORKSPACENAME}
+          resourceGroup: ${RESOURCEGROUPNAME}
+
     outputs:
       result: ${{ steps.compare.outputs.result }}
 
@@ -181,6 +110,19 @@ jobs:
         uses: Azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Moving model's stage
+        uses: ./.github/actions/aml-model-set
+        if: ${{ steps.evaluation.outputs.result == 'true' }}
+        with:
+          modelName: ${MODELNAME}
+          modelVersion: latest
+          property: stage
+          value: production
+          exclusive: true
+          replaceExistingWith: surpassed
+          workspaceName: ${WORKSPACENAME}
+          resourceGroup: ${RESOURCEGROUPNAME}
       
       - name: Deploying models
         id: deployment
@@ -192,27 +134,4 @@ jobs:
           resourceGroup: ${RESOURCEGROUPNAME}
           secretsToKeyVault: true
           keyVaultName: ${KEYVAULTNAME}
-
-      - name: Configuring model stage
-        uses: ./.github/actions/aml-model-set
-        with:
-          modelName: ${MODELNAME}
-          modelVersion: ${{ steps.deployment.outputs.deployedVersion }}
-          property: stage
-          value: production
-          exclusive: true
-          replaceExistingWith: surpassed
-          workspaceName: ${WORKSPACENAME}
-          resourceGroup: ${RESOURCEGROUPNAME}
-
-      - name: Configuring model inference
-        uses: ./.github/actions/aml-model-set
-        with:
-          modelName: ${MODELNAME}
-          modelVersion: ${{ steps.deployment.outputs.deployedVersion }}
-          property: inference
-          value: ${GITHUB_SHA}
-          workspaceName: ${WORKSPACENAME}
-          resourceGroup: ${RESOURCEGROUPNAME}
   
-      
