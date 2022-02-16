@@ -24,7 +24,7 @@ dependencies:
       - numpy==1.19
       - scikit-learn==1.0.1
       - statsmodels==0.13.1
-      - jobtools==0.0.4
+      - jobtools
       - ipykernel==6.4
       - jupyter==1.0
       - pytest==6.2.5
