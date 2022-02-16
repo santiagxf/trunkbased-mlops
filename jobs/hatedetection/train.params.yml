@@ -12,3 +12,6 @@ trainer:
     weight_decay: 0.01
 data:
     format: 'csv'
+    preprocessing:
+        split_unique_words: 150
+        split_seq_len: 200

@@ -3,6 +3,7 @@ Training routine for a language model using transformers
 """
 import shutil
 import logging
+import mlflow
 from typing import Dict, Any
 from types import SimpleNamespace
 
@@ -34,6 +35,8 @@ def train_and_evaluate(input_dataset: str, eval_dataset: str,
     """
     classifier = HateDetectionClassifier()
     classifier.build(baseline=params.model.baseline)
+    classifier.split_unique_words = params.data.preprocessing.split_unique_words
+    classifier.split_seq_len = params.data.preprocessing.split_seq_len
 
     examples_train, labels_train = load_examples(input_dataset)
     if eval_dataset:
@@ -70,11 +73,12 @@ def train_and_evaluate(input_dataset: str, eval_dataset: str,
     saved_location=f"{params.model.output_dir}/{params.model.name}"
     classifier.save_pretrained(saved_location)
 
-    logging.info('[INFO] Zipping assets to target directory')
-    shutil.make_archive(saved_location, format='zip', root_dir=saved_location, base_dir='./')
+    mlflow.log_metrics(evaluation_metrics)
+    mlflow.log_params(history.metrics)
+    mlflow.pyfunc.log_model(artifact_path=params.model.name, python_model=classifier, artifacts=classifier.get_artifacts())
 
     return {
         'metrics': evaluation_metrics,
         'arguments': history.metrics,
-        'artifacts': [ f'{saved_location}.zip' ]
+        'artifacts': [ saved_location ]
     }

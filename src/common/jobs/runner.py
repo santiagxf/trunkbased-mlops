@@ -3,6 +3,7 @@ This module provides orchestration to run and execute a job in Azure ML
 """
 import os
 import logging
+import mlflow
 from typing import Callable, Dict, Any
 from enum import Enum
 from jobtools.runner import TaskRunner
@@ -32,6 +33,7 @@ class TaskResultKey(StringEnum):
     METRICS = 'metrics'
     ARTIFACTS = 'artifacts'
     ARGUMENTS = 'arguments'
+    MODELS = 'models'
 
 class ExperimentRunner(TaskRunner):
     """
@@ -92,7 +94,7 @@ class ExperimentRunner(TaskRunner):
         self.experiment = Experiment(workspace=ws, name=experiment_name)
         self.run = self.experiment.start_logging()
 
-    def log_on_run(self, key: str, value: Any) -> None:
+    def log_on_run(self, key: str, value: Any, is_param: bool = False) -> None:
         """
         Logs a given value in the current run with a key. This method can log
         any type of data.
@@ -108,7 +110,9 @@ class ExperimentRunner(TaskRunner):
             if isinstance(value, list):
                 if len(value) > 0:
                     try:
-                        self.run.log_list(key, value)
+                        mlflow.log
+                        for step, step_value in enumerate(value):
+                            mlflow.log_metric(key, step_value, step=step)
                     except RuntimeError:
                         logging.error(f"[ERROR] Unable to log key {key} of type \
                             [LIST] {type(value)}.")
@@ -117,13 +121,15 @@ class ExperimentRunner(TaskRunner):
                         items. Key was {key}.")
             else:
                 try:
+                    if is_param:
+                        mlflow.log_param()
                     self.run.log(key, value)
                 except RuntimeError:
                     logging.error(f"[ERROR] Unable to log with key {key} of type {type(value)}.")
         else:
             logging.warning(f"[WARN] Logging key '{key}' ignored as no run available.")
 
-    def to_azureml(self, results: Dict[TaskResultKey, Dict[str, Any]]) -> None:
+    def to_tracking_server(self, results: Dict[TaskResultKey, Dict[str, Any]]) -> None:
         """
         Takes a dictionary containing all the results from a run execution and logs in the
         current run. Metrics and arguments are logged as "run metrics" and artifacts are
@@ -139,9 +145,7 @@ class ExperimentRunner(TaskRunner):
         task_results = { TaskResultKey(key): values for key, values in results.items() }
 
         if TaskResultKey.ARGUMENTS in task_results.keys():
-            for arg, value in task_results[TaskResultKey.ARGUMENTS].items():
-                logging.info(f"[INFO] Logging argument {arg} with value {str(value)}")
-                self.log_on_run(arg, value)
+            mlflow.log_params(task_results[TaskResultKey.ARGUMENTS])
 
         if TaskResultKey.METRICS in task_results.keys():
             for metric, value in task_results[TaskResultKey.METRICS].items():
@@ -154,6 +158,9 @@ class ExperimentRunner(TaskRunner):
 
                 logging.info(f"[INFO] Uploading artifact {base_name} at {artifact_path}")
                 self.run.upload_file(name=base_name, path_or_stream=artifact_path)
+
+        if TaskResultKey.MODELS in task_results.keys():
+            for model_path in task_results[TaskResultKey.MODELS]
 
     def run_and_log(self, task: Callable[[], Dict[TaskResultKey, Dict[str, Any]]]) -> None:
         """
@@ -171,7 +178,7 @@ class ExperimentRunner(TaskRunner):
             `TaskRunner` object.
         """
         outputs = super().run(task)
-        self.to_azureml(outputs)
+        self.to_tracking_server(outputs)
 
         if self.experiment:
             self.run.complete()
