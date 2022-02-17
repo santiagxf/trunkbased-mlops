@@ -73,9 +73,9 @@ def train_and_evaluate(input_dataset: str, eval_dataset: str,
     saved_location=f"{params.model.output_dir}/{params.model.name}"
     classifier.save_pretrained(saved_location)
 
-    mlflow.log_metrics(evaluation_metrics)
-    mlflow.log_params(history.metrics)
     mlflow.pyfunc.log_model(artifact_path=params.model.name, python_model=classifier, artifacts=classifier.get_artifacts())
+    mlflow.log_metrics(dict(filter(lambda item: item[1] is not None, evaluation_metrics.items())))
+    mlflow.log_params(history.metrics)
 
     return {
         'metrics': evaluation_metrics,

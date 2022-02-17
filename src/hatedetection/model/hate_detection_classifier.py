@@ -1,9 +1,10 @@
-﻿
+
 
 import logging
 import shutil
 import math
 import os
+import pathlib
 import numpy as np
 from typing import Dict, Union
 from os import PathLike
@@ -30,7 +31,12 @@ class HateDetectionClassifier(PythonModel):
         self.split_seq_len = 200
 
     def get_artifacts(self) -> Dict[str, str]:
-        return { 'model': self.model_path }
+        artifacts = {}
+        for rootdir, subdir, files in os.walk(f'{self.artifacts_path}/{self.model_path}'):
+            for file in files:
+                if not os.path.basename(file).startswith('.'):
+                    artifacts[pathlib.Path(file).stem]=os.path.join(rootdir, file)
+        return artifacts
         
     def load(self, path: PathLike):
         """Loads the model from a folder where artifacts are stored, including the model and its
@@ -92,8 +98,8 @@ class HateDetectionClassifier(PythonModel):
             else:
                 save_directory = self.artifacts_path
 
-        self.tokenizer.save_pretrained(save_directory)
-        self.model.save_pretrained(save_directory)
+        self.tokenizer.save_pretrained(f'{save_directory}/{self.model_path}')
+        self.model.save_pretrained(f'{save_directory}/{self.model_path}')
 
         return save_directory
     
