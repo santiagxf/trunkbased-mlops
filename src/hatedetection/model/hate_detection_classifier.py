@@ -25,14 +25,16 @@ except ImportError:
 class HateDetectionClassifier(PythonModel):
     def __init__(self, model_name = 'hate-pt-speech'):
         self.model_name = model_name
-        self.model_path = 'model'
         self.artifacts_path = None
         self.split_unique_words = 150
         self.split_seq_len = 200
 
     def get_artifacts(self) -> Dict[str, str]:
+        if self.artifacts_path is None:
+            raise ValueError("Can't get the artificats of an unpersisted model. Call save_pretrained first.")
+
         artifacts = {}
-        for rootdir, subdir, files in os.walk(f'{self.artifacts_path}/{self.model_path}'):
+        for rootdir, subdir, files in os.walk(self.artifacts_path):
             for file in files:
                 if not os.path.basename(file).startswith('.'):
                     artifacts[pathlib.Path(file).stem]=os.path.join(rootdir, file)
@@ -52,12 +54,12 @@ class HateDetectionClassifier(PythonModel):
             logging.info(f"[INFO] Unpacking archive {path}")
 
             self.artifacts_path = f'./{self.model_name}/'
-            shutil.unpack_archive(path, self.model_path)
+            shutil.unpack_archive(path, self.artifacts_path)
         else:
             self.artifacts_path = path
 
         logging.info("[INFO] Loading transformer")
-        self.build(f'{self.artifacts_path}/{self.model_path}')
+        self.build(self.artifacts_path)
 
         logging.info("[INFO] Switching to evaluation mode")
         _ = self.model.eval()
@@ -70,7 +72,8 @@ class HateDetectionClassifier(PythonModel):
         context : PythonModelContext
             Model context
         """
-        self.load(context.artifacts["model"])
+        artifacts_path = os.path.dirname(context.artifacts["pytorch_model"])
+        self.load(artifacts_path)
 
     def build(self, baseline: str, tokenizer: str = None):
         """
@@ -92,24 +95,19 @@ class HateDetectionClassifier(PythonModel):
         """
         Saves the model to a directory. Multiple files are generated.
         """
-        if save_directory is None:
-            if self.artifacts_path is None:
-                save_directory = self.model_name
-            else:
-                save_directory = self.artifacts_path
-
-        self.tokenizer.save_pretrained(f'{save_directory}/{self.model_path}')
-        self.model.save_pretrained(f'{save_directory}/{self.model_path}')
+        self.artifacts_path = save_directory or self.artifacts_path or self.model_name
+        self.tokenizer.save_pretrained(self.artifacts_path)
+        self.model.save_pretrained(self.artifacts_path)
 
         return save_directory
     
     def predict(self, context: PythonModelContext, model_input: Union[list, pd.Series, pd.DataFrame]):
         if isinstance(model_input, pd.DataFrame):
-            data = data["text"]
+            data = model_input["text"]
         elif isinstance(model_input, list):
-            data = pd.Series(data)
+            data = pd.Series(model_input)
         elif isinstance(model_input, np.ndarray):
-            data = pd.Series(data)
+            data = pd.Series(model_input)
         else:
             raise TypeError(f"Unsupported type {type(model_input).__name__}")
         
