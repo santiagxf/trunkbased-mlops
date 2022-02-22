@@ -30,6 +30,23 @@ class HateDetectionClassifier(PythonModel):
         self.split_seq_len = 200
 
     def get_artifacts(self) -> Dict[str, str]:
+        """
+        Gets a dictionary with the paths to all the artifacts persisted for
+        this model. Accordingly, this method can only be called after the model
+        has been persisted.
+
+        Returns
+        -------
+        Dict[str, str]
+            A dictionary containing all the paths to the artifacts of the model. Keys
+            contains the name of the artifacts (file name with no extension), and the
+            values contians the path to the artifact.
+
+        Raises
+        ------
+        ValueError
+            If the model has never been saved to disk.
+        """
         if self.artifacts_path is None:
             raise ValueError("Can't get the artificats of an unpersisted model. Call save_pretrained first.")
 
@@ -102,7 +119,9 @@ class HateDetectionClassifier(PythonModel):
         return save_directory
     
     def predict(self, context: PythonModelContext, model_input: Union[list, pd.Series, pd.DataFrame]):
-        if isinstance(model_input, pd.DataFrame):
+        if isinstance(model_input, pd.Series):
+            data = model_input
+        elif isinstance(model_input, pd.DataFrame):
             data = model_input["text"]
         elif isinstance(model_input, list):
             data = pd.Series(model_input)
@@ -129,12 +148,14 @@ class HateDetectionClassifier(PythonModel):
         return scores
     
     def predict_proba(self, model_input: Union[list, pd.Series, pd.DataFrame]):
-        if isinstance(model_input, pd.DataFrame):
-            data = data["text"]
+        if isinstance(model_input, pd.Series):
+            data = model_input
+        elif isinstance(model_input, pd.DataFrame):
+            data = model_input["text"]
         elif isinstance(model_input, list):
-            data = pd.Series(data)
+            data = pd.Series(model_input)
         elif isinstance(model_input, np.ndarray):
-            data = pd.Series(data)
+            data = pd.Series(model_input)
         else:
             raise TypeError(f"Unsupported type {type(model_input).__name__}")
 
@@ -156,6 +177,21 @@ class HateDetectionClassifier(PythonModel):
         return scores
 
     def predict_batch(self, model_input: Union[list, pd.Series, pd.DataFrame], batch_size: int = 64):
+        """
+        Calls the predict API using batches of data instead of running it all at once.
+
+        Parameters
+        ----------
+        model_input : Union[list, pd.Series, pd.DataFrame]
+            Inputs of the model.
+        batch_size : int, optional
+            Size of the batches, by default 64
+
+        Returns
+        -------
+        np.ndarray
+            The model predictions for the input data.
+        """
         sample_size = len(model_input)
         batches_idx = range(0, math.ceil(sample_size / batch_size))
         scores = np.zeros(sample_size)
