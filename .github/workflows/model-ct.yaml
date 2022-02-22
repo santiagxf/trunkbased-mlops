@@ -87,7 +87,7 @@ jobs:
           fromJob: true
           jobName: ${{ needs.build.outputs.jobName }}
           description: ${DESCRIPTION}
-          modelPath: outputs/hate-pt-speech.zip
+          modelPath: hate-pt-speech
           modelVersion: latest
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
