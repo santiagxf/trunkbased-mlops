@@ -1,6 +1,7 @@
 import logging
 from typing import Dict, Any
 import torch
+import mlflow
 from sklearn.metrics import f1_score, precision_score, confusion_matrix
 from sklearn.metrics import accuracy_score, recall_score, precision_recall_fscore_support
 from statsmodels.stats.contingency_tables import mcnemar
@@ -126,24 +127,22 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
         cont_table = confusion_matrix(champion_scores, challenger_scores)
         results = mcnemar(cont_table, exact=False)
 
-        return { 
-            "metrics": {
+        mlflow.log_metrics({
                 "statistic": results.statistic,
                 "pvalue": results.pvalue,
                 "confidence": confidence,
                 "test": results.pvalue < confidence
-            }
-        }
+            })
     else:
-        return  { 
-            "metrics": {
+        mlflow.log_param("warning", "No champion model indicated")
+        mlflow.log_metrics({
                 "statistic": 0,
                 "pvalue": 0,
                 "confidence": confidence,
                 "test": True,
-                "warning": "No champion model indicated"
-            }
-        }
+            })
+    
+    return None
 
 def evaluate(model_path: str, eval_dataset: str, threshold: float = 0.5) -> Dict[str, Dict[str, float]]:
     """
