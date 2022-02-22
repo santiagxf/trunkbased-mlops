@@ -1,4 +1,4 @@
-name: model-CD
+name: model-CT
 
 on:
   workflow_dispatch:
