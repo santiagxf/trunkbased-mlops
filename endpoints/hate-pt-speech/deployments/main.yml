@@ -6,6 +6,6 @@ code_configuration:
   code:
     local_path: ../../../src
   scoring_script: score/score_transformer.py
-environment: azureml:transformers-torch-19:5
+environment: azureml:transformers-torch-19:2
 instance_type: Standard_DS2_v2
 instance_count: 1
