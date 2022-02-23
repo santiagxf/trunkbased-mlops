@@ -105,7 +105,7 @@ steps:
               TARGET_MODEL_TAG=$(echo $TARGET_MODEL_VERSION | cut -d= -f1)
               TARGET_MODEL_TVALUE=$(echo $TARGET_MODEL_VERSION | cut -d= -f2)
 
-              MODEL_TAGGED=$(az ml model list -n $DEPLOYMENT_MODEL | jq -r --arg TARGET_MODEL_TAG $TARGET_MODEL_TAG --arg TARGET_MODEL_TVALUE $TARGET_MODEL_TVALUE '.[] | select(.tags.$TARGET_MODEL_TAG == $TARGET_MODEL_TVALUE) | .version')
+              MODEL_TAGGED=$(az ml model list -n $DEPLOYMENT_MODEL | jq -r --arg TARGET_MODEL_TAG $TARGET_MODEL_TAG --arg TARGET_MODEL_TVALUE $TARGET_MODEL_TVALUE '.[] | select(.tags[$TARGET_MODEL_TAG] == $TARGET_MODEL_TVALUE) | .version')
               echo "##[debug]Updating yaml files with model version: $MODEL_TAGGED"
               sed -i 's/:'$DEPLOYMENT_MODEL_VERSION'/:'$MODEL_TAGGED'/' $DEPLOYMENT_FILE 
             fi
