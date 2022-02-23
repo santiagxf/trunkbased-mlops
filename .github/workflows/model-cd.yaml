@@ -55,7 +55,7 @@ jobs:
           greaterIsBetter: false
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
-          failureMessage: Unable to conclude if challenger is better than champion.
+          failureMessage: Unable to conclude if challenger is better than champion
       
       - name: Comparing models
         id: compare

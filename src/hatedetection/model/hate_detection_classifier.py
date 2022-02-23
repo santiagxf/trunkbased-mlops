@@ -51,7 +51,7 @@ class HateDetectionClassifier(PythonModel):
             raise ValueError("Can't get the artificats of an unpersisted model. Call save_pretrained first.")
 
         artifacts = {}
-        for rootdir, subdir, files in os.walk(self.artifacts_path):
+        for rootdir, _, files in os.walk(self.artifacts_path):
             for file in files:
                 if not os.path.basename(file).startswith('.'):
                     artifacts[pathlib.Path(file).stem]=os.path.join(rootdir, file)
