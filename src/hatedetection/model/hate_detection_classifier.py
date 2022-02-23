@@ -73,7 +73,10 @@ class HateDetectionClassifier(PythonModel):
             self.artifacts_path = f'./{self.model_name}/'
             shutil.unpack_archive(path, self.artifacts_path)
         else:
-            self.artifacts_path = path
+            if os.path.exists(os.path.join(path, "MLmodel")):
+                self.artifacts_path = os.path.join(path, "artifacts")
+            else:
+                self.artifacts_path = path
 
         logging.info("[INFO] Loading transformer")
         self.build(self.artifacts_path)
