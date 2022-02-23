@@ -121,7 +121,7 @@ class HateDetectionClassifier(PythonModel):
 
         return save_directory
     
-    def predict(self, context: PythonModelContext, model_input: Union[list, pd.Series, pd.DataFrame]):
+    def predict(self, model_input: Union[list, pd.Series, pd.DataFrame], context: PythonModelContext = None):
         if isinstance(model_input, pd.Series):
             data = model_input
         elif isinstance(model_input, pd.DataFrame):
