@@ -113,7 +113,7 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
         text, _ = load_examples(eval_dataset)
         champion_model = HateDetectionClassifier()
         champion_model.load(champion_path)
-        champion_scores = champion_model.predict_batch(data=text)
+        champion_scores = champion_model.predict_batch(model_input=text)
 
         logging.info("[INFO] Unloading champion object from memory")
         del champion_model
@@ -121,7 +121,7 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
 
         challenger_model = HateDetectionClassifier()
         challenger_model.load(challenger_path)
-        challenger_scores = challenger_model.predict_batch(data=text)
+        challenger_scores = challenger_model.predict_batch(model_input=text)
 
         logging.info("[INFO] Unloading challenger object from memory")
         del challenger_model
@@ -169,7 +169,7 @@ def evaluate(model_path: str, eval_dataset: str, threshold: float = 0.5) -> Dict
     model.load(model_path)
 
     # Runs the model and transform the results into binaries according to the threshold
-    scores     = model.predict_proba(data=text)
+    scores     = model.predict_proba(model_input=text)
     bin_scores = [1 if score > threshold else 0 for score in scores]
 
     tn, fp, _, _ = confusion_matrix(labels, bin_scores).ravel()
