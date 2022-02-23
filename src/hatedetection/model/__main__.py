@@ -8,4 +8,4 @@ from hatedetection.model.evaluation import resolve_and_compare
 if __name__ == "__main__":
     tr = TaskRunner()
     tr.run(resolve_and_compare)
-    time.sleep(5)
+    time.sleep(3)
