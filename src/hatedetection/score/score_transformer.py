@@ -56,7 +56,7 @@ def init(from_workspace: bool = False, workspace = None):
 
     if not from_workspace:
         model_path = os.getenv("AZUREML_MODEL_DIR")
-        model_package = f'{model_path}/{model_name}.zip'
+        model_package = f'{model_path}/{model_name}'
     else:
         logging.warning("[WARN] Opening model from workspace")
 
