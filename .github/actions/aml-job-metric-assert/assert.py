@@ -67,7 +67,10 @@ def assert_metric(subscription_id: str, resource_group: str, workspace_name:str,
         return bool(metric_value)
 
     if data_type in ["float", "numeric", "int", "integer"]:
-        return float(metric_value) >= float(expected) if greater_is_better else float(metric_value) < float(expected)
+        if greater_is_better:
+            return float(metric_value) >= float(expected)
+        else:
+            return float(metric_value) < float(expected)
 
     return ValueError(f"Data type {data_type} is not supported")
 
