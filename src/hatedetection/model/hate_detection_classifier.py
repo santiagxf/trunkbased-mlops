@@ -202,6 +202,6 @@ class HateDetectionClassifier(PythonModel):
         for batch_idx in batches_idx:
             batch_from = batch_idx * batch_size
             batch_to = batch_from + batch_size
-            scores[batch_from:batch_to] = self.predict(model_input.iloc[batch_from:batch_to])
+            scores[batch_from:batch_to] = self.predict(model_input=model_input.iloc[batch_from:batch_to])
         
         return scores
