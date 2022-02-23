@@ -106,6 +106,9 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
         A dictionary of metrics with keys `statistic`, `pvalue`, `confidence` and `test`. Test
         is a boolean value indicating if the hypotesis of models are equivalent is `false`.
     """
+    mlflow.log_param("test", "mcnemar")
+    mlflow.log_param("confidence", confidence)
+
     if champion_path and challenger_path:
         text, _ = load_examples(eval_dataset)
         champion_model = HateDetectionClassifier()
@@ -130,16 +133,12 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
         mlflow.log_metrics({
                 "statistic": results.statistic,
                 "pvalue": results.pvalue,
-                "confidence": confidence,
-                "test": results.pvalue < confidence
             })
     else:
         mlflow.log_param("warning", "No champion model indicated")
         mlflow.log_metrics({
                 "statistic": 0,
                 "pvalue": 0,
-                "confidence": confidence,
-                "test": True,
             })
     
     return None

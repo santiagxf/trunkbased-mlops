@@ -49,9 +49,10 @@ jobs:
         id: jobMetricAssert
         with:
           jobName: ${{ steps.jobRun.outputs.jobName }}
-          metric: test
-          expecting: true
-          dataType: boolean
+          metric: pvalue
+          expecting: 0.05
+          dataType: float
+          greaterIsBetter: false
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
           failureMessage: Unable to conclude if challenger is better than champion.
