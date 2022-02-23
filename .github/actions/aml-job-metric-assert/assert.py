@@ -76,4 +76,4 @@ if __name__ == "__main__":
     tr = jobtools.runner.TaskRunner()
     result = tr.run(assert_metric)
     print(result)
-    exit(result)
+    exit(0)

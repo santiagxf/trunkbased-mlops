@@ -56,6 +56,7 @@ runs:
           --data-type ${{ inputs.dataType }} \
           --greater-is-better ${{ inputs.greaterIsBetter }})
         
+        echo "::debug::Assert has returned the following value: $ASSERT"
         # assert.py will return True or False, but bash expects lowercase.
         if ${ASSERT,,} ; then
           echo "::debug::Assertion returned true."
