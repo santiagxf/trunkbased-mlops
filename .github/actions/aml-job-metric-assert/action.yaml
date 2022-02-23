@@ -46,10 +46,6 @@ runs:
         echo "::debug::Expecting value ${{ inputs.expecting }} (of type ${{ inputs.dataType }}). Greater values are better? ${{ inputs.greaterIsBetter }}"
         SUBSCRIPTION_ID=$(az account show | jq -r ".id")
 
-        if ${{ inputs.greaterIsBetter }}; then
-          GREATER_IS_BETTER_FLAG="--greater-is-better"
-        fi
-
         ASSERT=$(python ${{ github.action_path }}/assert.py \
           --subscription-id $SUBSCRIPTION_ID \
           --workspace-name ${{ inputs.workspaceName }} \
@@ -58,7 +54,7 @@ runs:
           --metric ${{ inputs.metric }} \
           --expected ${{ inputs.expecting }} \
           --data-type ${{ inputs.dataType }} \
-          $GREATER_IS_BETTER_FLAG)
+          --greater-is-better ${{ inputs.greaterIsBetter }})
         
         echo "::debug::Assert has returned the following value: $ASSERT"
         # assert.py will return True or False, but bash expects lowercase.
