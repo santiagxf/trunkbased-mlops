@@ -72,7 +72,7 @@ jobs:
 
       - name: Moving model's stage
         uses: ./.github/actions/aml-model-set
-        if: ${{ steps.evaluation.outputs.result == 'true' }}
+        if: ${{ steps.compare.outputs.result == 'true' }}
         with:
           modelName: ${MODELNAME}
           modelVersion: latest
