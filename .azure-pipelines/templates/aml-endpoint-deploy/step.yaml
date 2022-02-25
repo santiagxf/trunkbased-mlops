@@ -151,10 +151,34 @@ steps:
 
           echo "##[debug]Endpoint evaluation completed"
         done
+
+  - task: AzureCLI@2
+    name: collect_logs
+    displayName: Collecting deployment logs
+    inputs:
+      scriptType: bash
+      scriptLocation: inlineScript
+      azureSubscription: ${{ parameters.azureServiceConnectionName }}
+      inlineScript: |
+        echo "##[debug]Collecting deployment logs"
+        
+        ENDPOINT_FILES=$(find ${{ parameters.endpointFile }})
+        for ENDPOINT_FILE in $ENDPOINT_FILES
+        do
+          ENDPOINT_NAME=$(yq -r ".name" $ENDPOINT_FILE)
+          
+          for DEPLOYMENT_FILE in $DEPLOYMENT_FILES
+          do
+            echo "##[debug]Working on deployment file $DEPLOYMENT_FILE"
+            DEPLOYMENT_NAME=$(yq -r ".name" $DEPLOYMENT_FILE)
+            
+            az ml online-deployment get-logs --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME >> ./logs/$ENDPOINT_NAME.log
+          done
+        done
   
   - task: PublishPipelineArtifact@1
     displayName: Uploading deployment logs
-    condition: and(succeededOrFailed(), eq('${{ parameters.noWait }}', 'false'))
+    condition: and(succeeded(), eq('${{ parameters.noWait }}', 'false'))
     inputs:
       artifactName: deployment-logs
       targetPath: logs

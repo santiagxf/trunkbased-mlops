@@ -164,10 +164,31 @@ runs:
 
           echo "::debug::Endpoint evaluation completed"
         done
+    
+    - name: Collecting deployment logs
+      id: collect_logs
+      shell: bash
+      if: ${{ (failure() || success()) && inputs.noWait == 'false' }}
+      run: |
+        echo "::debug::Collecting deployment logs"
+        
+        ENDPOINT_FILES=$(find ${{ inputs.endpointFile }})
+        for ENDPOINT_FILE in $ENDPOINT_FILES
+        do
+          ENDPOINT_NAME=$(yq -r ".name" $ENDPOINT_FILE)
+          
+          for DEPLOYMENT_FILE in $DEPLOYMENT_FILES
+          do
+            echo "::debug::Working on deployment file $DEPLOYMENT_FILE"
+            DEPLOYMENT_NAME=$(yq -r ".name" $DEPLOYMENT_FILE)
+            
+            az ml online-deployment get-logs --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME >> ./logs/$ENDPOINT_NAME.log
+          done
+        done
 
     - name: Uploading deployment logs
       uses: actions/upload-artifact@v2
-      if: ${{ (failure() || success()) && inputs.noWait == 'false' }}
+      if: ${{ success() && inputs.noWait == 'false' }}
       with:
         name: deployment-logs
         path: logs/*
