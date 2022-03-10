@@ -25,3 +25,4 @@ dependencies:
       - scikit-learn==1.0.1
       - statsmodels==0.13.1
       - jobtools==0.0.10
+      - flask==1.0.3
