@@ -9,7 +9,7 @@ dependencies:
       - azureml-defaults==1.39.0
       - azureml-telemetry==1.39.0
       - azureml-mlflow==1.39.0
-      - mlflow==1.24
+      - mlflow-skinny==1.24
       - torch==1.9
       - transformers==4.10
       - tensorboard==2.6
