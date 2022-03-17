@@ -100,7 +100,7 @@ def run(raw_data: Union[pd.DataFrame, str]) -> Union[np.ndarray ,List[float]]:
         else:
             data = raw_data
 
-        return MODEL.predict_proba(data).tolist()
+        return MODEL.predict(context=None, data).tolist()
 
     except RuntimeError as E:
         logging.error(f'[ERR] Exception happened: {str(E)}')

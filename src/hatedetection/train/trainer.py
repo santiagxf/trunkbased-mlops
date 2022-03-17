@@ -1,11 +1,13 @@
 """
 Training routine for a language model using transformers
 """
-import shutil
 import logging
 import mlflow
 from typing import Dict, Any
 from types import SimpleNamespace
+from mlflow.models.signature import ModelSignature
+from mlflow.types.schema import Schema, ColSpec
+from mlflow.types import DataType
 
 from transformers import Trainer, TrainingArguments
 from hatedetection.model.hate_detection_classifier import HateDetectionClassifier
@@ -71,14 +73,23 @@ def train_and_evaluate(input_dataset: str, eval_dataset: str,
 
     logging.info('[INFO] Training completed. Persisting model and tokenizer.')
     saved_location=f"{params.model.output_dir}/{params.model.name}"
-    classifier.save_pretrained(saved_location)
+    artifacts = classifier.save_pretrained(saved_location)
+
+    input_schema = Schema([
+      ColSpec(DataType.string, "text"),
+    ])
+    output_schema = Schema([
+      ColSpec(DataType.double, "hate"),
+    ])
+    signature = ModelSignature(inputs=input_schema, outputs=output_schema)
 
     mlflow.log_metrics(dict(filter(lambda item: item[1] is not None, evaluation_metrics.items())))
     mlflow.log_params(history.metrics)
     mlflow.pyfunc.log_model(artifact_path=params.model.name, 
                             code_path=['./hatedetection'], 
                             python_model=classifier, 
-                            artifacts=classifier.get_artifacts())
+                            artifacts=artifacts,
+                            signature=signature)
 
     return {
         'metrics': evaluation_metrics,
