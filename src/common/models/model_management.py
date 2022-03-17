@@ -90,7 +90,7 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
                           version=model_version,
                           tags=tags)
         
-        if tags != None or set(tags).issubset(model.tags):
+        if tags != None or (tags == None and model.tags == None) or set(tags.items()).issubset(model.tags.items()):
             # This is a bug in Model constructor. I won't filter correctly by tag.
             # Checking that manually.
             return model

@@ -37,29 +37,6 @@ def compute_classification_metrics(pred: Dict) -> Dict[str, float]:
         'support': support
     }
 
-def resolve_and_evaluate(model_name: str, eval_dataset: str, threshold: float = 0.5) -> Dict[str, float]:
-    """
-    Resolves the model from it's name and runs the evaluation routine.
-
-    Parameters
-    ----------
-    model_name: str
-        Name of the model to get. The model will be downloaded from the model registry.
-    eval_dataset: str
-        Path that leads to the dataset.
-    threshold: float
-        The workspace to load the model from.
-        If not indicated, it will use the default model.
-
-    Returns
-    -------
-    Dict[str, float]
-       A dictionary containing the keys `f1_score`, `precision`, `recall`, `specificity` and `accuracy` as the results of the run.
-    """
-    model_path = amlmodels.resolve_model_from_context(model_name, "latest")
-    
-    return evaluate(model_path, eval_dataset, threshold)
-
 def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_dataset: str, confidence: float = 0.05) -> Dict[str, Dict[str, float]]:
     """
     Resolves the model from it's name and runs the evaluation routine.
@@ -68,27 +45,30 @@ def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_da
     ----------
     model_name: str
         Name of the model to get. The model will be downloaded from the model registry.
+    champion: str
+        Champion version of the model. This can be a number, a tag like `stage=production` or `latest`
+    challenger: str
+        Challenger version of the model. This can be a number, a tag like `stage=production` or `latest`
     eval_dataset: str
         Path that leads to the dataset.
-    threshold: float
-        The workspace to load the model from.
-        If not indicated, it will use the default model.
+    confidence: float
+        The condifidence level of the test (p-value). Defaults to 95% (0.05)
 
     Returns
     -------
     Dict[str, float]
-       A dictionary containing the keys `f1_score`, `precision`, `recall`, `specificity` and `accuracy` as the results of the run.
+       A dictionary containing the keys `statistic`, `pvalue` as a result of the statistical test.
     """
     champion_path = amlmodels.resolve_model_from_context(model_name, version=champion, target_path="champion")
     challenger_path = amlmodels.resolve_model_from_context(model_name, version=challenger, target_path="challenger")
 
-    return compare(champion_path, challenger_path, eval_dataset, confidence)
+    return compute_mcnemmar(champion_path, challenger_path, eval_dataset, confidence)
 
-def compare(champion_path: str, challenger_path: str, eval_dataset: str, confidence: float = 0.05) -> Dict[str, Dict[str, Any]]:
+def compute_mcnemmar(champion_path: str, challenger_path: str, eval_dataset: str, confidence: float = 0.05) -> Dict[str, Dict[str, Any]]:
     """
     Compares two hate detection models and decides if the two models make the same mistakes or not.
     Note that this method doesn't tell if challenger is better that champion but if the models are
-    statistically different.
+    statistically different. It uses the McNemmar test.
 
     Parameters
     ----------
@@ -104,8 +84,7 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
     Returns
     -------
     Dict[str, Dict[str, float]]:
-        A dictionary of metrics with keys `statistic`, `pvalue`, `confidence` and `test`. Test
-        is a boolean value indicating if the hypotesis of models are equivalent is `false`.
+        A dictionary containing the keys `statistic`, `pvalue` as a result of the statistical test.
     """
     mlflow.log_param("test", "mcnemar")
     mlflow.log_param("confidence", confidence)
@@ -141,6 +120,29 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
             })
     
     return None
+
+def resolve_and_evaluate(model_name: str, eval_dataset: str, threshold: float = 0.5) -> Dict[str, float]:
+    """
+    Resolves the model from it's name and runs the evaluation routine.
+
+    Parameters
+    ----------
+    model_name: str
+        Name of the model to get. The model will be downloaded from the model registry.
+    eval_dataset: str
+        Path that leads to the dataset.
+    threshold: float
+        The workspace to load the model from.
+        If not indicated, it will use the default model.
+
+    Returns
+    -------
+    Dict[str, float]
+       A dictionary containing the keys `f1_score`, `precision`, `recall`, `specificity` and `accuracy` as the results of the run.
+    """
+    model_path = amlmodels.resolve_model_from_context(model_name, "latest")
+    
+    return evaluate(model_path, eval_dataset, threshold)
 
 def evaluate(model_path: str, eval_dataset: str, threshold: float = 0.5) -> Dict[str, Dict[str, float]]:
     """
