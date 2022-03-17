@@ -97,19 +97,23 @@ def get_metric_for_model(workspace: aml.Workspace,
         The value of the given metric if present. Otherwise an exception is raised.
     """
     model_run = get_run_for_model(workspace, model_name, version)
-    model_metric = model_run.get_metrics(name=metric_name)
+    if model_run:
+        model_metric = model_run.get_metrics(name=metric_name)
 
-    if metric_name not in model_metric.keys():
-        raise ValueError(f"Metric with name {metric_name} is not present in \
-            run {model_run.id} for model {model_name} ({model_hint}). Avalilable \
-            metrics are {model_run.get_metrics().keys()}")
+        if metric_name not in model_metric.keys():
+            raise ValueError(f"Metric with name {metric_name} is not present in \
+                run {model_run.id} for model {model_name} ({model_hint}). Avalilable \
+                metrics are {model_run.get_metrics().keys()}")
 
-    metric_value = model_metric[metric_name]
+        metric_value = model_metric[metric_name]
 
-    if isinstance(metric_value, list):
-        return metric_value[0]
-    else:
-        return metric_value
+        if isinstance(metric_value, list):
+            return metric_value[0]
+        else:
+            return metric_value
+
+    logging.warn("[WARN] No model matches the given specification. No metric is returned")
+    return None  
 
 def get_run_for_model(workspace: aml.Workspace,
                       model_name: str, version: str = 'latest', **tags) -> aml.Run:
