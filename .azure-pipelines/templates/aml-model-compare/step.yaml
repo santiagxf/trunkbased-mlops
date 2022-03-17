@@ -8,12 +8,6 @@ parameters:
   - name: challenger
     type: string
     default: latest
-  - name: endpoint
-    type: string
-    default: 
-  - name: deployment
-    type: string
-    default:
   - name: compareBy
     type: string
     default: accuracy
@@ -36,39 +30,6 @@ steps:
       scriptLocation: inlineScript
       azureSubscription: ${{ parameters.azureServiceConnectionName }}
       inlineScript: |
-        if [[ "${{ parameters.champion }}" == "current" ]]; then
-          echo "##[debug]Resolving current champion version from endpoint"
-          ENDPOINT_NAME=$(yq -r ".name" ${{ parameters.endpoint }})
-          
-          if [[ $(az ml online-endpoint show -n $ENDPOINT_NAME -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }}) ]]; then
-            if [[ "${{ parameters.deployment }}" == "" ]]; then
-              echo "##[debug]Querying champion version from endpoint with name $ENDPOINT_NAME"
-              CHAMPION_MODEL=$(az ml online-deployment list --endpoint-name $ENDPOINT_NAME -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r ".[].model")
-            else
-              echo "##[debug]Querying champion version from endpoint/deployment with name $ENDPOINT_NAME/${{ parameters.deployment }}"
-              CHAMPION_MODEL=$(az ml online-deployment show --endpoint-name $ENDPOINT_NAME --name ${{ parameters.deployment }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r ".[].model")
-            fi
-          fi
-          if [[ $CHAMPION_MODEL ]]; then
-            CHAMPION=$(basename $CHAMPION_MODEL)
-          else
-            echo "##vso[task.logissue type=warning;]There are no models deployed at endpoint $ENDPOINT_NAME. Model will be deployed without compare."
-            echo "##vso[task.setvariable variable=result;isOutput=true]true"
-            exit 0
-          fi
-        else
-          CHAMPION=${{ parameters.champion }}
-        fi
-        echo "##[debug]CHAMPION is version:$CHAMPION"
-
-        if [[ "${{ parameters.challenger }}" == "latest" ]]; then
-          echo "##[debug]Resolving challenger version from latest available"
-          CHALLENGER=$(az ml model list --name ${{ parameters.modelName }} -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r '.[0].version')
-        else
-          CHALLENGER=${{ parameters.champion }}
-        fi
-        echo "##[debug]CHALLENGER is version:$CHALLENGER"
-
         echo "##[debug]Comparing models by ${{ parameters.compareBy }}"
 
         SUBSCRIPTION_ID=$(az account show | jq -r ".id")
@@ -78,8 +39,8 @@ steps:
           --workspace-name ${{ parameters.workspaceName }} \
           --resource-group ${{ parameters.resourceGroup }} \
           --model-name ${{ parameters.modelName }} \
-          --champion $CHAMPION \
-          --challenger $CHALLENGER \
+          --champion ${{ parameters.champion }} \
+          --challenger ${{ parameters.challenger }} \
           --compare-by ${{ parameters.compareBy }} \
           --greater-is-better ${{ parameters.greaterIsBetter }}
 

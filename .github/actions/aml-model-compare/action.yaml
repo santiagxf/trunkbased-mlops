@@ -52,8 +52,8 @@ runs:
           --workspace-name ${{ inputs.workspaceName }} \
           --resource-group ${{ inputs.resourceGroup }} \
           --model-name ${{ inputs.modelName }} \
-          --champion $CHAMPION \
-          --challenger $CHALLENGER \
+          --champion ${{ inputs.champion }} \
+          --challenger ${{ inputs.challenger }} \
           --compare-by ${{ inputs.compareBy }} \
           --greater-is-better ${{ inputs.greaterIsBetter }})
 

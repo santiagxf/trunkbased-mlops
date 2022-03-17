@@ -107,9 +107,8 @@ stages:
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
           modelName: ${{ variables.modelName }}
-          champion: current
+          champion: stage=production
           challenger: latest
-          endpoint: endpoints/${{ variables.modelName }}/endpoint.yml
           compareBy: eval_recall
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
