@@ -37,7 +37,7 @@ class HateDetectionClassifier(PythonModel):
         context : PythonModelContext
             Model context
         """
-        artifacts_path = os.path.dirname(context.artifacts["pytorch_model"])
+        artifacts_path = os.path.dirname(context.artifacts["config"])
         logging.info("[INFO] Loading transformer")
         
         self.build(artifacts_path, eval=True)
