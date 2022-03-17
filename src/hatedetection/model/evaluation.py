@@ -2,6 +2,7 @@ import logging
 from typing import Dict, Any
 import torch
 import mlflow
+import numpy as np
 from sklearn.metrics import f1_score, precision_score, confusion_matrix
 from sklearn.metrics import accuracy_score, recall_score, precision_recall_fscore_support
 from statsmodels.stats.contingency_tables import mcnemar
@@ -113,7 +114,7 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
         text, _ = load_examples(eval_dataset)
         champion_model = HateDetectionClassifier()
         champion_model.load(champion_path)
-        champion_scores = champion_model.predict_batch(model_input=text)
+        champion_scores = np.round(champion_model.predict(context=None, text))
 
         logging.info("[INFO] Unloading champion object from memory")
         del champion_model
@@ -121,7 +122,7 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
 
         challenger_model = HateDetectionClassifier()
         challenger_model.load(challenger_path)
-        challenger_scores = challenger_model.predict_batch(model_input=text)
+        challenger_scores = np.round(challenger_model.predict(context=None, text))
 
         logging.info("[INFO] Unloading challenger object from memory")
         del challenger_model

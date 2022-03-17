@@ -119,14 +119,14 @@ class HateDetectionClassifier(PythonModel):
 
         return scores
 
-    def predict(self, context: PythonModelContext, model_input: Union[list, pd.Series, pd.DataFrame]):
-        sample_size = len(model_input)
+    def predict(self, context: PythonModelContext, data: Union[list, pd.Series, pd.DataFrame]):
+        sample_size = len(data)
         batches_idx = range(0, math.ceil(sample_size / self.batch_size))
         scores = np.zeros(sample_size)
 
         for batch_idx in batches_idx:
             batch_from = batch_idx * self.batch_size
             batch_to = batch_from + self.batch_size
-            scores[batch_from:batch_to] = self.predict_batch(model_input.iloc[batch_from:batch_to])
+            scores[batch_from:batch_to] = self.predict_batch(data.iloc[batch_from:batch_to])
         
         return scores
