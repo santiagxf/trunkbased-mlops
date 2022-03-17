@@ -51,7 +51,14 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
                           name=stripped_model_name,
                           version=model_version,
                           tags=tags)
-        return model
+
+        if tags != None or set(tags).issubset(model.tags):
+            # This is a bug in Model constructor. I won't filter correctly by tag.
+            # Checking that manually.
+            return model
+        else:
+            return None
+
     except ModelNotFoundException:
         logging.warning(f"[WARN] Unable to find a model with the given specification. \
             Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
