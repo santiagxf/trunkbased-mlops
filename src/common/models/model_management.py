@@ -134,7 +134,12 @@ def get_metric_for_model(workspace: aml.Workspace,
             run {model_run.id} for model {model_name} ({model_hint}). Avalilable \
             metrics are {model_run.get_metrics().keys()}")
 
-    return model_metric[metric_name]
+    metric_value = model_metric[metric_name]
+
+    if isinstance(metric_value, list):
+        return metric_value[0]
+    else:
+        return metric_value
 
 def get_run_for_model(workspace: aml.Workspace,
                       model_name: str, version: str = 'latest', **tags) -> aml.Run:
