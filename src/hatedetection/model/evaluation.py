@@ -114,7 +114,7 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
         text, _ = load_examples(eval_dataset)
         champion_model = HateDetectionClassifier()
         champion_model.load(champion_path)
-        champion_scores = np.round(champion_model.predict(context=None, text))
+        champion_scores = np.round(champion_model.predict(context=None, data=text))
 
         logging.info("[INFO] Unloading champion object from memory")
         del champion_model
@@ -122,7 +122,7 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
 
         challenger_model = HateDetectionClassifier()
         challenger_model.load(challenger_path)
-        challenger_scores = np.round(challenger_model.predict(context=None, text))
+        challenger_scores = np.round(challenger_model.predict(context=None, data=text))
 
         logging.info("[INFO] Unloading challenger object from memory")
         del challenger_model
