@@ -63,9 +63,8 @@ jobs:
         if: ${{ steps.jobMetricAssert.outputs.result == 'true' }}
         with:
           modelName: ${MODELNAME}
-          champion: current
+          champion: stage=production
           challenger: latest
-          endpoint: endpoints/${MODELNAME}/endpoint.yml
           compareBy: eval_recall
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}

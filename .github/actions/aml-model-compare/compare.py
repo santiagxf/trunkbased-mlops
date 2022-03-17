@@ -3,11 +3,69 @@ import jobtools
 import azureml.core as aml
 
 from typing import Any
-from azureml.core import workspace
 from azureml.core.authentication import AzureCliAuthentication
+from azureml.exceptions import ModelNotFoundException, WebserviceException
 
 
-def get_metric_for_model(workspace: aml.Workspace, model_name: str, version: int, metric_name: str, model_hint: str = None) -> Any:
+def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **tags) -> aml.Model:
+    """
+    Gets a model from the Azure Registry. `model_name` can be the name of the model,
+    including it's version. use `[model_name]:[version]` or `[model_name]:latest` or
+    `[model_name]:[tag]=[value]`
+
+    Parameters
+    ----------
+    workspace: aml.Workspace
+        Azure ML Workspace
+    model_name: str
+        Name of the model. It can include the model version.
+    version: str
+        Version of the model. If indicated in `model_name`, this parameter is ignored.
+    tags: kwargs
+        Tags the model should contain in order to be retrieved. If tags are indicated in
+        model_name, this parameter is ignored.
+
+    Return
+    ------
+    aml.Model
+        The model if any
+    """
+    if ":" in model_name:
+        stripped_model_name, version = model_name.split(':')
+    else:
+        stripped_model_name = model_name
+
+    if version is None or version == "latest":
+        model_version = None
+    elif version == "current":
+        raise ValueError("Model version 'current' is not support using this SDK right now.")
+    elif '=' in version:
+        model_tag_name, model_tag_value = version.split('=')
+        model_version = None
+        tags = { model_tag_name: model_tag_value }
+    else:
+        model_version = int(version)
+
+    try:
+        model = aml.Model(workspace=workspace,
+                          name=stripped_model_name,
+                          version=model_version,
+                          tags=tags)
+        return model
+    except ModelNotFoundException:
+        logging.warning(f"[WARN] Unable to find a model with the given specification. \
+            Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
+        return None
+    except WebserviceException:
+        logging.warning(f"[WARN] Unable to find a model with the given specification. \
+            Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
+        return None
+
+def get_metric_for_model(workspace: aml.Workspace,
+                         model_name: str,
+                         version: str,
+                         metric_name: str,
+                         model_hint: str = None) -> Any:
     """
     Gets a given metric from the run that generated a given model and version.
 
@@ -17,29 +75,53 @@ def get_metric_for_model(workspace: aml.Workspace, model_name: str, version: int
         The workspace where the model is stored.
     model_name: str
         The name of the model registered
-    version: int
-        The version of the model
+    version: str
+        The version of the model. It can be a number like "22" or a token like "latest" or a tag.
     metric_name: str
         The name of the metric you want to retrieve from the run
     model_hint: str | None
-        Any hint you want to provide about the given version of the model. This is useful for debugging in case the given
-        metric you indicated is not present in the run that generated the model.
+        Any hint you want to provide about the given version of the model. This is useful for
+        debugging in case the given metric you indicated is not present in the run that generated
+        the model.
 
     Return
     ------
         The value of the given metric if present. Otherwise an exception is raised.
     """
-    model = aml.Model(workspace=workspace, name=model_name, version=version)
-    if not model.run_id:
-        raise ValueError(f"The model {model_name} has not a run associated with it. Unable to retrieve metrics.")
-
-    model_run = workspace.get_run(model.run_id)
+    model_run = get_run_for_model(workspace, model_name, version)
     model_metric = model_run.get_metrics(name=metric_name)
 
     if metric_name not in model_metric.keys():
-        raise ValueError(f"Metric with name {metric_name} is not present in run {model.run_id} for model {model_name} ({model_hint}). Avalilable metrics are {model_run.get_metrics().keys()}")
+        raise ValueError(f"Metric with name {metric_name} is not present in \
+            run {model_run.id} for model {model_name} ({model_hint}). Avalilable \
+            metrics are {model_run.get_metrics().keys()}")
 
     return model_metric[metric_name]
+
+def get_run_for_model(workspace: aml.Workspace,
+                      model_name: str, version: str = 'latest', **tags) -> aml.Run:
+    """
+    Gets a the run that generated a given model and version.
+
+    Parameters
+    ----------
+    workspace: azureml.core.Workspace
+        The workspace where the model is stored.
+    model_name: str
+        The name of the model registered
+    version: str
+        The version of the model. It can be a number like "22" or a token like "latest" or a tag.
+
+    Return
+    ------
+        The given run.
+    """
+    model = get_model(workspace, model_name, version, **tags)
+    if not model.run_id:
+        raise ValueError(f"The model {model_name} has not a run associated with it. \
+            Unable to retrieve metrics.")
+
+    return workspace.get_run(model.run_id)
 
 def compare(subscription_id: str, resource_group: str, workspace_name:str, model_name: str,
             champion: int, challenger: int, compare_by: str, greater_is_better: bool = True):
