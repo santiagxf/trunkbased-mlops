@@ -113,7 +113,7 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
     if champion_path and challenger_path:
         text, _ = load_examples(eval_dataset)
         champion_model = HateDetectionClassifier()
-        champion_model.load(champion_path)
+        champion_model.build(champion_path, eval=True)
         champion_scores = np.round(champion_model.predict(context=None, data=text))
 
         logging.info("[INFO] Unloading champion object from memory")
@@ -121,7 +121,7 @@ def compare(champion_path: str, challenger_path: str, eval_dataset: str, confide
         torch.cuda.synchronize()
 
         challenger_model = HateDetectionClassifier()
-        challenger_model.load(challenger_path)
+        challenger_model.build(challenger_path, eval=True)
         challenger_scores = np.round(challenger_model.predict(context=None, data=text))
 
         logging.info("[INFO] Unloading challenger object from memory")
