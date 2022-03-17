@@ -84,7 +84,7 @@ def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_da
 
     return compare(champion_path, challenger_path, eval_dataset, confidence)
 
-def compare(champion: str, challenger: str, eval_dataset: str, confidence: float = 0.05) -> Dict[str, Dict[str, Any]]:
+def compare(champion_path: str, challenger_path: str, eval_dataset: str, confidence: float = 0.05) -> Dict[str, Dict[str, Any]]:
     """
     Compares two hate detection models and decides if the two models make the same mistakes or not.
     Note that this method doesn't tell if challenger is better that champion but if the models are
@@ -112,14 +112,14 @@ def compare(champion: str, challenger: str, eval_dataset: str, confidence: float
 
     if champion_path and challenger_path:
         text, _ = load_examples(eval_dataset)
-        champion_model = mlflow.pyfunc.load_model(champion)
+        champion_model = mlflow.pyfunc.load_model(champion_path)
         champion_scores = np.round(champion_model.predict(text.to_frame("text")))
 
         logging.info("[INFO] Unloading champion object from memory")
         del champion_model
         torch.cuda.synchronize()
 
-        challenger_model = mlflow.pyfunc.load_model(challenger)
+        challenger_model = mlflow.pyfunc.load_model(challenger_path)
         challenger_scores = np.round(challenger_model.predict(text.to_frame("text")))
 
         logging.info("[INFO] Unloading challenger object from memory")
