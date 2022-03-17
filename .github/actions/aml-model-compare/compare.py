@@ -124,7 +124,7 @@ def get_run_for_model(workspace: aml.Workspace,
     return workspace.get_run(model.run_id)
 
 def compare(subscription_id: str, resource_group: str, workspace_name:str, model_name: str,
-            champion: int, challenger: int, compare_by: str, greater_is_better: bool = True):
+            champion: str, challenger: str, compare_by: str, greater_is_better: bool = True):
     """
     Compares a challenger model version with a champion one and indicates if the new version (challenger) is
     better than the current one (champion) while comparing them using `compared_by`. Metrics are retrieved
