@@ -94,17 +94,18 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
             # This is a bug in Model constructor. I won't filter correctly by tag.
             # Checking that manually.
             return model
-        else:
-            return None
 
     except ModelNotFoundException:
         logging.warning(f"[WARN] Unable to find a model with the given specification. \
             Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
-        return None
     except WebserviceException:
         logging.warning(f"[WARN] Unable to find a model with the given specification. \
             Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
-        return None
+    
+    logging.warning(f"[WARN] Unable to find a model with the given specification. \
+            Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
+    return None
+
 
 def get_metric_for_model(workspace: aml.Workspace,
                          model_name: str,
@@ -167,11 +168,14 @@ def get_run_for_model(workspace: aml.Workspace,
         The given run.
     """
     model = get_model(workspace, model_name, version, **tags)
-    if not model.run_id:
-        raise ValueError(f"The model {model_name} has not a run associated with it. \
-            Unable to retrieve metrics.")
+    if model:
+        if not model.run_id:
+            raise ValueError(f"The model {model_name} has not a run associated with it. \
+                Unable to retrieve metrics.")
 
-    return workspace.get_run(model.run_id)
+        return workspace.get_run(model.run_id)
+    
+    return None
 
 def register(subscription_id: str, resource_group: str, workspace_name:str, name: str,
              version: str, model_path: str, description: str, run_id: str = None, 

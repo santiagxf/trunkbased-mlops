@@ -108,18 +108,20 @@ def compute_mcnemmar(champion_path: str, challenger_path: str, eval_dataset: str
         cont_table = confusion_matrix(champion_scores, challenger_scores)
         results = mcnemar(cont_table, exact=False)
 
-        mlflow.log_metrics({
-                "statistic": results.statistic,
-                "pvalue": results.pvalue,
-            })
+        metrics = {
+            "statistic": results.statistic,
+            "pvalue": results.pvalue,
+        }
+
     else:
+        metrics = {
+            "statistic": 0,
+            "pvalue": 0,
+        }
         mlflow.log_param("warning", "No champion model indicated")
-        mlflow.log_metrics({
-                "statistic": 0,
-                "pvalue": 0,
-            })
-    
-    return None
+
+    mlflow.log_metrics(metrics)
+    return metrics
 
 def resolve_and_evaluate(model_name: str, eval_dataset: str, threshold: float = 0.5) -> Dict[str, float]:
     """

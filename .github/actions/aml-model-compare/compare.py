@@ -1,3 +1,4 @@
+from asyncio.log import logger
 import logging
 import jobtools
 import azureml.core as aml
@@ -51,22 +52,22 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
                           name=stripped_model_name,
                           version=model_version,
                           tags=tags)
-
+        
         if tags == None or (model.tags != None and set(tags.items()).issubset(model.tags.items())):
             # This is a bug in Model constructor. I won't filter correctly by tag.
             # Checking that manually.
             return model
-        else:
-            return None
 
     except ModelNotFoundException:
         logging.warning(f"[WARN] Unable to find a model with the given specification. \
             Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
-        return None
     except WebserviceException:
         logging.warning(f"[WARN] Unable to find a model with the given specification. \
             Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
-        return None
+    
+    logging.warning(f"[WARN] Unable to find a model with the given specification. \
+            Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
+    return None
 
 def get_metric_for_model(workspace: aml.Workspace,
                          model_name: str,
@@ -129,11 +130,14 @@ def get_run_for_model(workspace: aml.Workspace,
         The given run.
     """
     model = get_model(workspace, model_name, version, **tags)
-    if not model.run_id:
-        raise ValueError(f"The model {model_name} has not a run associated with it. \
-            Unable to retrieve metrics.")
+    if model:
+        if not model.run_id:
+            raise ValueError(f"The model {model_name} has not a run associated with it. \
+                Unable to retrieve metrics.")
 
-    return workspace.get_run(model.run_id)
+        return workspace.get_run(model.run_id)
+    
+    return None
 
 def compare(subscription_id: str, resource_group: str, workspace_name:str, model_name: str,
             champion: str, challenger: str, compare_by: str, greater_is_better: bool = True):
@@ -160,17 +164,21 @@ def compare(subscription_id: str, resource_group: str, workspace_name:str, model
     cli_auth = AzureCliAuthentication()
     ws = aml.Workspace(subscription_id, resource_group, workspace_name, auth=cli_auth)
 
-    if champion == 0:
+    if not champion:
         logging.warning("[WARN] No champion model indicated. We infer there is no champion by the time.")
         return True
 
     champion_score = get_metric_for_model(ws, model_name, champion, compare_by, "champion")
     challenger_score = get_metric_for_model(ws, model_name, challenger, compare_by, "challenger")
 
-    if greater_is_better:
-        return champion_score < challenger_score
+    if champion_score and challenger_score:
+        if greater_is_better:
+            return champion_score < challenger_score
+        else:
+            return champion_score > challenger_score
     else:
-        return champion_score > challenger_score
+        logging.warning("[WARN] No champion or challenger model indicated. We infer there is no champion by the time.")
+        return True
 
 if __name__ == "__main__":
     tr = jobtools.runner.TaskRunner()
