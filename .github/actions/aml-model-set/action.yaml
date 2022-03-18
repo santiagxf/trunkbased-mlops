@@ -61,7 +61,7 @@ runs:
               --resource-group ${{ inputs.resourceGroup }} \
               --name ${{ inputs.modelName }} \
               --version $VERSION_RESET  \
-              --tag ${{ inputs.property }}
+              --tag ${{ inputs.property }} \
               --value ${{ inputs.replaceExistingWith }}
             fi
           fi
@@ -82,5 +82,5 @@ runs:
           --resource-group ${{ inputs.resourceGroup }} \
           --name ${{ inputs.modelName }} \
           --version $MODEL_VERSION  \
-          --tag ${{ inputs.property }}
+          --tag ${{ inputs.property }} \
           --value ${{ inputs.value }}
