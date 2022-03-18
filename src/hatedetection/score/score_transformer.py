@@ -59,7 +59,7 @@ def init(from_workspace: bool = False, workspace = None):
 
     logging.info(f"[INFO] Loading model from package {model_package}")
 
-    MODEL = mlflow.pyfunc.load(model_package)
+    MODEL = mlflow.pyfunc.load_model(model_package)
 
     logging.info("[INFO] Init completed")
 
