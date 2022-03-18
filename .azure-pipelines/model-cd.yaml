@@ -6,8 +6,6 @@ trigger:
     include:
     - jobs/**
     - src/**
-    exclude:
-    - src/*/score/**
 
 pool:
   vmImage: ubuntu-latest
@@ -16,62 +14,6 @@ variables:
   - template: variables.group.yaml
 
 stages:
-- stage: aml_model_integrate
-  displayName: Model - Build
-  jobs:
-  - job: train
-    displayName: Model training
-    steps:
-      - template: templates/aml-cli-install/step.yaml
-        parameters:
-          componentSupport: false
-          minVersion: 2.0
-      - template: templates/aml-env-ensure/step.yaml
-        parameters:
-          azureServiceConnectionName: $(SERVICECONNECTION)
-          envFile: environments/${{ variables.condaEnvName }}/environment.yml
-          validateOnly: true
-          workspaceName: $(WORKSPACENAME)
-          resourceGroup: $(RESOURCEGROUPNAME)
-      - template: templates/aml-job-create/step.yaml
-        parameters:
-          azureServiceConnectionName: $(SERVICECONNECTION)
-          name: ${{ variables.modelName }}
-          jobFile: jobs/hatedetection/train.job.yml
-          workspaceName: $(WORKSPACENAME)
-          resourceGroup: $(RESOURCEGROUPNAME)
-          noWait: false
-
-- stage: aml_model_registration
-  displayName: Model - Source control
-  jobs:
-  - deployment: model_registration
-    displayName: Model registration
-    environment: amlworkspace_$(env)
-    variables:
-      jobName: $[ stageDependencies.aml_model_integrate.train.outputs['jobRun.jobName'] ]
-    strategy: 
-      runOnce:
-        deploy:
-          steps:
-            - checkout: self
-            - template: templates/aml-cli-install/step.yaml
-              parameters:
-                componentSupport: false
-                minVersion: 2.0
-                pythonTools: true
-            - template: templates/aml-model-register/step.yaml
-              parameters:
-                azureServiceConnectionName: $(SERVICECONNECTION)
-                name: ${{ variables.modelName }}
-                fromJob: true
-                jobName: $(jobName)
-                description: $(description)
-                modelPath: outputs/hate-pt-speech.zip
-                modelVersion: latest
-                workspaceName: $(WORKSPACENAME)
-                resourceGroup: $(RESOURCEGROUPNAME)
-
 - stage: aml_model_evaluate
   displayName: Model - Evaluation
   jobs:
@@ -97,9 +39,10 @@ stages:
           azureServiceConnectionName: $(SERVICECONNECTION)
           stepDisplayName: Verifying evaluation
           jobName: $(jobRun.jobName)
-          metric: test
-          expecting: true
-          dataType: boolean
+          metric: pvalue
+          expecting: 0.05
+          dataType: float
+          greaterIsBetter: false
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
           failureMessage: Unable to conclude if challenger is better than champion.
@@ -110,6 +53,17 @@ stages:
           champion: stage=production
           challenger: latest
           compareBy: eval_recall
+          workspaceName: $(WORKSPACENAME)
+          resourceGroup: $(RESOURCEGROUPNAME)
+      - template: templates/aml-model-set/step.yaml
+        parameters:
+          azureServiceConnectionName: $(SERVICECONNECTION)
+          modelName: ${{ variables.modelName }}
+          modelVersion: $(deployment.deployedVersion)
+          property: stage
+          value: staged
+          exclusive: true
+          replaceExistingWith: unstaged
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
 
@@ -132,16 +86,6 @@ stages:
                 minVersion: 2.0
                 pythonTools: true
 
-            - template: templates/aml-endpoint-deploy/step.yaml
-              parameters:
-                azureServiceConnectionName: $(SERVICECONNECTION)
-                endpointFile: endpoints/*/endpoint.yml
-                deploymentFile: deployments/*.yml
-                workspaceName: $(WORKSPACENAME)
-                resourceGroup: $(RESOURCEGROUPNAME)
-                secretsToKeyVault: true
-                keyVaultName: $(KEYVAULTNAME)
-
             - template: templates/aml-model-set/step.yaml
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)
@@ -154,12 +98,14 @@ stages:
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)
 
-            - template: templates/aml-model-set/step.yaml
+            - template: templates/aml-endpoint-deploy/step.yaml
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)
-                modelName: ${{ variables.modelName }}
-                modelVersion: $(deployment.deployedVersion)
-                property: inference
-                value: $(Build.SourceVersion)
+                endpointFile: endpoints/*/endpoint.yml
+                deploymentFile: deployments/*.yml
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)
+                secretsToKeyVault: true
+                keyVaultName: $(KEYVAULTNAME)
+
+

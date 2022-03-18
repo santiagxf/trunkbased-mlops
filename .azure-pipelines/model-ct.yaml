@@ -1,0 +1,72 @@
+trigger:
+  branches:
+    include:
+    - main
+  paths:
+    include:
+    - jobs/**
+    - src/**
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  - template: variables.group.yaml
+
+stages:
+- stage: aml_model_integrate
+  displayName: Model - Build
+  jobs:
+  - job: train
+    displayName: Model training
+    steps:
+      - template: templates/aml-cli-install/step.yaml
+        parameters:
+          componentSupport: false
+          minVersion: 2.0
+      - template: templates/aml-env-ensure/step.yaml
+        parameters:
+          azureServiceConnectionName: $(SERVICECONNECTION)
+          envFile: environments/${{ variables.condaEnvName }}/environment.yml
+          validateOnly: true
+          workspaceName: $(WORKSPACENAME)
+          resourceGroup: $(RESOURCEGROUPNAME)
+      - template: templates/aml-job-create/step.yaml
+        parameters:
+          azureServiceConnectionName: $(SERVICECONNECTION)
+          name: ${{ variables.modelName }}
+          jobFile: jobs/hatedetection/train.job.yml
+          workspaceName: $(WORKSPACENAME)
+          resourceGroup: $(RESOURCEGROUPNAME)
+          noWait: false
+
+- stage: aml_model_registration
+  displayName: Model - Source control
+  jobs:
+  - deployment: model_registration
+    displayName: Model registration
+    environment: amlworkspace_$(env)
+    variables:
+      jobName: $[ stageDependencies.aml_model_integrate.train.outputs['jobRun.jobName'] ]
+    strategy: 
+      runOnce:
+        deploy:
+          steps:
+            - checkout: self
+            - template: templates/aml-cli-install/step.yaml
+              parameters:
+                componentSupport: false
+                minVersion: 2.0
+                pythonTools: true
+            - template: templates/aml-model-register/step.yaml
+              parameters:
+                azureServiceConnectionName: $(SERVICECONNECTION)
+                name: ${{ variables.modelName }}
+                fromJob: true
+                jobName: $(jobName)
+                description: $(description)
+                modelPath: outputs/hate-pt-speech.zip
+                modelVersion: latest
+                workspaceName: $(WORKSPACENAME)
+                resourceGroup: $(RESOURCEGROUPNAME)
+d

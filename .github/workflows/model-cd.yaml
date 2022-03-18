@@ -65,6 +65,7 @@ jobs:
           modelName: ${MODELNAME}
           champion: stage=production
           challenger: latest
+          endpoint: endpoints/${MODELNAME}/endpoint.yml
           compareBy: eval_recall
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
