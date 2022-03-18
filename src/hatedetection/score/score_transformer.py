@@ -4,23 +4,15 @@ Scoring routines for models based on transformers.
 import logging
 import json
 import os
-import sys
 from typing import List, Union
 
 import pandas as pd
 import numpy as np
+import mlflow
 from inference_schema.schema_decorators import input_schema, output_schema
 from inference_schema.parameter_types.numpy_parameter_type import NumpyParameterType
 from inference_schema.parameter_types.pandas_parameter_type import PandasParameterType
 
-try:
-    from hatedetection.model.hate_detection_classifier import HateDetectionClassifier
-except ImportError:
-    currentdir = os.path.dirname(os.path.realpath(__file__))
-    packagedir = os.path.dirname(os.path.dirname(currentdir))
-    sys.path.append(packagedir)
-
-    from hatedetection.model.hate_detection_classifier import HateDetectionClassifier
 
 try:
     from azureml.core import Workspace
@@ -67,8 +59,7 @@ def init(from_workspace: bool = False, workspace = None):
 
     logging.info(f"[INFO] Loading model from package {model_package}")
 
-    MODEL = HateDetectionClassifier()
-    MODEL.load(path=model_package)
+    MODEL = mlflow.pyfunc.load(model_package)
 
     logging.info("[INFO] Init completed")
 
@@ -100,7 +91,7 @@ def run(raw_data: Union[pd.DataFrame, str]) -> Union[np.ndarray ,List[float]]:
         else:
             data = raw_data
 
-        return MODEL.predict(context=None, data).tolist()
+        return MODEL.predict(data).tolist()
 
     except RuntimeError as E:
         logging.error(f'[ERR] Exception happened: {str(E)}')
