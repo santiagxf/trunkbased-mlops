@@ -13,12 +13,7 @@ import torch
 
 from transformers.models.auto.tokenization_auto import AutoTokenizer
 from transformers.models.auto import AutoModelForSequenceClassification
-
-try:
-    from hatedetection.prep.text_preparation import split_to_sequences
-except ImportError:
-    from ..prep.text_preparation import split_to_sequences
-    logging.warning("[WARN] hatedetection package failed to import. Used relative importing instead.")
+from hatedetection.prep.text_preparation import split_to_sequences
 
 
 class HateDetectionClassifier(PythonModel):
@@ -106,18 +101,21 @@ class HateDetectionClassifier(PythonModel):
                           unique_words=self.split_unique_words,
                           seq_len=self.split_seq_len).explode()
         
-        inputs = self.tokenizer(list(data), padding=True, truncation=True, return_tensors='pt')
+        inputs = self.tokenizer(list(data), padding=True, return_tensors='pt')
         predictions = self.model(**inputs)
         probs = torch.nn.Softmax(dim=1)(predictions.logits)
         
         logging.info("[INFO] Building results with hate probabilities only (class=1)")
         hate = probs.T[1]
+        class_idx = probs.argmax(axis=1)
 
         data = data.reset_index()
-        data['hate'] = hate.detach().numpy()
-        scores = data[['index', 'hate']].groupby('index').agg('mean')['hate']
+        data['hate'] = class_idx.detach().numpy()
+        data['confidence'] = hate.detach().numpy()
 
-        return scores
+        results = data[['index', 'hate', 'confidence']].groupby('index').agg({'confidence': 'mean', 'hate': pd.Series.mode })
+
+        return results
 
     def predict(self, context: PythonModelContext, data: Union[list, pd.Series, pd.DataFrame]):
         sample_size = len(data)
@@ -130,7 +128,6 @@ class HateDetectionClassifier(PythonModel):
             scores[batch_from:batch_to] = self.predict_batch(data.iloc[batch_from:batch_to])
         
         return scores
-
 
     def __getstate__(self):
         state = self.__dict__.copy()

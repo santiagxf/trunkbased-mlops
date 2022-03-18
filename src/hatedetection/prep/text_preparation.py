@@ -9,7 +9,7 @@ from typing import List, Tuple
 
 import pandas as pd
 
-def split_to_sequences(text: str, unique_words: int = 150, seq_len: int = 200) -> List[str]:
+def split_to_sequences(text: str, unique_words, seq_len) -> List[str]:
     """
     Splits a text sequence of an arbitrary length to sub-sequences of no more than `seq_len`
     words. Each sub-sequence will have `unique_words` words from the original text and the
@@ -40,7 +40,7 @@ def split_to_sequences(text: str, unique_words: int = 150, seq_len: int = 200) -
     seqs = [' '.join(words[seq*unique_words:seq*unique_words + seq_len]) for seq in range(n_seq)]
     return seqs
 
-def load_examples(data_path: str) -> Tuple[pd.Series, pd.Series]:
+def load_examples(data_path: str, split_seq: bool = False, unique_words: int = 150, seq_len: int = 200) -> Tuple[pd.Series, pd.Series]:
     """
     Loads data examples from CSV files stored in the given folder. Wildcards are supported.
 
@@ -48,6 +48,16 @@ def load_examples(data_path: str) -> Tuple[pd.Series, pd.Series]:
     ----------
     data_path: str
         The path where the data is located.
+    split_seq: bool
+        Indicates if long sequences should be splitted in subsequences. If the case
+        the index of the resulting data frame will indicate when subsequences belonged
+        to the same sequence.
+    unique_words: int
+        Number of unique words to use on each subsequence.
+    seq_len : int
+        Number of total words to output on each sequence. Each sequence would then contain
+        `seq_len - unique_words` from the previous subsequence (context) and then `unique_words`
+        from the current subsequence being generated.
 
     Returns
     -------
@@ -64,5 +74,7 @@ def load_examples(data_path: str) -> Tuple[pd.Series, pd.Series]:
         raise FileNotFoundError(f"Path or directory {data_path} doesn't exists")
 
     df = pd.concat(map(pd.read_csv, glob.glob(data_path)))
-    df.loc[:,'text'] = df['text'].apply(split_to_sequences).explode('text').reset_index(drop=True)
+    if split_seq:
+        df.loc[:,'text'] = df['text'].apply(split_to_sequences, unique_words, seq_len).explode('text').reset_index(drop=True)
+    
     return df['text'], df['hate']

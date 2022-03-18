@@ -40,9 +40,15 @@ def train_and_evaluate(input_dataset: str, eval_dataset: str,
     classifier.split_unique_words = params.data.preprocessing.split_unique_words
     classifier.split_seq_len = params.data.preprocessing.split_seq_len
 
-    examples_train, labels_train = load_examples(input_dataset)
+    examples_train, labels_train = load_examples(input_dataset,
+                                                 split_seq=True,
+                                                 unique_words=params.data.preprocessing.split_unique_words,
+                                                 seq_len = params.data.preprocessing.split_seq_len)
     if eval_dataset:
-        examples_eval, labels_eval = load_examples(eval_dataset)
+        examples_eval, labels_eval = load_examples(eval_dataset,
+                                                   split_seq=True,
+                                                   unique_words=params.data.preprocessing.split_unique_words,
+                                                   seq_len = params.data.preprocessing.split_seq_len)
     else:
         logging.warning('[WARN] Evaluation will happen over the training dataset as evaluation \
                         dataset has not been provided.')
@@ -76,17 +82,18 @@ def train_and_evaluate(input_dataset: str, eval_dataset: str,
     artifacts = classifier.save_pretrained(saved_location)
 
     input_schema = Schema([
-      ColSpec(DataType.string, "text"),
+        ColSpec(DataType.string, "text"),
     ])
     output_schema = Schema([
-      ColSpec(DataType.double, "hate"),
+        ColSpec(DataType.integer, "hate"),
+        ColSpec(DataType.double, "confidence"),
     ])
     signature = ModelSignature(inputs=input_schema, outputs=output_schema)
 
     mlflow.log_metrics(dict(filter(lambda item: item[1] is not None, evaluation_metrics.items())))
     mlflow.log_params(history.metrics)
     mlflow.pyfunc.log_model(artifact_path=params.model.name, 
-                            code_path=['./hatedetection'], 
+                            code_path=['hatedetection'], 
                             python_model=classifier, 
                             artifacts=artifacts,
                             signature=signature)
