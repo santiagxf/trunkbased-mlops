@@ -10,9 +10,7 @@ import pandas as pd
 import numpy as np
 import mlflow
 from inference_schema.schema_decorators import input_schema, output_schema
-from inference_schema.parameter_types.numpy_parameter_type import NumpyParameterType
 from inference_schema.parameter_types.pandas_parameter_type import PandasParameterType
-
 
 try:
     from azureml.core import Workspace
@@ -25,7 +23,10 @@ input_sample = pd.DataFrame(data=[{
 }])
 
 # Sample output for the service
-output_sample = np.array([0.1, 0.1])
+output_sample = pd.DataFrame(data=[{
+    "hate": 0,
+    "confidence": 0.25
+}])
 
 MODEL = None
 
@@ -64,7 +65,7 @@ def init(from_workspace: bool = False, workspace = None):
     logging.info("[INFO] Init completed")
 
 @input_schema('raw_data', PandasParameterType(input_sample))
-@output_schema(NumpyParameterType(output_sample))
+@output_schema(PandasParameterType(output_sample))
 def run(raw_data: Union[pd.DataFrame, str]) -> Union[np.ndarray ,List[float]]:
     """
     Scoring routing for the model
