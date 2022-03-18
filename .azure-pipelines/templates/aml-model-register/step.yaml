@@ -36,7 +36,7 @@ steps:
         SUBSCRIPTION_ID=$(az account show | jq -r ".id")
         echo "##[debug]Working on subscription $SUBSCRIPTION_ID"
         
-        python $(Build.SourcesDirectory)/.azure-pipelines/templates/aml-model-register/register.py \
+        python -m jobtools $(Build.SourcesDirectory)/.azure-pipelines/templates/aml-model-register/register.py register \
           --subscription-id $SUBSCRIPTION_ID \
           --workspace-name ${{ parameters.workspaceName }} \
           --resource-group ${{ parameters.resourceGroup }} \

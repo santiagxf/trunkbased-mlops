@@ -39,7 +39,7 @@ runs:
       run: |
         SUBSCRIPTION_ID=$(az account show | jq -r ".id")
 
-        python ${{ github.action_path }}/register.py \
+        python -m jobtools ${{ github.action_path }}/register.py register \
           --subscription-id $SUBSCRIPTION_ID \
           --workspace-name ${{ inputs.workspaceName }} \
           --resource-group ${{ inputs.resourceGroup }} \

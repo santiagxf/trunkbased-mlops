@@ -130,6 +130,7 @@ stages:
               parameters:
                 componentSupport: false
                 minVersion: 2.0
+                pythonTools: true
 
             - template: templates/aml-endpoint-deploy/step.yaml
               parameters:

@@ -12,6 +12,10 @@ inputs:
     description: 'Version of the model that is acting as the challenger. It can be indicated using a given model version, like 22, or using tokens like `latest` indicating the latest version of the model in the registry.'
     required: true
     default: 'latest'
+  endpoint:
+    description: 'The path of the endpoint `YAML` file. This is used to infer which is the current version of the model. The first deployment will be used if `deployment` is not indicated. This parameter is required if `champion` is `current`.'
+    required: false
+    default: ''
   deployment:
     description: 'The name of the deployment inside the given endpoint to get the model from. If this parameter is not indicated but an endpoint has been specified, then the first available endpoint is used inside the endpoint.'
     required: true
@@ -43,6 +47,31 @@ runs:
       id: compare
       shell: bash
       run: |        
+        if [[ "${{ inputs.champion }}" == "current" ]]; then
+          echo "::debug::Resolving current champion version from endpoint"
+          ENDPOINT_NAME=$(yq -r ".name" ${{ inputs.endpoint }})
+          
+          if [[ $(az ml online-endpoint show -n $ENDPOINT_NAME -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }}) ]]; then
+            if [[ "${{ inputs.deployment }}" == "" ]]; then
+              echo "::debug::Querying champion version from endpoint with name $ENDPOINT_NAME"
+              CHAMPION_MODEL=$(az ml online-deployment list --endpoint-name $ENDPOINT_NAME -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} | jq -r ".[].model")
+            else
+              echo "::debug::Querying champion version from endpoint/deployment with name $ENDPOINT_NAME/${{ inputs.deployment }}"
+              CHAMPION_MODEL=$(az ml online-deployment show --endpoint-name $ENDPOINT_NAME --name ${{ inputs.deployment }} -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} | jq -r ".[].model")
+            fi
+          fi
+          if [[ $CHAMPION_MODEL ]]; then
+            CHAMPION=$(basename $CHAMPION_MODEL)
+          else
+            echo "::warning::There are no models deployed at endpoint $ENDPOINT_NAME. Model will be deployed without compare."
+            echo "::set-output name=result::true"
+            exit 0
+          fi
+        else
+          CHAMPION=${{ inputs.champion }}
+        fi
+        echo "::debug::CHAMPION is version:$CHAMPION"
+
         echo "::debug::Comparing models by ${{ inputs.compareBy }}"
 
         SUBSCRIPTION_ID=$(az account show | jq -r ".id")

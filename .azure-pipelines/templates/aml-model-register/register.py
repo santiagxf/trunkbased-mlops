@@ -1,5 +1,4 @@
 import logging
-import jobtools
 import azureml.core as aml
 
 from typing import List, Dict, Any
@@ -63,7 +62,3 @@ def register(subscription_id: str, resource_group: str, workspace_name:str, name
                            model_path=model_path, 
                            tags=tags,
                            datasets=datasets)
-
-if __name__ == "__main__":
-    tr = jobtools.runner.TaskRunner()
-    tr.run(register)
