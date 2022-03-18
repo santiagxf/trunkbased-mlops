@@ -130,3 +130,10 @@ class HateDetectionClassifier(PythonModel):
             scores[batch_from:batch_to] = self.predict_batch(data.iloc[batch_from:batch_to])
         
         return scores
+
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state["tokenizer"]
+        del state["model"]
+        return state
