@@ -37,6 +37,7 @@ runs:
       shell: bash
       run: |
         set -e
+        SUBSCRIPTION_ID=$(az account show | jq -r ".id")
         
         if ${{ inputs.exclusive }}; then
           VERSION_RESET=$(az ml model list -n ${{ inputs.modelName }} -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} | jq -r --arg PROP_VALUE ${{ inputs.value }} '.[] | select(.tags.${{ inputs.property }} == $PROP_VALUE) | .version')
@@ -44,10 +45,24 @@ runs:
           if [[ "$VERSION_RESET" != "" ]]; then
             echo "::debug::Removing or replacing tag ${{ inputs.property }} from model ${{ inputs.modelName }}:$VERSION_REST"
             if [[ "${{ inputs.replaceExistingWith }}" == "" ]]; then
-              az ml model update -n ${{ inputs.modelName }} -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} --version $VERSION_RESET --set tags={}
+              # az ml model update -n ${{ inputs.modelName }} -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} --version $VERSION_RESET --set tags={}
+              python -m jobtools tags.py remove_tag \
+              --subscription-id $SUBSCRIPTION_ID \
+              --workspace-name ${{ inputs.workspaceName }} \
+              --resource-group ${{ inputs.resourceGroup }} \
+              --name ${{ inputs.modelName }} \
+              --tag ${{ inputs.property }}
             else
               echo "::debug::Replacing tag ${{ inputs.property }} from model ${{ inputs.modelName }}:$VERSION_REST with value ${{ inputs.replaceExistingWith }}"
-              az ml model update -n ${{ inputs.modelName }} -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} --version $VERSION_RESET --set tags.${{ inputs.property }}=${{ inputs.replaceExistingWith }}
+              # az ml model update -n ${{ inputs.modelName }} -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} --version $VERSION_RESET --set tags.${{ inputs.property }}=${{ inputs.replaceExistingWith }}
+              python -m jobtools tags.py add_tag \
+              --subscription-id $SUBSCRIPTION_ID \
+              --workspace-name ${{ inputs.workspaceName }} \
+              --resource-group ${{ inputs.resourceGroup }} \
+              --name ${{ inputs.modelName }} \
+              --version $VERSION_RESET  \
+              --tag ${{ inputs.property }}
+              --value ${{ inputs.replaceExistingWith }}
             fi
           fi
         fi
@@ -60,4 +75,12 @@ runs:
         fi
         
         echo "::debug::Applying tag ${{ inputs.property }}=${{ inputs.value }} to model ${{ inputs.modelName }}:$MODEL_VERSION"
-        az ml model update -n ${{ inputs.modelName }} -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} --version $MODEL_VERSION --set tags.${{ inputs.property }}=${{ inputs.value }}
+        # az ml model update -n ${{ inputs.modelName }} -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} --version $MODEL_VERSION --set tags.${{ inputs.property }}=${{ inputs.value }}
+        python -m jobtools tags.py add_tag \
+          --subscription-id $SUBSCRIPTION_ID \
+          --workspace-name ${{ inputs.workspaceName }} \
+          --resource-group ${{ inputs.resourceGroup }} \
+          --name ${{ inputs.modelName }} \
+          --version $MODEL_VERSION  \
+          --tag ${{ inputs.property }}
+          --value ${{ inputs.value }}
