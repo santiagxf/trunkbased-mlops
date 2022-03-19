@@ -75,6 +75,8 @@ def load_examples(data_path: str, split_seq: bool = False, unique_words: int = 1
 
     df = pd.concat(map(pd.read_csv, glob.glob(data_path)))
     if split_seq:
-        df.loc[:,'text'] = df['text'].apply(split_to_sequences, unique_words, seq_len).explode('text').reset_index(drop=True)
+        df.loc[:,'text'] = df['text'].apply(split_to_sequences, 
+                                            unique_words=unique_words, 
+                                            seq_len=seq_len).explode('text').reset_index(drop=True)
     
     return df['text'], df['hate']
