@@ -90,7 +90,7 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
                           version=model_version,
                           tags=tags)
 
-        if tags is None or (model.tags is not None and set(tags.items()).issubset(model.tags.items())):
+        if tags is None or (model.tags and set(tags.items()).issubset(model.tags.items())):
             # This is a bug in Model constructor. I won't filter correctly by tag.
             # Checking that manually.
             return model
@@ -147,7 +147,7 @@ def get_metric_for_model(workspace: aml.Workspace,
 
         if isinstance(metric_value, list):
             return metric_value[0]
-    
+
         return metric_value
 
     logging.warning("[WARN] No model matches the given specification. No metric is returned")
