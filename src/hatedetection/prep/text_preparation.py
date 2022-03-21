@@ -40,7 +40,8 @@ def split_to_sequences(text: str, unique_words, seq_len) -> List[str]:
     seqs = [' '.join(words[seq*unique_words:seq*unique_words + seq_len]) for seq in range(n_seq)]
     return seqs
 
-def load_examples(data_path: str, split_seq: bool = False, unique_words: int = 150, seq_len: int = 200) -> Tuple[pd.Series, pd.Series]:
+def load_examples(data_path: str, split_seq: bool = False, unique_words: int = 150,
+                  seq_len: int = 200) -> Tuple[pd.Series, pd.Series]:
     """
     Loads data examples from CSV files stored in the given folder. Wildcards are supported.
 
@@ -75,8 +76,8 @@ def load_examples(data_path: str, split_seq: bool = False, unique_words: int = 1
 
     df = pd.concat(map(pd.read_csv, glob.glob(data_path)))
     if split_seq:
-        df.loc[:,'text'] = df['text'].apply(split_to_sequences, 
-                                            unique_words=unique_words, 
+        df.loc[:,'text'] = df['text'].apply(split_to_sequences,
+                                            unique_words=unique_words,
                                             seq_len=seq_len).explode('text').reset_index(drop=True)
-    
+
     return df['text'], df['hate']

@@ -2,9 +2,10 @@
 Training routine for a language model using transformers
 """
 import logging
-import mlflow
 from typing import Dict, Any
 from types import SimpleNamespace
+
+import mlflow
 from mlflow.models.signature import ModelSignature
 from mlflow.types.schema import Schema, ColSpec
 from mlflow.types import DataType
@@ -42,13 +43,13 @@ def train_and_evaluate(input_dataset: str, eval_dataset: str,
 
     examples_train, labels_train = load_examples(input_dataset,
                                                  split_seq=True,
-                                                 unique_words=params.data.preprocessing.split_unique_words,
-                                                 seq_len = params.data.preprocessing.split_seq_len)
+                                                 unique_words=classifier.split_unique_words,
+                                                 seq_len = classifier.split_seq_len)
     if eval_dataset:
         examples_eval, labels_eval = load_examples(eval_dataset,
                                                    split_seq=True,
-                                                   unique_words=params.data.preprocessing.split_unique_words,
-                                                   seq_len = params.data.preprocessing.split_seq_len)
+                                                   unique_words=classifier.split_unique_words,
+                                                   seq_len = classifier.split_seq_len)
     else:
         logging.warning('[WARN] Evaluation will happen over the training dataset as evaluation \
                         dataset has not been provided.')
@@ -78,28 +79,27 @@ def train_and_evaluate(input_dataset: str, eval_dataset: str,
     evaluation_metrics = trainer.evaluate()
 
     logging.info('[INFO] Training completed. Persisting model and tokenizer.')
-    saved_location=f"{params.model.output_dir}/{params.model.name}"
-    artifacts = classifier.save_pretrained(saved_location)
+    artifacts = classifier.save_pretrained(f"{params.model.output_dir}/{params.model.name}")
 
-    input_schema = Schema([
-        ColSpec(DataType.string, "text"),
-    ])
-    output_schema = Schema([
-        ColSpec(DataType.integer, "hate"),
-        ColSpec(DataType.double, "confidence"),
-    ])
-    signature = ModelSignature(inputs=input_schema, outputs=output_schema)
+    signature = ModelSignature(
+        inputs=Schema([
+            ColSpec(DataType.string, "text"),
+        ]), 
+        outputs=Schema([
+            ColSpec(DataType.integer, "hate"),
+            ColSpec(DataType.double, "confidence"),
+        ]))
 
     mlflow.log_metrics(dict(filter(lambda item: item[1] is not None, evaluation_metrics.items())))
     mlflow.log_params(history.metrics)
-    mlflow.pyfunc.log_model(artifact_path=params.model.name, 
-                            code_path=['hatedetection'], 
-                            python_model=classifier, 
+    mlflow.pyfunc.log_model(artifact_path=params.model.name,
+                            code_path=['hatedetection'],
+                            python_model=classifier,
                             artifacts=artifacts,
                             signature=signature)
 
     return {
         'metrics': evaluation_metrics,
         'arguments': history.metrics,
-        'artifacts': [ saved_location ]
+        'artifacts': artifacts.keys()
     }
