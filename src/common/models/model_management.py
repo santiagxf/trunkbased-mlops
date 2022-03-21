@@ -89,8 +89,8 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
                           name=stripped_model_name,
                           version=model_version,
                           tags=tags)
-        
-        if tags == None or (model.tags != None and set(tags.items()).issubset(model.tags.items())):
+
+        if tags is None or (model.tags is not None and set(tags.items()).issubset(model.tags.items())):
             # This is a bug in Model constructor. I won't filter correctly by tag.
             # Checking that manually.
             return model
@@ -101,7 +101,7 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
     except WebserviceException:
         logging.warning(f"[WARN] Unable to find a model with the given specification. \
             Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
-    
+
     logging.warning(f"[WARN] Unable to find a model with the given specification. \
             Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
     return None
@@ -147,11 +147,11 @@ def get_metric_for_model(workspace: aml.Workspace,
 
         if isinstance(metric_value, list):
             return metric_value[0]
-        else:
-            return metric_value
+    
+        return metric_value
 
-    logging.warn("[WARN] No model matches the given specification. No metric is returned")
-    return None    
+    logging.warning("[WARN] No model matches the given specification. No metric is returned")
+    return None
 
 def get_run_for_model(workspace: aml.Workspace,
                       model_name: str, version: str = 'latest', **tags) -> aml.Run:
@@ -178,11 +178,11 @@ def get_run_for_model(workspace: aml.Workspace,
                 Unable to retrieve metrics.")
 
         return workspace.get_run(model.run_id)
-    
+
     return None
 
 def register(subscription_id: str, resource_group: str, workspace_name:str, name: str,
-             version: str, model_path: str, description: str, run_id: str = None, 
+             version: str, model_path: str, description: str, run_id: str = None,
              datasets_id: List[str] = None, tags: Dict[str, Any] = None):
     """
     Registers a model into the model registry using the given parameters. This method
@@ -196,7 +196,7 @@ def register(subscription_id: str, resource_group: str, workspace_name:str, name
          compatibility. Latest is used.")
 
     if datasets_id:
-        datasets = [get_dataset(worksapce=ws, name=ds) for ds in datasets_id]
+        datasets = [get_dataset(workspace=ws, name=ds) for ds in datasets_id]
     else:
         datasets = None
 
@@ -212,15 +212,15 @@ def register(subscription_id: str, resource_group: str, workspace_name:str, name
             model_run.register_model(model_name=name,
                                      model_path=model_path,
                                      description=description,
-                                     tags=tags, 
+                                     tags=tags,
                                      datasets=datasets)
         else:
             logging.error(f"[ERROR] Run with ID {run_id} couldn't been found. \
                 Model is not registered.")
     else:
-        aml.Model.register(workspace=ws, 
+        aml.Model.register(workspace=ws,
                            model_name=name,
                            description=description,
-                           model_path=model_path, 
+                           model_path=model_path,
                            tags=tags,
                            datasets=datasets)
