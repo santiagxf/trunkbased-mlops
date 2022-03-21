@@ -92,7 +92,10 @@ def run(raw_data: Union[pd.DataFrame, str]) -> Union[np.ndarray ,List[float]]:
         else:
             data = raw_data
 
-        return MODEL.predict(data)
+        results = MODEL.predict(data)
+        if isinstance(results, pd.DataFrame):
+            results = results.values
+        return json.dumps({"result": results.tolist()})
 
     except RuntimeError as E:
         logging.error(f'[ERR] Exception happened: {str(E)}')
