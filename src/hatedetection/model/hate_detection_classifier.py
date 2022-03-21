@@ -80,7 +80,7 @@ class HateDetectionClassifier(PythonModel):
                     artifacts[pathlib.Path(file).stem]=os.path.join(rootdir, file)
         return artifacts
 
-    def predict_batch(self, data: Union[list, pd.Series, pd.DataFrame]):
+    def predict(self, context: PythonModelContext, data: Union[list, pd.Series, pd.DataFrame]):
         """
         Predicts a single batch of data.
 
@@ -113,21 +113,9 @@ class HateDetectionClassifier(PythonModel):
         data['hate'] = class_idx.detach().numpy()
         data['confidence'] = hate.detach().numpy()
 
-        results = data[['index', 'hate', 'confidence']].groupby('index').agg({'confidence': 'mean', 'hate': pd.Series.mode })
+        results = data[['index', 'hate', 'confidence']].groupby('index').agg({'hate': pd.Series.mode, 'confidence': 'mean' })
 
         return results
-
-    def predict(self, context: PythonModelContext, data: Union[list, pd.Series, pd.DataFrame]):
-        sample_size = len(data)
-        batches_idx = range(0, math.ceil(sample_size / self.batch_size))
-        scores = np.zeros(sample_size)
-
-        for batch_idx in batches_idx:
-            batch_from = batch_idx * self.batch_size
-            batch_to = batch_from + self.batch_size
-            scores[batch_from:batch_to] = self.predict_batch(data.iloc[batch_from:batch_to])
-        
-        return scores
 
     def __getstate__(self):
         state = self.__dict__.copy()
