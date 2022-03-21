@@ -3,6 +3,7 @@ from typing import Dict, Any
 import torch
 import mlflow
 import numpy as np
+import math
 from sklearn.metrics import f1_score, precision_score, confusion_matrix
 from sklearn.metrics import accuracy_score, recall_score, precision_recall_fscore_support
 from statsmodels.stats.contingency_tables import mcnemar
@@ -64,6 +65,18 @@ def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_da
 
     return compute_mcnemmar(champion_path, challenger_path, eval_dataset, confidence)
 
+def predict_batch(model, data, batch_size = 64):
+    sample_size = len(data)
+    batches_idx = range(0, math.ceil(sample_size / batch_size))
+    scores = np.zeros(sample_size)
+
+    for batch_idx in batches_idx:
+        batch_from = batch_idx * batch_size
+        batch_to = batch_from + batch_size
+        scores[batch_from:batch_to] = model.predict(data.iloc[batch_from:batch_to].to_frame("text"))['hate']
+    
+    return scores
+
 def compute_mcnemmar(champion_path: str, challenger_path: str, eval_dataset: str, confidence: float = 0.05) -> Dict[str, Dict[str, Any]]:
     """
     Compares two hate detection models and decides if the two models make the same mistakes or not.
@@ -92,14 +105,14 @@ def compute_mcnemmar(champion_path: str, challenger_path: str, eval_dataset: str
     if champion_path and challenger_path:
         text, _ = load_examples(eval_dataset)
         champion_model = mlflow.pyfunc.load_model(champion_path)
-        champion_scores = np.round(champion_model.predict(text.to_frame("text")))
+        champion_scores = predict_batch(champion_model, text)
 
         logging.info("[INFO] Unloading champion object from memory")
         del champion_model
         torch.cuda.synchronize()
 
         challenger_model = mlflow.pyfunc.load_model(challenger_path)
-        challenger_scores = np.round(challenger_model.predict(text.to_frame("text")))
+        challenger_scores = predict_batch(challenger_model, text)
 
         logging.info("[INFO] Unloading challenger object from memory")
         del challenger_model
