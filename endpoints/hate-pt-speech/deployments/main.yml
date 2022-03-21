@@ -5,7 +5,7 @@ model: azureml:hate-pt-speech:stage=production
 code_configuration:
   code:
     local_path: ../../../src
-  scoring_script: score/score_transformer.py
+  scoring_script: hatedetection/score/score_transformer.py
 environment: azureml:transformers-torch-19:8
 instance_type: Standard_DS3_v2
 instance_count: 1
