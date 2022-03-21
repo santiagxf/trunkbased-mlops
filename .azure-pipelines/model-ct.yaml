@@ -58,6 +58,7 @@ stages:
                 componentSupport: false
                 minVersion: 2.0
                 pythonTools: true
+
             - template: templates/aml-model-register/step.yaml
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)
@@ -69,4 +70,3 @@ stages:
                 modelVersion: latest
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)
-d
