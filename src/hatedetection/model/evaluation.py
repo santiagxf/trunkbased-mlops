@@ -1,16 +1,16 @@
 import logging
-from typing import Dict, Any
 import torch
 import mlflow
 import numpy as np
 import math
-from sklearn.metrics import f1_score, precision_score, confusion_matrix
-from sklearn.metrics import accuracy_score, recall_score, precision_recall_fscore_support
+
+from typing import Dict, Any
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from statsmodels.stats.contingency_tables import mcnemar
 
 import common.models.model_management as amlmodels
 from hatedetection.prep.text_preparation import load_examples 
-from hatedetection.model.hate_detection_classifier import HateDetectionClassifier
 
 def compute_classification_metrics(pred: Dict) -> Dict[str, float]:
     """
@@ -135,75 +135,3 @@ def compute_mcnemmar(champion_path: str, challenger_path: str, eval_dataset: str
 
     mlflow.log_metrics(metrics)
     return metrics
-
-def resolve_and_evaluate(model_name: str, eval_dataset: str, threshold: float = 0.5) -> Dict[str, float]:
-    """
-    Resolves the model from it's name and runs the evaluation routine.
-
-    Parameters
-    ----------
-    model_name: str
-        Name of the model to get. The model will be downloaded from the model registry.
-    eval_dataset: str
-        Path that leads to the dataset.
-    threshold: float
-        The workspace to load the model from.
-        If not indicated, it will use the default model.
-
-    Returns
-    -------
-    Dict[str, float]
-       A dictionary containing the keys `f1_score`, `precision`, `recall`, `specificity` and `accuracy` as the results of the run.
-    """
-    model_path = amlmodels.resolve_model_from_context(model_name, "latest")
-    
-    return evaluate(model_path, eval_dataset, threshold)
-
-def evaluate(model_path: str, eval_dataset: str, threshold: float = 0.5) -> Dict[str, Dict[str, float]]:
-    """
-    Evaluation routine for the model
-    
-    Parameters
-    ----------
-    model_path: str
-        Path to where the model is stored.
-    eval_dataset: str
-        Path that leads to the dataset.
-    threshold: float
-        The workspace to load the model from.
-        If not indicated, it will use the default model.
-
-    Returns
-    -------
-    Dict[str, Dict[str, float]]
-       A dictionary of "metrics" containing the keys `f1_score`, `precision`, `recall`, `specificity`
-       and `accuracy` as the results of the run.
-    """
-    # Get the path for the dataset from the input
-    text, labels = load_examples(eval_dataset)
-    model = HateDetectionClassifier()
-    model.load(model_path)
-
-    # Runs the model and transform the results into binaries according to the threshold
-    scores     = model.predict_proba(model_input=text)
-    bin_scores = [1 if score > threshold else 0 for score in scores]
-
-    tn, fp, _, _ = confusion_matrix(labels, bin_scores).ravel()
-
-    # Metrics
-    f1 = f1_score(labels, bin_scores)
-    precision = precision_score(labels, bin_scores)
-    recall = recall_score(labels, bin_scores)
-    specificity = tn / (tn+fp) if (tn+fp) != 0 else 0
-    accuracy = accuracy_score(labels, bin_scores)
-
-    # Output a dict with the calculated metrics
-    metrics = {
-        "f1_score": f1,
-        "precision": precision,
-        "recall": recall,
-        "specificity": specificity,
-        "accuracy": accuracy
-    }
-
-    return {'metrics': metrics}
