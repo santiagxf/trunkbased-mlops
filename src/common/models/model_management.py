@@ -12,7 +12,7 @@ from azureml.exceptions import RunEnvironmentException, ModelNotFoundException, 
 from azureml.core.authentication import AzureCliAuthentication
 from common.datasets.dataset_management import get_dataset
 
-def resolve_model_from_context(model_name: str, version: str = None,
+def download_model_from_context(model_name: str, version: str = None,
                                target_path: PathLike = '.', **tags) -> os.PathLike:
     """
     Resolves the name of a given model registered in Azure ML and downloads it in a local
@@ -68,6 +68,8 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
     aml.Model
         The model if any
     """
+    tags_list = None
+
     if ":" in model_name:
         stripped_model_name, version = model_name.split(':')
     else:
@@ -78,22 +80,27 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
     elif version == "current":
         raise ValueError("Model version 'current' is not support using this SDK right now.")
     elif '=' in version:
-        model_tag_name, model_tag_value = version.split('=')
         model_version = None
-        tags = { model_tag_name: model_tag_value }
+        tags_list = [ version ]
     else:
         model_version = int(version)
+
+    if tags:
+        if tags_list:
+            logging.warning("[WARN] Indicating tags both in version and tags keywords is not supported. Tags are superseded by version.")
+        else:
+            tags_list = [ f'{tag[0]}={tag[1]}' for tag in tags.items() ]
 
     try:
         model = aml.Model(workspace=workspace,
                           name=stripped_model_name,
                           version=model_version,
-                          tags=tags)
+                          tags=tags_list)
 
-        if tags is None or (model.tags and set(tags.items()).issubset(model.tags.items())):
-            # This is a bug in Model constructor. I won't filter correctly by tag.
-            # Checking that manually.
-            return model
+        if model:
+            logging.info(f"[INFO] Returning model with name: {model.name}, version: {model.version}, tags: {model.tags}")
+
+        return model
 
     except ModelNotFoundException:
         logging.warning(f"[WARN] Unable to find a model with the given specification. \

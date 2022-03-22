@@ -60,8 +60,8 @@ def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_da
     Dict[str, float]
        A dictionary containing the keys `statistic`, `pvalue` as a result of the statistical test.
     """
-    champion_path = amlmodels.resolve_model_from_context(model_name, version=champion, target_path="champion")
-    challenger_path = amlmodels.resolve_model_from_context(model_name, version=challenger, target_path="challenger")
+    champion_path = amlmodels.download_model_from_context(model_name, version=champion, target_path="champion")
+    challenger_path = amlmodels.download_model_from_context(model_name, version=challenger, target_path="challenger")
 
     return compute_mcnemmar(champion_path, challenger_path, eval_dataset, confidence)
 
