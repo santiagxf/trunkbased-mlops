@@ -31,6 +31,8 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
     aml.Model
         The model if any
     """
+    tags_list = None
+
     if ":" in model_name:
         stripped_model_name, version = model_name.split(':')
     else:
@@ -41,22 +43,27 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
     elif version == "current":
         raise ValueError("Model version 'current' is not support using this SDK right now.")
     elif '=' in version:
-        model_tag_name, model_tag_value = version.split('=')
         model_version = None
-        tags = { model_tag_name: model_tag_value }
+        tags_list = [ version ]
     else:
         model_version = int(version)
+
+    if tags:
+        if tags_list:
+            logging.warning("[WARN] Indicating tags both in version and tags keywords is not supported. Tags are superseded by version.")
+        else:
+            tags_list = [ f'{tag[0]}={tag[1]}' for tag in tags.items() ]
 
     try:
         model = aml.Model(workspace=workspace,
                           name=stripped_model_name,
                           version=model_version,
-                          tags=tags)
-        
-        if tags == None or (model.tags != None and set(tags.items()).issubset(model.tags.items())):
-            # This is a bug in Model constructor. I won't filter correctly by tag.
-            # Checking that manually.
-            return model
+                          tags=tags_list)
+
+        if model:
+            logging.info(f"[INFO] Returning model with name: {model.name}, version: {model.version}, tags: {model.tags}")
+
+        return model
 
     except ModelNotFoundException:
         logging.warning(f"[WARN] Unable to find a model with the given specification. \
@@ -64,7 +71,7 @@ def get_model(workspace: aml.Workspace, model_name: str, version: str = None, **
     except WebserviceException:
         logging.warning(f"[WARN] Unable to find a model with the given specification. \
             Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
-    
+
     logging.warning(f"[WARN] Unable to find a model with the given specification. \
             Name: {stripped_model_name}. Version: {model_version}. Tags: {tags}.")
     return None
