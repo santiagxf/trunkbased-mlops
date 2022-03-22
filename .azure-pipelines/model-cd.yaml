@@ -26,6 +26,7 @@ stages:
           componentSupport: false
           minVersion: 2.0
           pythonTools: true
+
       - template: templates/aml-job-create/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
@@ -35,6 +36,7 @@ stages:
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
           noWait: false
+
       - template: templates/aml-job-metric-assert/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
@@ -47,6 +49,7 @@ stages:
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
           failureMessage: Unable to conclude if challenger is better than champion.
+
       - template: templates/aml-model-compare/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
@@ -56,11 +59,12 @@ stages:
           compareBy: eval_recall
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
+
       - template: templates/aml-model-set/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
           modelName: ${{ variables.modelName }}
-          modelVersion: $(deployment.deployedVersion)
+          modelVersion: latest
           property: stage
           value: staged
           exclusive: true
