@@ -131,8 +131,9 @@ steps:
             fi
 
             echo "##[debug]Updating properties for deployment"
+            BRANCH_REF=$(Build.SourceBranch)
             az ml online-deployment update --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME --set tags.'Git commit'=$(Build.SourceVersion)
-            az ml online-deployment update --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME --set tags.'Git branch'=${(Build.SourceBranch)#refs/*/}
+            az ml online-deployment update --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME --set tags.'Git branch'=${BRANCH_REF#refs/*/}
             az ml online-deployment update --name $DEPLOYMENT_NAME --endpoint-name $ENDPOINT_NAME --set tags.'Git repository'=$(Build.Repository.Uri)
 
             echo "##[debug]Deployment completed"
