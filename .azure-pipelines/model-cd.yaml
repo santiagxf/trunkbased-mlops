@@ -1,11 +1,12 @@
-trigger:
-  branches:
-    include:
-    - main
-  paths:
-    include:
-    - jobs/**
-    - src/**
+resources:
+  pipelines:
+  - pipeline: model-CT
+    source: model-CT
+    trigger: 
+      branches:
+        include: 
+        - maind
+
 
 pool:
   vmImage: ubuntu-latest
