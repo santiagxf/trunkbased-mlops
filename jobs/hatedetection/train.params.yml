@@ -10,6 +10,7 @@ trainer:
     per_device_eval_batch_size: 64
     warmup_steps: 500
     weight_decay: 0.01
+    report_to: none
 data:
     format: 'csv'
     preprocessing:

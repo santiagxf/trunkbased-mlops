@@ -69,7 +69,7 @@ def train_and_evaluate(input_dataset: str, eval_dataset: str,
         args=training_args,
         train_dataset=train_dataset,
         eval_dataset=eval_dataset,
-        compute_metrics=compute_classification_metrics
+        compute_metrics=compute_classification_metrics,
     )
 
     logging.info('[INFO] Training will start now')
