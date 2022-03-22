@@ -1,4 +1,3 @@
-from asyncio.log import logger
 import logging
 import jobtools
 import azureml.core as aml
