@@ -96,7 +96,8 @@ stages:
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)
                 modelName: ${{ variables.modelName }}
-                modelVersion: $(deployment.deployedVersion)
+                #modelVersion: $(deployment.deployedVersion)
+                modelVersion: latest
                 property: stage
                 value: production
                 exclusive: true
