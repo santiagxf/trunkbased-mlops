@@ -83,84 +83,33 @@ Dataset pointers are kept on git. If new datasets are registered, model is not a
 
 ![](docs/assets/diagrams/datasets-ref.png)
 
+#### How datasets pointers are kept on github?
+
+Azure Machine Learning has the [dataset concept](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-train-with-datasets). Basically, a dataset is a pointer to an storage solution where the data is located. [Azure ML allows to materialize this concept in a `YAML` definition](https://docs.microsoft.com/en-us/azure/machine-learning/reference-yaml-dataset) so as long as we keep this definition on YAML, then we can have a git representation of the dataset in the repository. That's the role of the `datasets` folder, where you will see definitions for 2 datasets:
+
+ - **portuguese-hate-speech-tweets**: The training dataset for hate detection in portuguese.
+ - **portuguese-hate-speech-tweets-eval**: The evaluation dataset we use to assess the performance of the models.
+
+> You will see that these datasets also has a folder called `data` inside of them. That's the initialization data so you can have a sample of this data. When datasets are created in Azure ML, we can initialize them using that data so you have something to start with. However, the data is uploaded to the Azure Storage Account you configure during infraestructure deployment.
 
 ## Using MLOps to enforce the workflow
 
-In the folder `.azure-pipelines` (for `Azure DevOps`) and in the folder `.github` (for `GitHub Actions`) you will find the following pipelines available:
+We can use MLOps to enforce this workflow and achive automatica integration and deployment (CI/CD). In the folder `.azure-pipelines` (for `Azure DevOps`) and in the folder `.github` (for `GitHub Actions`) you will find the following pipelines available that are pointed out in the workflow. Both implementation are equally capable so you can decide which one is better to use.
 
-### Workspaces
+| Area             | Workflow/pipeline    | Description                                        | Triggers on |
+|------------------|------------------|----------------------------------------------------| ----------- |
+| Workspaces       | [Workspace-CD](workflows.md#Workspace-CD)     | Performs deployments of the Azure Machine Learning resources using Infrastructure as Code (IaC) and ensure workspaces' assets including datasets, data sources and compute clusters. | `main` for changes in path `datasets/*` and `.cloud/*`   | 
+| Environments     | [Environment-CI](workflows.md#Environment-CI)   | Performs the build and basic validations on the training and inference environments. | PR into `main` on paths `environments/*` |
+| Environments     | [Environment-CD](workflows.md#Environment-Cd)   | Builds training and inference environments and deploys them on Azure ML | `main` for changes in path `environments/*` |
+| Models           | [Model-CI](workflows.md#Model-CI)         | Ensures that the model training can be executed in the indicated training environment and that the source code complies with quality standards. | PR into `main` for paths `src/*` and `jobs/*`. |
+| Models           | [Model-CT](workflows.md#Model-CT)         | Responsable for continous training of the model and its corresponding registration in model's registry. This pipeline ensure `main` is always deployable. | `main` for changes in path `src/*` and `jobs/*` |
+| Models           | [Model-CD](workflows.md#Model-CD)         | Responsable of the continuos evaluation and deployment of new trained models. | New model registered in the model registry |
 
-- **Workspace-CD:** Performs deployments and initialization of some of the elements of the workspace.
-    - **Triggers on:** `main` for changes in path `datasets/*` and `.cloud/*`
-    - **Actions:**
-        - **Infrastructure:** Infraestructure is automatically deployed by the pipeline using ARM tempaltes. The ARM templates are located in the folder `.cloud`. To know more about the resources deployed see [Architecture details](docs/architecture.md).
-        - **Datasets:** Ensures that datasets are created and available in the workspace. If they are not, they are initialized with data in the current git repository. For datasets that evolve over time, this pipeline will just create the initial version and the registration. You can leverage tools like Azure Data Factory to move data to the datasets and update the versions. This is outside of the scope of this repository right now but will be shared soon.
+### Details
 
+* You can check more details about what actions are performed for each workflow clicking on the link on them or you can [review all the workflow details following this documentation](docs/workflows.md).
 
-### Environments:
-
-- **Environment-CI:** Performs build and basic validations on the environments. All environments in the environments folder will be built and validated.
-    - **Triggers on:** Validations for PR into `main`
-    - **Actions:**
-        - Builds the environment proposed using `conda`
-        - Check if the environments already exists in Azure ML and has the right version.
-        - Ensure that if the environment details have changed, then a new version is proposed.
-- **Environment-CD**: Performs validation and deployment of environments. All environments in the environments folder will be validated.
-    - **Triggers on:** `main` for changes in path `environments/*`
-    - **Actions:**
-        - Check if the environment already exits in Azure ML and has the right version.
-        - Look after changes in the environment definition and ensures the right version is used. If any change is introduced, new versions are deployed automatically.
-        - Deploy the new version of the environment if needed.
-
-### Models:
-
-- **Model-CI:** Ensures that the model training can be executed and the code complies with standards.
-    - **Triggers on:** Validations for PR into `main`
-    - **Actions:**
-        - Ensure the environment for training exists in Azure ML with the right version.
-        - Builds the environment localy.
-        - Run lintering.
-        - Run unit tests.
-        - Create a job for training and capture logs.
-        - Publish logs into the assets of the pipeline.
-        - Capture metrics, parameters and models and register them in the experiment.
-- **Model-CD:** This pipeline is responsable of continuously building and deploying the last version of the model accourding to `main`. 
-    - **Triggers on:** `main` for changes in path `src/*` and `jobs/*`.
-    - **Actions:**
-        - Stage 1: Model build
-            - Ensure the environment for training exists in Azure ML with the right version.
-            - Creates a training job and capture logs.
-            - Builds the model and compute metrics.
-        - Stage 2: Model source control
-            - Registers model in the repository and associates it with the run that originated the model.
-
-                ![](docs/assets/model-registry-tags.png)
-
-            - **Approvals:** This stage requires approval. This prevents the registration of an unwanted model.
-
-                ![](docs/assets/model-cd-stages-registry.png)
-        - Stage 3: Model evaluation
-            - Evaluates model performance and detemines if the new model is better than the current one. This CI/CD implementation uses the champion/challenger approach meaning that the currently deployed model is the current champion. Each time a new model is trained, a challenger, it will be evaluated against the current champion. If success, then the challenger would take the place of the champion. Only one model is deployed at a time. If not, a warning will notify that no deployment will happen.
-
-                ![](docs/assets/model-cd-stages-eval.png)
-        - Stage 4: Model deployment
-            - Deploys the new version of the model and updates the online endpoint.
-            - **Approvals:** This stage requires approval.
-
-                ![](docs/assets/model-cd-stages-deploy.png)
-
-### Endpoints
-- **endpoint-CD:** Ensures that the last serving code for the model is deployed along with the last promoted model. This pipelines can update the serving code without updating the model.
-    - **Trigges on:** `main` for changes in path `src/*/scoring` and `endpoints`.
-    - **Actions:**
-        - Deploys the last version of `main` in the current deployment of the model. No models are trained nor replaced.
-        - Updates the references to know which version of the serving code is being installed on the endpoint. For this purpose we tag the commit SHA of the `main` by the time the deployed was done. The repository information is also added.
-
-        ![](docs/assets/deployment-tags.png)
-
-    - **Approvals:** This stage requires approval.
-
-For a detail of the actions used to implement this pipelines see [Custom Actions](docs/actions.md).
+* For details about the custom GitHub Actions / Azure DevOps templates used in this implementation check [Custom Actions](docs/actions.md) documentation.
 
 ## Starting using this project
 
