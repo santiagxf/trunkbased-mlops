@@ -38,7 +38,7 @@ Performs validation and deployment of environments. All environments in the envi
     - Look after changes in the environment definition and ensures the right version is used. If any change is introduced, new versions are deployed automatically.
     - Deploy the new version of the environment if needed.
 
-        ![](/assets/github-environment-cd.png)
+        ![](assets/github-environment-cd.png)
 
 ## Models:
 
