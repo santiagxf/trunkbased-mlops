@@ -35,10 +35,24 @@ runs:
         echo "::debug::Creating job with name: $JOB_NAME" 
         echo "::set-output name=jobName::$JOB_NAME"
 
+        az ml job create -n $JOB_NAME -f ${{ inputs.jobFile }} --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }}
+
         if ${{ inputs.noWait }}; then
-          az ml job create -n $JOB_NAME -f ${{ inputs.jobFile }} --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }}
+          echo "::debug::Job is running but execution will continue. Use 'az ml job stream' if you want to capture logs."
         else
-          az ml job create -n $JOB_NAME -f ${{ inputs.jobFile }} --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} --stream >> job.log
+          echo "::debug::Streaming logs"
+          
+          if [[ $(az ml job stream -n $JOB_NAME -f ${{ inputs.jobFile }} --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} >> job.log) ]]; then
+            echo "::debug::Logs captured"
+          else
+            echo "::warning::Log capturing didn't work. Check experiment details."
+            echo "::debug::Waiting for the job "
+            while [ $(az ml job show -n $JOB_NAME | jq '.status') = *"Running"* ];
+            do
+              sleep 60s
+              echo "::debug::Still running" 
+            done
+          fi
         fi
 
     - name: Uploading job logs
