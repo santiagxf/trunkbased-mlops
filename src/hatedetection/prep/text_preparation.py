@@ -79,7 +79,7 @@ def load_examples(data_path: str, eval_size: float = 0, split_seq: bool = False,
         raise FileNotFoundError(f"Path or directory {data_path} doesn't exists")
 
     df = pd.concat(map(pd.read_csv, glob.glob(data_path)))
-    if eval:
+    if eval_size > 0:
         train, test = train_test_split(df, test_size=eval_size, stratify=df['hate'])
     else:
         train = df
@@ -89,7 +89,7 @@ def load_examples(data_path: str, eval_size: float = 0, split_seq: bool = False,
                                             unique_words=unique_words,
                                             seq_len=seq_len).explode('text').reset_index(drop=True)
     
-    if eval:
+    if eval_size > 0:
         if split_seq:
             test.loc[:,'text'] = test['text'].apply(split_to_sequences,
                                             unique_words=unique_words,

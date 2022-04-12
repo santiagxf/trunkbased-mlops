@@ -7,8 +7,7 @@ command: >-
   python -m jobtools hatedetection.model.evaluator resolve_and_compare --eval-dataset ${{inputs.eval_dataset}} --model-name ${{inputs.model_name}} --champion ${{inputs.champion}} --challenger ${{inputs.challenger}} --confidence ${{inputs.confidence}}
 inputs:
   eval_dataset:
-    type: uri_folder
-    path: azureml:portuguese-hate-speech-tweets-eval:1
+    path: azureml:portuguese-hate-speech-tweets-eval:4
   model_name: hate-pt-speech
   champion: stage=production
   challenger: latest
