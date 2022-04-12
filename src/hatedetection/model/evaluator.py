@@ -8,8 +8,6 @@ from typing import Dict, Any
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score, precision_recall_fscore_support
 from statsmodels.stats.contingency_tables import mcnemar
-
-import common.models.model_management as amlmodels
 from hatedetection.prep.text_preparation import load_examples 
 
 def compute_classification_metrics(pred: Dict[str, torch.Tensor]) -> Dict[str, float]:
@@ -39,7 +37,8 @@ def compute_classification_metrics(pred: Dict[str, torch.Tensor]) -> Dict[str, f
         'support': support
     }
 
-def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_dataset: str, confidence: float = 0.05) -> Dict[str, Dict[str, float]]:
+def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_dataset: str,
+                        confidence: float = 0.05) -> Dict[str, Dict[str, float]]:
     """
     Resolves the model from it's name and runs the evaluation routine.
 
@@ -48,9 +47,9 @@ def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_da
     model_name: str
         Name of the model to get. The model will be downloaded from the model registry.
     champion: str
-        Champion version of the model. This can be a number, a tag like `stage=production` or `latest`
+        Champion version of the model. This can be a number, or a label like `latest` or `Production`
     challenger: str
-        Challenger version of the model. This can be a number, a tag like `stage=production` or `latest`
+        Challenger version of the model. This can be a number, or a label like `latest` or `Production`
     eval_dataset: str
         Path that leads to the dataset.
     confidence: float
@@ -61,10 +60,16 @@ def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_da
     Dict[str, float]
        A dictionary containing the keys `statistic`, `pvalue` as a result of the statistical test.
     """
-    champion_path = amlmodels.download_model_from_context(model_name, version=champion, target_path="champion")
-    challenger_path = amlmodels.download_model_from_context(model_name, version=challenger, target_path="challenger")
-
-    return compute_mcnemmar(champion_path, challenger_path, eval_dataset, confidence)
+    client = mlflow.tracking.MlflowClient()
+    if champion.isdigit() or len(client.get_latest_versions(model_name, stages=[champion])) > 0:
+        champion_path = f"models:/{model_name}/{champion}"
+    else:
+        champion_path = None
+    
+    return compute_mcnemmar(champion_path,
+                            f"models:/{model_name}/{challenger}",
+                            eval_dataset,
+                            confidence)
 
 def _predict_batch(model, data, batch_size = 64):
     sample_size = len(data)
@@ -72,13 +77,14 @@ def _predict_batch(model, data, batch_size = 64):
     scores = np.zeros(sample_size)
 
     for batch_idx in batches_idx:
-        batch_from = batch_idx * batch_size
-        batch_to = batch_from + batch_size
-        scores[batch_from:batch_to] = model.predict(data.iloc[batch_from:batch_to].to_frame("text"))['hate']
+        bfrom = batch_idx * batch_size
+        bto = bfrom + batch_size
+        scores[bfrom:bto] = model.predict(data.iloc[bfrom:bto].to_frame("text"))['hate']
     
     return scores
 
-def compute_mcnemmar(champion_path: str, challenger_path: str, eval_dataset: str, confidence: float = 0.05) -> Dict[str, Dict[str, Any]]:
+def compute_mcnemmar(champion_path: str, challenger_path: str, eval_dataset: str,
+                     confidence: float = 0.05) -> Dict[str, Dict[str, Any]]:
     """
     Compares two hate detection models and decides if the two models make the same mistakes or not.
     Note that this method doesn't tell which one is better but if the models are statistically

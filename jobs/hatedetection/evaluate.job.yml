@@ -9,7 +9,7 @@ inputs:
   eval_dataset:
     path: azureml:portuguese-hate-speech-tweets-eval:4
   model_name: hate-pt-speech
-  champion: stage=production
+  champion: Production
   challenger: latest
   confidence: 0.05
 
