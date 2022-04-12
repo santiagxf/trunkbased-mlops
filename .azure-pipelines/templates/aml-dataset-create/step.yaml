@@ -37,11 +37,11 @@ steps:
           CONTAINER_NAME=$(dirname $REMOTE_FILE | cut -d/ -f4)
           LOCAL_FOLDER=$(dirname $DATASET_FILE)
 
-          if [[ $(az ml dataset list --name $DATASET_NAME --workspace-name ${{ parameters.workspaceName }} --resource-group ${{ parameters.resourceGroup }}) ]]; then
+          if [[ $(az ml data list --name $DATASET_NAME --workspace-name ${{ parameters.workspaceName }} --resource-group ${{ parameters.resourceGroup }}) ]]; then
             echo "##[debug]Dataset $DATASET_NAME already in target workspace."
           else
             echo "##[debug]Dataset $DATASET_NAME is missing. Creating from file $DATASET_FILE."
-            az ml dataset create --file $DATASET_FILE --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }}
+            az ml data create --file $DATASET_FILE --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }}
             
             if ${{ lower(parameters.initialize) }}; then
               # Data uploaded manually as AzureFileCopy@4 not supported in Linux
