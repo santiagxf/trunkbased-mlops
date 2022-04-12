@@ -5,6 +5,6 @@ model: azureml:hate-pt-speech:stage=production
 code_configuration:
   code: ../../../src
   scoring_script: hatedetection/score/score_transformer.py
-environment: azureml:transformers-torch-19:8
+environment: azureml:transformers-torch-19:9
 instance_type: Standard_DS3_v2
 instance_count: 1
