@@ -67,6 +67,5 @@ stages:
                 jobName: $(jobName)
                 description: $(description)
                 modelPath: hate-pt-speech
-                modelVersion: latest
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)

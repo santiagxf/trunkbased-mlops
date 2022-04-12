@@ -88,6 +88,5 @@ jobs:
           jobName: ${{ needs.build.outputs.jobName }}
           description: ${DESCRIPTION}
           modelPath: hate-pt-speech
-          modelVersion: latest
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
