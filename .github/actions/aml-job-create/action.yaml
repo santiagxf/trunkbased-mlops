@@ -40,7 +40,7 @@ runs:
         if ! ${{ inputs.noWait }}; then
           echo "::debug::Streaming logs"
           
-          if [[ $(az ml job stream -n $JOB_NAME -f ${{ inputs.jobFile }} --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} >> job.log) ]]; then
+          if [[ $(az ml job stream -n $JOB_NAME --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} >> job.log) ]]; then
             echo "::debug::Logs captured"
           else
             echo "::warning::Log capturing didn't work. Check experiment details."
