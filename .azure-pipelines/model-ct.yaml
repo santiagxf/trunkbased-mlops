@@ -67,5 +67,6 @@ stages:
                 jobName: $(jobName)
                 description: $(description)
                 modelPath: hate-pt-speech
+                modelType: mlflow_model
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)
