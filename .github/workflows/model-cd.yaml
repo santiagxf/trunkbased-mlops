@@ -122,7 +122,7 @@ jobs:
           property: stage
           value: production
           exclusive: true
-          replaceExistingWith: surpassed
+          replaceExistingWith: archived
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
       

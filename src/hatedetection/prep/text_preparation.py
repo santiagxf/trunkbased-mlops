@@ -8,6 +8,7 @@ import math
 from typing import List, Tuple
 
 import pandas as pd
+from sklearn.model_selection import train_test_split
 
 def split_to_sequences(text: str, unique_words, seq_len) -> List[str]:
     """
@@ -40,7 +41,7 @@ def split_to_sequences(text: str, unique_words, seq_len) -> List[str]:
     seqs = [' '.join(words[seq*unique_words:seq*unique_words + seq_len]) for seq in range(n_seq)]
     return seqs
 
-def load_examples(data_path: str, split_seq: bool = False, unique_words: int = 150,
+def load_examples(data_path: str, eval_size: float = 0, split_seq: bool = False, unique_words: int = 150,
                   seq_len: int = 200) -> Tuple[pd.Series, pd.Series]:
     """
     Loads data examples from CSV files stored in the given folder. Wildcards are supported.
@@ -49,6 +50,9 @@ def load_examples(data_path: str, split_seq: bool = False, unique_words: int = 1
     ----------
     data_path: str
         The path where the data is located.
+    eval_size: float
+        The evaluation proportion to withhold. If > 0, then returned series include evaluation
+        data like (train_X, train_y, test_X, test_y)
     split_seq: bool
         Indicates if long sequences should be splitted in subsequences. If the case
         the index of the resulting data frame will indicate when subsequences belonged
@@ -75,9 +79,21 @@ def load_examples(data_path: str, split_seq: bool = False, unique_words: int = 1
         raise FileNotFoundError(f"Path or directory {data_path} doesn't exists")
 
     df = pd.concat(map(pd.read_csv, glob.glob(data_path)))
+    if eval:
+        train, test = train_test_split(df, test_size=eval_size, stratify=df['hate'])
+    else:
+        train = df
+
     if split_seq:
-        df.loc[:,'text'] = df['text'].apply(split_to_sequences,
+        train.loc[:,'text'] = train['text'].apply(split_to_sequences,
                                             unique_words=unique_words,
                                             seq_len=seq_len).explode('text').reset_index(drop=True)
+    
+    if eval:
+        if split_seq:
+            test.loc[:,'text'] = test['text'].apply(split_to_sequences,
+                                            unique_words=unique_words,
+                                            seq_len=seq_len).explode('text').reset_index(drop=True)
+            return train['text'], train['hate'], test['text'], test['hate']
 
-    return df['text'], df['hate']
+    return train['text'], train['hate']

@@ -1,15 +1,12 @@
-import logging
-import math
 import os
+import logging
 import pathlib
 
-from os import PathLike
 from typing import Dict, Union
 from mlflow.pyfunc import PythonModel, PythonModelContext
 
-import pandas as pd
-import numpy as np
 import torch
+import pandas as pd
 
 from transformers.models.auto.tokenization_auto import AutoTokenizer
 from transformers.models.auto import AutoModelForSequenceClassification
@@ -57,7 +54,7 @@ class HateDetectionClassifier(PythonModel):
             logging.info("[INFO] Switching to evaluation mode")
             _ = self.model.eval()
     
-    def save_pretrained(self, save_directory: Union[str, PathLike] = None) -> Dict[str, str]:
+    def save_pretrained(self, save_directory: str = None) -> Dict[str, str]:
         """
         Saves the model to a directory. All the required artifacts are persisted.
 
@@ -74,10 +71,9 @@ class HateDetectionClassifier(PythonModel):
         self.model.save_pretrained(self.artifacts_path)
 
         artifacts = {}
-        for rootdir, _, files in os.walk(self.artifacts_path):
-            for file in files:
-                if not os.path.basename(file).startswith('.'):
-                    artifacts[pathlib.Path(file).stem]=os.path.join(rootdir, file)
+        for file in os.listdir(self.artifacts_path):
+            if not os.path.basename(file).startswith('.'):
+                artifacts[pathlib.Path(file).stem]=os.path.join(self.artifacts_path, file)
         return artifacts
 
     def predict(self, context: PythonModelContext, data: Union[list, pd.Series, pd.DataFrame]):
@@ -105,13 +101,13 @@ class HateDetectionClassifier(PythonModel):
         predictions = self.model(**inputs)
         probs = torch.nn.Softmax(dim=1)(predictions.logits)
         
-        logging.info("[INFO] Building results with hate probabilities only (class=1)")
-        hate = probs.T[1]
-        class_idx = probs.argmax(axis=1)
+        logging.info("[INFO] Building results with hate probabilities")
+        classes = probs.argmax(axis=1)
+        confidence = probs.max(axis=1)
 
         data = data.reset_index()
-        data['hate'] = class_idx.detach().numpy()
-        data['confidence'] = hate.detach().numpy()
+        data['hate'] = classes.detach().numpy()
+        data['confidence'] = confidence.detach().numpy()
 
         results = data[['index', 'hate', 'confidence']].groupby('index').agg({'hate': pd.Series.mode, 'confidence': 'mean' })
 

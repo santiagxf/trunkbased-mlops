@@ -12,13 +12,14 @@ from statsmodels.stats.contingency_tables import mcnemar
 import common.models.model_management as amlmodels
 from hatedetection.prep.text_preparation import load_examples 
 
-def compute_classification_metrics(pred: Dict) -> Dict[str, float]:
+def compute_classification_metrics(pred: Dict[str, torch.Tensor]) -> Dict[str, float]:
     """
-    Computes the metrics given predictions of a torch model
+    Computes the classification metrics for the given predictions returned by a 
+    Torch model.
 
     Parameters
     ----------
-    pred: Dict
+    pred: Dict[str, torch.Tensor]
         Predictions returned from the model.
 
     Returns
@@ -65,7 +66,7 @@ def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_da
 
     return compute_mcnemmar(champion_path, challenger_path, eval_dataset, confidence)
 
-def predict_batch(model, data, batch_size = 64):
+def _predict_batch(model, data, batch_size = 64):
     sample_size = len(data)
     batches_idx = range(0, math.ceil(sample_size / batch_size))
     scores = np.zeros(sample_size)
@@ -80,8 +81,8 @@ def predict_batch(model, data, batch_size = 64):
 def compute_mcnemmar(champion_path: str, challenger_path: str, eval_dataset: str, confidence: float = 0.05) -> Dict[str, Dict[str, Any]]:
     """
     Compares two hate detection models and decides if the two models make the same mistakes or not.
-    Note that this method doesn't tell if challenger is better that champion but if the models are
-    statistically different. It uses the McNemmar test.
+    Note that this method doesn't tell which one is better but if the models are statistically
+    different. It uses the McNemmar test.
 
     Parameters
     ----------
@@ -105,14 +106,14 @@ def compute_mcnemmar(champion_path: str, challenger_path: str, eval_dataset: str
     if champion_path and challenger_path:
         text, _ = load_examples(eval_dataset)
         champion_model = mlflow.pyfunc.load_model(champion_path)
-        champion_scores = predict_batch(champion_model, text)
+        champion_scores = _predict_batch(champion_model, text)
 
         logging.info("[INFO] Unloading champion object from memory")
         del champion_model
         torch.cuda.synchronize()
 
         challenger_model = mlflow.pyfunc.load_model(challenger_path)
-        challenger_scores = predict_batch(challenger_model, text)
+        challenger_scores = _predict_batch(challenger_model, text)
 
         logging.info("[INFO] Unloading challenger object from memory")
         del challenger_model

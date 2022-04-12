@@ -12,7 +12,7 @@ from mlflow.types import DataType
 
 from transformers import Trainer, TrainingArguments
 from hatedetection.model.hate_detection_classifier import HateDetectionClassifier
-from hatedetection.model.evaluation import compute_classification_metrics
+from hatedetection.model.evaluator import compute_classification_metrics
 from hatedetection.train.datasets import ClassificationDataset
 from hatedetection.prep.text_preparation import load_examples
 
@@ -41,11 +41,11 @@ def train_and_evaluate(input_dataset: str, eval_dataset: str,
     classifier.split_unique_words = params.data.preprocessing.split_unique_words
     classifier.split_seq_len = params.data.preprocessing.split_seq_len
 
-    examples_train, labels_train = load_examples(input_dataset,
-                                                 split_seq=True,
-                                                 unique_words=classifier.split_unique_words,
-                                                 seq_len = classifier.split_seq_len)
     if eval_dataset:
+        examples_train, labels_train = load_examples(input_dataset,
+                                                    split_seq=True,
+                                                    unique_words=classifier.split_unique_words,
+                                                    seq_len = classifier.split_seq_len)
         examples_eval, labels_eval = load_examples(eval_dataset,
                                                    split_seq=True,
                                                    unique_words=classifier.split_unique_words,
@@ -53,7 +53,11 @@ def train_and_evaluate(input_dataset: str, eval_dataset: str,
     else:
         logging.warning('[WARN] Evaluation will happen over the training dataset as evaluation \
                         dataset has not been provided.')
-        examples_eval, labels_eval = examples_train, labels_train
+        examples_train, labels_train, examples_eval, labels_eval = load_examples(input_dataset,
+                                                    eval_size=0.3,
+                                                    split_seq=True,
+                                                    unique_words=classifier.split_unique_words,
+                                                    seq_len = classifier.split_seq_len)
 
     train_dataset = ClassificationDataset(examples=examples_train,
                                           labels=labels_train,
