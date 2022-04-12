@@ -9,6 +9,7 @@ inputs:
   eval_dataset:
     type: mltable
     path: azureml:portuguese-hate-speech-tweets-eval:1
+    mode: eval_mount
   model_name: hate-pt-speech
   champion: stage=production
   challenger: latest
