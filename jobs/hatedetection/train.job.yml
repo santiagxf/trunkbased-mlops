@@ -4,16 +4,14 @@ experiment_name: hate-pt-speech
 description: Trains a model to clasificate tweets text according to hate/no hate
 code: ../../src/
 command: >-
-  python -m jobtools hatedetection.train.trainer train_and_evaluate --input-dataset ${{ inputs.input_dataset }} --eval-dataset ${{ inputs.eval_dataset }} --params ${{ inputs.params }}
+  python -m jobtools hatedetection.train.trainer train_and_evaluate --input-dataset ${{inputs.input_dataset}} --eval-dataset ${{inputs.eval_dataset}} --params ${{inputs.params}}
 inputs:
   input_dataset:
     type: uri_folder
     path: azureml:portuguese-hate-speech-tweets:1
-    mode: ro_mount
   eval_dataset:
     type: uri_folder
     path: azureml:portuguese-hate-speech-tweets-eval:1
-    mode: ro_mount
   params:
     type: uri_file
     path: ./train.params.yml
