@@ -1,0 +1,19 @@
+name: 'Configuring MLFlow'
+description: 'Configures MLflow in the current environment'
+
+inputs:
+  workspaceName:
+    description: 'Name of the workspace to work against.'
+    required: true
+  resourceGroup:
+    description: 'Name of the resource group where the workspace is placed.'
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Installing tools
+      shell: bash
+      run: |
+        pip install mlflow-skinny
+        export MLFLOW_TRACKING_URI="$(az ml workspace show -n ${{ inputs.workspaceName }} -g ${{ inputs.resourceGroup }} | jq -r '.mlflow_tracking_uri')"

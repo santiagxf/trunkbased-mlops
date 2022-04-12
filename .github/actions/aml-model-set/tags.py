@@ -1,8 +1,5 @@
 import logging
-import jobtools
 import azureml.core as aml
-
-from typing import List, Dict, Any
 from azureml.core.authentication import AzureCliAuthentication
 
 def add_tag(subscription_id: str, resource_group: str, workspace_name:str, name: str, version: str, tag: str, value: str):
