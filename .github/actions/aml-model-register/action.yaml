@@ -57,4 +57,4 @@ runs:
         fi
 
         echo "::debug::Creating model from path $MODEL_PATH"
-        az ml model create --name ${{ inputs.name }} --description ${{ inputs.description }} --path $MODEL_PATH --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }}
+        az ml model create --name "${{ inputs.name }}" --description "${{ inputs.description }}" --path $MODEL_PATH --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }}

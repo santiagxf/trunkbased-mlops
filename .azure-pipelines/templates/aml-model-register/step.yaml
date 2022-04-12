@@ -52,4 +52,4 @@ steps:
         fi
 
         echo "##[debug]Creating model from path $MODEL_PATH"
-        az ml model create --name ${{ parameters.name }} --description ${{ parameters.description }} --path $MODEL_PATH --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }}
+        az ml model create --name "${{ parameters.name }}" --description "${{ parameters.description }}" --path $MODEL_PATH --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }}
