@@ -55,7 +55,7 @@ steps:
               --resource-group ${{ parameters.resourceGroup }} \
               --name ${{ parameters.modelName }} \
               --version $VERSION_RESET  \
-              --tag ${{ parameters.property }}
+              --tag ${{ parameters.property }} \
               --value ${{ parameters.replaceExistingWith }}
           fi
         fi
@@ -76,5 +76,5 @@ steps:
           --resource-group ${{ parameters.resourceGroup }} \
           --name ${{ parameters.modelName }} \
           --version $MODEL_VERSION  \
-          --tag ${{ parameters.property }}
+          --tag ${{ parameters.property }} \
           --value ${{ parameters.value }}
