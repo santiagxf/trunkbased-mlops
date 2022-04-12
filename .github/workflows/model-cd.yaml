@@ -123,6 +123,7 @@ jobs:
           value: production
           exclusive: true
           replaceExistingWith: archived
+          isMlflowStage: true
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
       

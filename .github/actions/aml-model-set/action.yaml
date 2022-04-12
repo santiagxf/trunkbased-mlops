@@ -23,6 +23,10 @@ inputs:
     description: 'When `exclusive` is `true`, use this parameter to indicate the value you want to change the existing property to. If empty, property is removed.'
     required: true
     default: ''
+  isMlflowStage:
+    description: 'Indicates if the tag correspond to an mlflow stage'
+    required: true
+    default: 'false'
   workspaceName:
     description: 'Name of the workspace to work against.'
     required: true
@@ -84,3 +88,14 @@ runs:
           --version $MODEL_VERSION  \
           --tag ${{ inputs.property }} \
           --value ${{ inputs.value }}
+
+        if ${{ inputs.isMlflowStage }}; then
+          echo "::debug::Moving model ${{ inputs.modelName }}:$MODEL_VERSION to stage ${{ inputs.value }}"
+          python -m jobtools ${{ github.action_path }}/tags.py update_model_stage \
+            --subscription-id $SUBSCRIPTION_ID \
+            --workspace-name ${{ inputs.workspaceName }} \
+            --resource-group ${{ inputs.resourceGroup }} \
+            --name ${{ inputs.modelName }} \
+            --version $MODEL_VERSION  \
+            --stage ${{ inputs.value }}
+        fi

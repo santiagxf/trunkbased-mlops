@@ -101,7 +101,8 @@ stages:
                 property: stage
                 value: production
                 exclusive: true
-                replaceExistingWith: surpassed
+                isMlflowStage: true
+                replaceExistingWith: archived
                 workspaceName: $(WORKSPACENAME)
                 resourceGroup: $(RESOURCEGROUPNAME)
 

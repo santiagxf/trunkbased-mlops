@@ -16,6 +16,9 @@ parameters:
 - name: replaceExistingWith
   type: string
   default:
+- name: isMlflowStage
+  type: boolean
+  default: false
 - name: workspaceName
   type: string 
 - name: resourceGroup
@@ -78,3 +81,14 @@ steps:
           --version $MODEL_VERSION  \
           --tag ${{ parameters.property }} \
           --value ${{ parameters.value }}
+      
+      if ${{ parameters.isMlflowStage }}; then
+        echo ""##[debug]Moving model ${{ parameters.modelName }}:$MODEL_VERSION to stage ${{ parameters.value }}"
+        python -m jobtools $ACTION_PATH/tags.py update_model_stage \
+          --subscription-id $SUBSCRIPTION_ID \
+          --workspace-name ${{ parameters.workspaceName }} \
+          --resource-group ${{ parameters.resourceGroup }} \
+          --name ${{ parameters.modelName }} \
+          --version $MODEL_VERSION  \
+          --stage ${{ parameters.value }}
+      fi
