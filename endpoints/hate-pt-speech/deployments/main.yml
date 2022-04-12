@@ -3,8 +3,7 @@ name: main
 endpoint_name: hate-pt-speech
 model: azureml:hate-pt-speech:stage=production
 code_configuration:
-  code:
-    local_path: ../../../src
+  code: ../../../src
   scoring_script: hatedetection/score/score_transformer.py
 environment: azureml:transformers-torch-19:8
 instance_type: Standard_DS3_v2
