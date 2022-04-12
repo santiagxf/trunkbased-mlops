@@ -45,7 +45,7 @@ runs:
           else
             echo "::warning::Log capturing didn't work. Check experiment details."
             echo "::debug::Waiting for the job "
-            while [ $(az ml job show -n $JOB_NAME --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} | jq '.status') == "Running" ];
+            while [ $(az ml job show -n $JOB_NAME --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} | jq -r '.status') == "Running" ];
             do
               sleep 60s
               echo "::debug::Still running" 
