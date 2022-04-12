@@ -2,5 +2,5 @@ $schema: https://azuremlschemas.azureedge.net/latest/data.schema.json
 name: portuguese-hate-speech-tweets-eval
 description: Dataset containing the evaluation text to compute metrics.
 version: 1
-type: uri_folder
+type: mltable
 path: azureml://datastores/trusted/paths/datasets/portuguese-hate-speech-tweets-eval/1/*.csv

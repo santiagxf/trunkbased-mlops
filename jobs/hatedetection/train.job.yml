@@ -9,11 +9,9 @@ inputs:
   input_dataset:
     type: mltable
     path: azureml:portuguese-hate-speech-tweets:1
-    mode: eval_mount
   eval_dataset:
     type: mltable
     path: azureml:portuguese-hate-speech-tweets-eval:1
-    mode: eval_mount
   params:
     type: uri_file
     path: ./train.params.yml
