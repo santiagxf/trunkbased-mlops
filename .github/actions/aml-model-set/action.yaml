@@ -39,25 +39,25 @@ runs:
         set -e
         
         if ${{ inputs.exclusive }}; then
-          VERSION_RESET=$(az ml model list -n ${{ inputs.modelName }} -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} | jq -r --arg PROP_VALUE ${{ inputs.value }} '.[] | select(.tags.${{ inputs.property }} == $PROP_VALUE) | .version')
+          VERSION_RESET=$(az ml model list -n "${{ inputs.modelName }}" -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} | jq -r --arg PROP_VALUE ${{ inputs.value }} '.[] | select(.tags.${{ inputs.property }} == $PROP_VALUE) | .version')
 
           if [[ "$VERSION_RESET" != "" ]]; then
             echo "::debug::Removing or replacing tag ${{ inputs.property }} from model ${{ inputs.modelName }}:$VERSION_REST"
             if [[ "${{ inputs.replaceExistingWith }}" == "" ]]; then
-              az ml model update -n ${{ inputs.modelName }} -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} --version $VERSION_RESET --set tags={}
+              az ml model update -n "${{ inputs.modelName }}" -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} --version $VERSION_RESET --set tags={}
             else
               echo "::debug::Replacing tag ${{ inputs.property }} from model ${{ inputs.modelName }}:$VERSION_REST with value ${{ inputs.replaceExistingWith }}"
-              az ml model update -n ${{ inputs.modelName }} -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} --version $VERSION_RESET --set tags.${{ inputs.property }}=${{ inputs.replaceExistingWith }}
+              az ml model update -n "${{ inputs.modelName }}" -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} --version $VERSION_RESET --set tags.${{ inputs.property }}=${{ inputs.replaceExistingWith }}
             fi
           fi
         fi
 
         if [[ "${{ inputs.modelVersion }}" == "latest" ]]; then
           echo "::debug::Identifying latest version of the model ${{ inputs.modelName }}"
-          MODEL_VERSION=$(az ml model list --name ${{ inputs.modelName }} -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} | jq -r '.[0].version')
+          MODEL_VERSION=$(az ml model list --name "${{ inputs.modelName }}" -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} | jq -r '.[0].version')
         else
           MODEL_VERSION=${{ inputs.modelVersion }}
         fi
         
         echo "::debug::Applying tag ${{ inputs.property }}=${{ inputs.value }} to model ${{ inputs.modelName }}:$MODEL_VERSION"
-        az ml model update -n ${{ inputs.modelName }} -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} --version $MODEL_VERSION --set tags.${{ inputs.property }}=${{ inputs.value }}
+        az ml model update -n "${{ inputs.modelName }}" -g ${{ inputs.resourceGroup }} -w ${{ inputs.workspaceName }} --version $MODEL_VERSION --set tags.${{ inputs.property }}=${{ inputs.value }}
