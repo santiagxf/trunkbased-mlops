@@ -50,7 +50,7 @@ steps:
               echo "##[debug]Destination: $REMOTE_FOLDER"
 
               if test -d "$LOCAL_FOLDER/${{ parameters.initialDataPath }}"; then
-                az storage blob upload-batch -d $CONTAINER_NAME --account-name ${{ parameters.storageAccount }} --source "$LOCAL_FOLDER/${{ parameters.initialDataPath }}" --destination-path $REMOTE_FOLDER
+                az storage blob upload-batch -d $CONTAINER_NAME --overwrite --account-name ${{ parameters.storageAccount }} --source "$LOCAL_FOLDER/${{ parameters.initialDataPath }}" --destination-path $REMOTE_FOLDER
               else
                 echo "##vso[task.logissue type=error]Folder $LOCAL_FOLDER/${{ parameters.initialDataPath }} not found."
                 exit 1
