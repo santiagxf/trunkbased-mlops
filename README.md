@@ -111,6 +111,8 @@ We can use MLOps to enforce this workflow and achive automatica integration and 
 
 * For details about the custom GitHub Actions / Azure DevOps templates used in this implementation check [Custom Actions](docs/actions.md) documentation.
 
+* Check the [General architecture reference](docs/architecture.md) to know more about the role of each of the components in the architecture.
+
 ## Starting using this project
 
 To get yourself started using this repository, please follow the steps at [Quick start](docs/quickstart.md). After you are done, you will have to follow some configuration related to the CI/CD implementation. That will depend on the tool you are using. Follow [Quick start guide for Azure DevOps](docs/quickstart-devops.md) and [Quick start guide for GitHub Actions](docs/quickstart-github.md) depending which one you are using.

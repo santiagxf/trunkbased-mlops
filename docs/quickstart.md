@@ -1,6 +1,6 @@
 # Quick start
 
-This guide will walk you through all the steps required to use this repository in your project.
+This guide will walk you through all the steps required to use this repository in your project. Check the [General architecture](architecture.md) reference for details about the components. .
 
 ## Prerequisites
 

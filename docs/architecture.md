@@ -1,4 +1,6 @@
-# How git repository interacts with Azure ML workspace
+# General architecture
+
+## How git repository interacts with Azure ML workspace
 
 We propose to use `git` as the central repository and the single source of truth. That means that any change that anyone wants to introduce to the project needs to be introduced by changing something in the repository.
 
@@ -35,26 +37,26 @@ Each time a developer needs to introduce changes in the model, they will change 
 
 ### Introducing changes into the current model (blue reference)
 
-Once a developer is ready to merge the changes in the current model into `main`, the pipeline model-CD will be triggered.
+Once a developer is ready to merge the changes in the current model into `main`, the pipeline model-CT will be triggered.
 
 1. Changes in `src` or `jobs` are merged into `main`.
-2. Model is built in a job in remove compute by the pipeline Model-CD.
+2. Model is built in a job in remove compute by the pipeline Model-CT.
 3. Model is registered if validations are passed and approved.
     1. Only people registered to approve the registration in the current environment (dev, qa, prd) can approve registration. Typically they will validate the model according to their standard.
-4. Model performance is assessed against the evaluation dataset. The evaluation method depends on the model implementation. In this repository the evaluation uses McNemar test.
-5. Model is deployed is the model performance is better than the current one and approvals are passed.
+
+### Evaluating and deploying new models (dark green reference)
+
+Once a new model is registered, it has to be evaluated and if appropiate, deployed.
+
+1. A new model is registered in the registry.
+2. Model performance is assessed against the evaluation dataset. The evaluation method depends on the model implementation. In this repository the evaluation uses McNemar test.
+3. Model is deployed is the model performance is better than the current one and approvals are passed.
     1. Only people registered to approve the deployment in the current environment (dev, qa, prd) can approve deployment.
 
-### Introducing changes in the scoring code (green reference)
+### Trying to integrate changes into the current model (purple reference)
 
-Some times, the inference code that is run along with the model needs to be changed. However, the model does not. This changes will be applied in the `src` folder, in the module `score`.
-
-1. Changes are introduced in the scoring code and merged into `main`.
-    1. Since `main` is protected, a new branch is created where changes are introduced in `src/*/score` folder.
-    2. a PR is created and merged.
-2. The pipeline Endpoint-CD is executed and source code is updated.
-    1. Only people registered to approve the deployment in the current environment (dev, qa, prd) can approve deployment.
-    2. Model tags are updated.
+1. A new version of the dataset is available.
+2. The pipeline Model-CT is executed which generates a new version of the model according to the new data.
 
 ### Trying to introduce changes in an environment definition (gray reference)
 
