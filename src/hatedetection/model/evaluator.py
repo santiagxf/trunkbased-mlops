@@ -61,10 +61,11 @@ def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_da
        A dictionary containing the keys `statistic`, `pvalue` as a result of the statistical test.
     """
     client = mlflow.tracking.MlflowClient()
-    if champion.isdigit() or len(client.get_latest_versions(model_name, stages=[champion])) > 0:
+    if champion.isdigit() or champion == 'latest' or len(client.get_latest_versions(model_name, stages=[champion])) > 0:
         champion_path = f"models:/{model_name}/{champion}"
     else:
         champion_path = None
+
     
     return compute_mcnemmar(champion_path,
                             f"models:/{model_name}/{challenger}",
