@@ -41,7 +41,7 @@ runs:
 
         if ${{ inputs.useGitMessageForName }}; then
           DISPLAY_NAME=$(echo "${{ github.event.head_commit.message }}" | tr -dc '[:alnum:]')
-        else:
+        else
           DISPLAY_NAME=$JOB_NAME
         fi
 
