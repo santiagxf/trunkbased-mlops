@@ -7,11 +7,12 @@ This repository has an specific structure where each folder has an intended audi
 The repository contains the follwing structure. Some folders are specific to this model we are showcasing and hence if you plan to use this template you will have to change them. They are mark with * stars * for your convenience.
 
 ```
-── .azure-pipelines                                 # Azure DevOps CI/CD
-│   └── templates                                      # Azure DevOps templates
-├── .cloud                                          # Infrastructure as code
+project
+├─ .cloud                                          # Infrastructure as code
 │   ├── dev                                             # Dev parameters
 │   └── templates                                       # ARM templates
+├── .azure-pipelines                               # Azure DevOps CI/CD           
+│   └── templates                                       # Azure DevOps templates
 ├── .github                                         # GitHub Actions CI/CD
 │   ├── actions                                         # GHA custom actions
 │   └── workflows                                       # GHA workflows
@@ -31,10 +32,6 @@ The repository contains the follwing structure. Some folders are specific to thi
 │   └── *hatedetection*                                   # Jobs for the hate dection model, including params
 ├── notebooks                                       # Experimentation notebooks
 └── src                                             # Model's source code
-    ├── *common*                                          # Common library to speed up development
-    │   ├── datasets
-    │   ├── jobs
-    │   └── models
     ├── *hatedetection*                               # Hate detection model
     │   ├── model                                       # PyTorch model implementation
     │   ├── prep                                        # Data preparation code
