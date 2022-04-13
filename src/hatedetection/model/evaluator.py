@@ -1,3 +1,4 @@
+from asyncio.log import logger
 import logging
 import torch
 import mlflow
@@ -60,15 +61,18 @@ def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_da
     Dict[str, float]
        A dictionary containing the keys `statistic`, `pvalue` as a result of the statistical test.
     """
+    logger.info(f"[INFO] Resolving model for {champion}")
     client = mlflow.tracking.MlflowClient()
     if champion.isdigit() or champion == 'latest' or len(client.get_latest_versions(model_name, stages=[champion])) > 0:
         champion_path = f"models:/{model_name}/{champion}"
     else:
         champion_path = None
+        
+    challenger_path = f"models:/{model_name}/{challenger}"
 
-    
+    logger.info(f"[INFO] Comparing models {champion_path} vs {challenger_path}")
     return compute_mcnemmar(champion_path,
-                            f"models:/{model_name}/{challenger}",
+                            challenger_path,
                             eval_dataset,
                             confidence)
 
