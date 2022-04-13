@@ -50,7 +50,7 @@ steps:
           else
             echo "##vso[task.logissue type=warning;]Log capturing didn't work. Check experiment details."
             echo "##[debug]Waiting for the job "
-            while [[ $(az ml job show -n $JOB_NAME --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }} | jq -r '.status') =~ ^(Running|Queued)$ ]];
+            while [[ $(az ml job show -n $JOB_NAME --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }} | jq -r '.status') =~ ^(Running|Queued|Preparing)$ ]];
             do
               sleep 60s
               echo "##[debug]Still queued/running" 
