@@ -28,15 +28,13 @@ def get_run(workspace: aml.Workspace, run_id: str) -> aml.Run:
         run = None
     return run
 
-def register(subscription_id: str, resource_group: str, workspace_name:str, name: str, version: str, model_path: str,
+def register(subscription_id: str, resource_group: str, workspace_name:str, name: str, model_path: str,
              description: str, run_id: str = None, datasets_id: List[str] = None, tags: Dict[str, Any] = None):
     """
     Registers a model into the model registry using the given parameters. This method requires Azure CLI Authentication.
     """
     cli_auth = AzureCliAuthentication()
     ws = aml.Workspace(subscription_id, resource_group, workspace_name, auth=cli_auth)
-
-    logging.warning(f"[WARN] Model version {version} parameter is only for backward compatibility. Latest is used.")
 
     if datasets_id:
         datasets = [get_dataset(worksapce=ws, name=ds) for ds in datasets_id]
