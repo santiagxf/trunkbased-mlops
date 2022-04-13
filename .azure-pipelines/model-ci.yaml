@@ -29,7 +29,7 @@ stages:
           azureServiceConnectionName: $(SERVICECONNECTION)
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
-          outputFile: workspace.config.json
+          outputFile: $(Pipeline.Workspace)/workspace.config.json
 
       - template: templates/pylint-run/step.yaml
         parameters:
@@ -44,7 +44,7 @@ stages:
           source: src
           useConda: true
           condaEnvName: ${{ variables.condaEnvName }}
-          params: -q --ws-config-file="workspace.config.json"
+          params: -q --ws-config-file="$(Pipeline.Workspace)/workspace.config.json"
 
       - template: templates/aml-env-ensure/step.yaml
         parameters:
