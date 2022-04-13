@@ -77,7 +77,7 @@ steps:
 
         # compare.py will return true or false depending if challenger is better. false is encoded as 0 en bash and any other value is true.
         if ${COMPARE,,} ; then
-          echo "##vso[task.logissue type=warning;]Challenger model won the compare and will be deployed."
+          echo "##vso[task.logissue type=warning;]Challenger model won the compare."
 
           WINNING=$(python $$(Build.SourcesDirectory)/.azure-pipelines/templates/aml-model-compare/model_version.py \
             --subscription-id $SUBSCRIPTION_ID \

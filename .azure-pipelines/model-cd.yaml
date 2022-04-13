@@ -50,7 +50,7 @@ stages:
           greaterIsBetter: false
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
-          failureMessage: Unable to conclude if challenger is better than champion.
+          failureMessage: Unable to conclude if challenger is better than champion
 
       - template: templates/aml-model-compare/step.yaml
         parameters:
@@ -77,7 +77,7 @@ stages:
 - stage: aml_model_deployment
   displayName: Model - Deployment
   dependsOn: aml_model_evaluate
-  condition: eq(dependencies.aml_model_evaluate.outputs['evaluate.compare.result'], 'true')
+  condition: and(eq(dependencies.aml_model_evaluate.outputs['evaluate.compare.result'], 'true'), eq(dependencies.aml_model_evaluate.outputs['evaluate.jobMetricAssert.result'], 'true'))
   jobs:
   - deployment: model_deployment
     displayName: Model deployment
