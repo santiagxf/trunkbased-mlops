@@ -57,13 +57,15 @@ runs:
           else
             echo "::warning::Log capturing didn't work. Check experiment details."
             echo "::debug::Waiting for the job "
-            while [[ $(az ml job show -n $JOB_NAME --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} | jq -r '.status') =~ ^(Running|Queued|Preparing)$ ]];
+            JOB_STATUS="Queued"
+            while [[ $JOB_STATUS =~ ^(Running|Queued|Preparing)$ ]];
             do
               sleep 60s
               echo "::debug::Still queued/running" 
+              JOB_STATUS=$(az ml job show -n $JOB_NAME --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} | jq -r '.status')
             done
 
-            if [[ $(az ml job show -n $JOB_NAME --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} | jq -r '.status') == "Failed" ]]; then
+            if [[ $JOB_STATUS == "Failed" ]]; then
               echo "::error::Remote job status is failed."
               exit 1
             fi
