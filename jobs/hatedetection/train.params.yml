@@ -11,7 +11,8 @@ trainer:
     learning_rate: 0.00005
     warmup_steps: 500
     weight_decay: 0.01
-    report_to: none
+    report_to: 
+     - "tensorboard"
 data:
     format: 'csv'
     preprocessing:
