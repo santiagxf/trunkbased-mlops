@@ -90,7 +90,7 @@ steps:
           echo "##vso[task.setvariable variable=result;isOutput=true]true"
           echo "##vso[task.setvariable variable=winning;isOutput=true]$WINNING"
         else
-          echo "##[debug]Challenger model is not better than the current champion."
+          echo "##vso[task.logissue type=warning;Challenger model is not better than the current champion."
           echo "##vso[task.setvariable variable=result;isOutput=true]false"
         fi
     target:
