@@ -41,6 +41,7 @@ runs:
 
         if ${{ inputs.useGitMessageForName }}; then
           DISPLAY_NAME=$(echo "${{ github.event.head_commit.message }}" | tr -dc '[:alnum:]')
+          echo "::debug::Configuring display name to: $DISPLAY_NAME" 
         else
           DISPLAY_NAME=$JOB_NAME
         fi

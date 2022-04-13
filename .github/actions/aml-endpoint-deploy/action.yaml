@@ -65,7 +65,7 @@ runs:
           echo "::debug::Creating endpoint with name: $ENDPOINT_NAME"
           if [[ $(az ml online-endpoint show -n $ENDPOINT_NAME) ]]; then
             echo "::debug::Endpoint $ENDPOINT_NAME already exits. Creation skipped."
-            if [[ $(az ml online-endpoint show -n $ENDPOINT_NAME | yq .auth_mode != "$ENDPOINT_AUTH") ]]; then
+            if [[ $(az ml online-endpoint show -n $ENDPOINT_NAME | yq .auth_mode) != "$ENDPOINT_AUTH" ]]; then
               echo "::warning file=$ENDPOINT_FILE::Endpoint $ENDPOINT_NAME indicates a different authentication method that requires redeployment."
             fi
           else
