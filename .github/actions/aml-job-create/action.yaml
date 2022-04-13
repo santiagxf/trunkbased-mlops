@@ -63,7 +63,7 @@ runs:
               echo "::debug::Still queued/running" 
             done
 
-            if [[ $(az ml job show -n $JOB_NAME --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} | jq -r '.status') == "Failed" ]];
+            if [[ $(az ml job show -n $JOB_NAME --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} | jq -r '.status') == "Failed" ]]; then
               echo "::error::Remote job status is failed."
               exit 1
             fi
