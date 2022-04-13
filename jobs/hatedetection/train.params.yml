@@ -3,8 +3,8 @@ model:
     baseline: 'neuralmind/bert-base-portuguese-cased'
     output_dir: './outputs'
 trainer:
-    output_dir: './results'
-    logging_dir: './outputs/logs'
+    output_dir: './outputs/results'
+    logging_dir: './outputs/board'
     num_train_epochs: 3
     per_device_train_batch_size: 64
     per_device_eval_batch_size: 64
