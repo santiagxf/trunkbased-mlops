@@ -8,6 +8,10 @@ inputs:
   jobFile:
     description: 'Path to the job file.'
     required: true
+  useGitMessageForName:
+    description: 'Indicates if git message should be used for the commit message (experimental)'
+    required: true
+    default: 'true'
   workspaceName:
     description: 'Name of the workspace to work against.'
     required: true
@@ -35,7 +39,13 @@ runs:
         echo "::debug::Creating job with name: $JOB_NAME" 
         echo "::set-output name=jobName::$JOB_NAME"
 
-        az ml job create -n $JOB_NAME -f ${{ inputs.jobFile }} --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }}
+        if ${{ inputs.useGitMessageForName }}; then
+          DISPLAY_NAME=$(echo "${{ github.event.head_commit.message }}" | tr -dc '[:alnum:]')
+        else:
+          DISPLAY_NAME=$JOB_NAME
+        fi
+
+        az ml job create -n $JOB_NAME -f ${{ inputs.jobFile }} --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} --set display_name=$DISPLAY_NAME
 
         if ! ${{ inputs.noWait }}; then
           echo "::debug::Streaming logs"
