@@ -118,7 +118,7 @@ def get_metric_for_model(workspace: aml.Workspace,
         else:
             return metric_value
 
-    logging.warn("[WARN] No model matches the given specification. No metric is returned")
+    logging.warning("[WARN] No model matches the given specification. No metric is returned")
     return None  
 
 def get_run_for_model(workspace: aml.Workspace,

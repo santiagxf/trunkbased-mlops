@@ -97,7 +97,7 @@ runs:
             --workspace-name ${{ inputs.workspaceName }} \
             --resource-group ${{ inputs.resourceGroup }} \
             --model-name ${{ inputs.modelName }} \
-            --version ${{ inputs.challenger }}
+            --version ${{ inputs.challenger }})
 
           echo "::debug::Challenger version is $WINNING."
           echo "::set-output name=result::true"
