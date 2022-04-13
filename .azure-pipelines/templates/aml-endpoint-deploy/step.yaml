@@ -79,6 +79,7 @@ steps:
             else
               echo "##[debug]Model being targeted is being overwriten with version ${{ parameters.modelVersion }}"
               TARGET_MODEL_VERSION=${{ parameters.modelVersion }}
+              sed -i 's/:'$DEPLOYMENT_MODEL_VERSION'/:'$TARGET_MODEL_VERSION'/' $DEPLOYMENT_FILE
             fi
             
             echo "##[debug]Working on deployment with name: $ENDPOINT_NAME/$DEPLOYMENT_NAME"

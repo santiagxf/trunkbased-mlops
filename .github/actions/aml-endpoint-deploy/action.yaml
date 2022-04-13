@@ -92,6 +92,7 @@ runs:
             else
               echo "::debug::Model being targeted is being overwriten with version ${{ inputs.modelVersion }}"
               TARGET_MODEL_VERSION=${{ inputs.modelVersion }}
+              sed -i 's/:'$DEPLOYMENT_MODEL_VERSION'/:'$TARGET_MODEL_VERSION'/' $DEPLOYMENT_FILE
             fi
             
             echo "::debug::Working on deployment with name: $ENDPOINT_NAME/$DEPLOYMENT_NAME"
@@ -120,7 +121,7 @@ runs:
 
               MODEL_TAGGED=$(az ml model list -n $DEPLOYMENT_MODEL | jq -r --arg TARGET_MODEL_TAG $TARGET_MODEL_TAG --arg TARGET_MODEL_TVALUE $TARGET_MODEL_TVALUE '.[] | select(.tags[$TARGET_MODEL_TAG] == $TARGET_MODEL_TVALUE) | .version')
               echo "::debug::Updating yaml files with model version: $MODEL_TAGGED"
-              sed -i 's/:'$DEPLOYMENT_MODEL_VERSION'/:'$MODEL_TAGGED'/' $DEPLOYMENT_FILE 
+              sed -i 's/:'$DEPLOYMENT_MODEL_VERSION'/:'$MODEL_TAGGED'/' $DEPLOYMENT_FILE
             fi
         
             echo "::debug::Creating deployment with name: $ENDPOINT_NAME/$DEPLOYMENT_NAME"
