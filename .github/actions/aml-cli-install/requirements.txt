@@ -6,3 +6,4 @@ PyJWT==2.3.0
 cryptography<=3.4.8
 idna==2.10
 mlflow-skinny
+azureml-mlflow==1.37.0
