@@ -40,13 +40,14 @@ runs:
         echo "::set-output name=jobName::$JOB_NAME"
 
         if ${{ inputs.useGitMessageForName }}; then
-          DISPLAY_NAME=$(echo "${{ github.event.head_commit.message }}" | tr -dc '[:alnum:]')
+          DISPLAY_NAME="${{ github.event.head_commit.message }}"
+          DISPLAY_NAME=$(echo ${DISPLAY_NAME// /-} | tr -dc '[:alnum:]-')
           echo "::debug::Configuring display name to: $DISPLAY_NAME" 
         else
           DISPLAY_NAME=$JOB_NAME
         fi
 
-        az ml job create -n $JOB_NAME -f ${{ inputs.jobFile }} --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} --set display_name=$DISPLAY_NAME
+        az ml job create -n $JOB_NAME -f ${{ inputs.jobFile }} --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} --set display_name="$DISPLAY_NAME"
 
         if ! ${{ inputs.noWait }}; then
           echo "::debug::Streaming logs"

@@ -36,9 +36,11 @@ inputs:
 
 outputs:
   result:
-    description: ' Either `true` or `false` depending if the comparison favored `challenger` over `champion`.'
+    description: 'Either `true` or `false` depending if the comparison favored `challenger` over `champion`.'
     value: ${{ steps.compare.outputs.result }}
-
+  winning:
+    description: 'The version that won the compare.'
+    value: ${{ steps.compare.outputs.winning }}
 
 runs:
   using: "composite"
@@ -89,7 +91,17 @@ runs:
         # compare.py will return True or False, but bash expects lowercase.
         if ${COMPARE,,} ; then
           echo "::debug::Challenger model won the compare and will be deployed."
+
+          WINNING=$(python ${{ github.action_path }}/model_version.py \
+            --subscription-id $SUBSCRIPTION_ID \
+            --workspace-name ${{ inputs.workspaceName }} \
+            --resource-group ${{ inputs.resourceGroup }} \
+            --model-name ${{ inputs.modelName }} \
+            --version ${{ inputs.challenger }}
+
+          echo "::debug::Challenger version is $WINNING."
           echo "::set-output name=result::true"
+          echo "::set-output name=winning::$WINNING"
         else
           echo "::warning::Challenger model is not better than the current champion."
           echo "::set-output name=result::false"

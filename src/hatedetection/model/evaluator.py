@@ -60,20 +60,37 @@ def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_da
     Dict[str, float]
        A dictionary containing the keys `statistic`, `pvalue` as a result of the statistical test.
     """
-    logging.info(f"[INFO] Resolving model for {champion}")
-    client = mlflow.tracking.MlflowClient()
-    if champion.isdigit() or champion == 'latest' or len(client.get_latest_versions(model_name, stages=[champion])) > 0:
-        champion_path = f"models:/{model_name}/{champion}"
-    else:
-        champion_path = None
-        
-    challenger_path = f"models:/{model_name}/{challenger}"
-
-    logging.info(f"[INFO] Comparing models {champion_path} vs {challenger_path}")
-    return compute_mcnemmar(champion_path,
-                            challenger_path,
+    
+    logging.info(f"[INFO] Comparing models {champion} vs {challenger}")
+    return compute_mcnemmar(_model_uri_or_none(champion),
+                            _model_uri_or_none(challenger),
                             eval_dataset,
                             confidence)
+
+def _model_uri_or_none(model_name: str, version: str) -> str:
+    """
+    Build a model URI in MLFlow format for a given model in the registry.
+
+    Parameters
+    ----------
+    model_name : str
+        Name of the model
+    version : str
+        This can be a number, or a label like `latest` or `Production`
+
+    Returns
+    -------
+    str
+        The model URI or None.
+    """
+    client = mlflow.tracking.MlflowClient()
+    if version.isdigit() or version == 'latest':
+        return f"models:/{model_name}/{version}"
+    else:
+        if len(client.get_latest_versions(model_name, stages=[version])) > 0:
+            return f"models:/{model_name}/{version}"
+
+    return None
 
 def _predict_batch(model, data, batch_size = 64):
     sample_size = len(data)

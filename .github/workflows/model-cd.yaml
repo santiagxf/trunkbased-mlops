@@ -86,6 +86,7 @@ jobs:
 
     outputs:
       result: ${{ steps.compare.outputs.result }}
+      winning: ${{ steps.compare.outputs.winning }}
 
   deployment:
     environment: amlworkspace_dev
@@ -118,7 +119,7 @@ jobs:
         uses: ./.github/actions/aml-model-set
         with:
           modelName: ${MODELNAME}
-          modelVersion: latest
+          modelVersion: ${{ needs.evaluation.outputs.winning }}
           property: stage
           value: production
           exclusive: true
@@ -133,8 +134,10 @@ jobs:
         with:
           endpointFile: endpoints/*/endpoint.yml
           deploymentFile: deployments/*.yml
+          modelVersion: ${{ needs.evaluation.outputs.winning }}
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
           secretsToKeyVault: true
           keyVaultName: ${KEYVAULTNAME}
+
   
