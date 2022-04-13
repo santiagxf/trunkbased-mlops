@@ -91,11 +91,34 @@
             "metadata": {
                 "description": "Object ID used for managing secrets in Key Vault"
             }
+        },
+        "adoOrganizationName": {
+            "type": "string",
+            "metadata": {
+                "description": "Azure DevOps Organization Name"
+            }
+        },
+        "adoProjectName": {
+            "type": "string"
+        },
+        "adoAPIVersion": {
+            "defaultValue": "7.1-preview.7",
+            "type": "string"
+        },
+        "adoModelCdPipelineDefinitionId": {
+            "type": "int"
+        },
+        "adoPAT": {
+            "type": "securestring",
+            "metadata": {
+                "description": "Personal Authentication Token for Azure DevOps"
+            }
         }
     },
     "functions": [],
     "variables": {
-        "workspaceDeploymentName": "[concat('azureml-', deployment().name)]"
+        "workspaceDeploymentName": "[concat('azureml-', deployment().name)]",
+        "logicAppResourceName": "[replace(parameters('workspaceName'), 'mlw', 'lga-modelcd')]"
     },
     "resources": [
         {
@@ -236,6 +259,57 @@
                 }
             },
             "dependsOn": ["[variables('workspaceDeploymentName')]"]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-06-01",
+            "name": "[concat('ado-automation-', variables('workspaceDeploymentName'))]",
+            "resourceGroup": "[parameters('resourceGroupName')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "relativePath": "automation/lgaTriggerAdoPipeline.json"
+                },
+                "parameters": {
+                    "logicAppResourceName": {
+                        "value": "[variables('logicAppResourceName')]"
+                    },
+                    "adoOrganizationName": {
+                        "value": "[parameters('adoOrganizationName')]"
+                    },
+                    "adoProjectName": {
+                        "value": "[parameters('adoProjectName')]"
+                    },
+                    "adoPipelineDefinitionId": {
+                        "value": "[parameters('adoModelCdPipelineDefinitionId')]"
+                    },
+                    "adoPAT": {
+                        "value": "[parameters('adoPAT')]"
+                    }
+                }
+            },
+            "dependsOn": ["[variables('workspaceDeploymentName')]"]
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2020-06-01",
+            "name": "[concat('model-automation', variables('workspaceDeploymentName'))]",
+            "resourceGroup": "[parameters('resourceGroupName')]",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "relativePath": "automation/egrModelRegistered.json"
+                },
+                "parameters": {
+                    "workspaceResourceId": {
+                        "value": "[resourceId(parameters('resourceGroupName'), 'Microsoft.MachineLearningServices/workspaces', parameters('workspaceName'))]"
+                    },
+                    "targetLogicAppName": {
+                        "value": "[parameters('logicAppResourceName')]"
+                    }
+                }
+            },
+            "dependsOn": ["[concat('logicapp-automation-', variables('workspaceDeploymentName'))]"]
         }
     ],
     "outputs": {}

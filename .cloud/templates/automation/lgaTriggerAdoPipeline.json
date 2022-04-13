@@ -1,0 +1,168 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "logicAppResourceName": {
+            "defaultValue": "lga-trunkbased-modelregistry-dev",
+            "type": "string"
+        },
+        "adoOrganizationName": {
+            "type": "string"
+        },
+        "adoProjectName": {
+            "type": "string"
+        },
+        "adoAPIVersion": {
+            "defaultValue": "7.1-preview.7",
+            "type": "string"
+        },
+        "adoPipelineDefinitionId": {
+            "type": "int"
+        },
+        "adoPAT": {
+            "type": "securestring"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Logic/workflows",
+            "apiVersion": "2017-07-01",
+            "name": "[parameters('logicAppResourceName')]",
+            "location": "eastus2",
+            "properties": {
+                "state": "Enabled",
+                "definition": {
+                    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+                    "contentVersion": "1.0.0.0",
+                    "parameters": {
+                        "apiVersion": {
+                            "value": "[parameters('adoAPIVersion')]",
+                            "defaultValue": "7.1-preview.7",
+                            "type": "String"
+                        },
+                        "organization": {
+                            "value": "[parameters('adoOrganizationName')]",
+                            "defaultValue": "",
+                            "type": "String"
+                        },
+                        "pipelineDefinitionId": {
+                            "value": "[parameters('adoPipelineDefinitionId')]",
+                            "defaultValue": 1,
+                            "type": "Int"
+                        },
+                        "project": {
+                            "value": "[parameters('adoProjectName')]",
+                            "defaultValue": "",
+                            "type": "String"
+                        }
+                    },
+                    "triggers": {
+                        "manual": {
+                            "type": "Request",
+                            "kind": "EventGrid",
+                            "inputs": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "items": {
+                                                "properties": {
+                                                    "data": {
+                                                        "properties": {
+                                                            "ModelName": {
+                                                                "type": "string"
+                                                            },
+                                                            "ModelProperties": {
+                                                                "properties": {
+                                                                    "type": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "ModelTags": {
+                                                                "properties": {
+                                                                    "area": {
+                                                                        "type": "string"
+                                                                    },
+                                                                    "type": {
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "type": "object"
+                                                            },
+                                                            "ModelVersion": {
+                                                                "type": "integer"
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    },
+                                                    "dataVersion": {
+                                                        "type": "string"
+                                                    },
+                                                    "eventTime": {
+                                                        "type": "string"
+                                                    },
+                                                    "eventType": {
+                                                        "type": "string"
+                                                    },
+                                                    "id": {
+                                                        "type": "string"
+                                                    },
+                                                    "metadataVersion": {
+                                                        "type": "string"
+                                                    },
+                                                    "subject": {
+                                                        "type": "string"
+                                                    },
+                                                    "topic": {
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "topic",
+                                                    "subject",
+                                                    "eventType",
+                                                    "eventTime",
+                                                    "id",
+                                                    "data",
+                                                    "dataVersion",
+                                                    "metadataVersion"
+                                                ],
+                                                "type": "object"
+                                            },
+                                            "type": "array"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "actions": {
+                        "HTTP": {
+                            "runAfter": {},
+                            "type": "Http",
+                            "inputs": {
+                                "authentication": {
+                                    "password": "[parameters('adoPAT')]",
+                                    "type": "Basic",
+                                    "username": "PAT"
+                                },
+                                "body": "@concat('{\r\n    \"definition\": {\r\n        \"id\": ', parameters('pipelineDefinitionId'),'\r\n    }\r\n}')",
+                                "headers": {
+                                    "Accept": "application/json",
+                                    "Content-Type": "application/json"
+                                },
+                                "method": "POST",
+                                "uri": "@{concat('https://dev.azure.com/',parameters('organization'),'/',parameters('project'),'/_apis/build/builds?api-version=',parameters('apiVersion'))}"
+                            }
+                        }
+                    },
+                    "outputs": {}
+                },
+                "parameters": {}
+            }
+        }
+    ]
+}

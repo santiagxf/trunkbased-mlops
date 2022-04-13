@@ -1,0 +1,65 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "topicName": {
+            "defaultValue": "ModelRegistered",
+            "type": "string"
+        },
+        "workspaceResourceId": {
+            "type": "string"
+        },
+        "targetLogicAppName": {
+            "type": "string"
+        }
+    },
+    "variables": {
+        "targetLogicApp": {
+            "name": "[parameters('topicName')]",
+            "resourceId": "[resourceId('Microsoft.Logic/workflows', parameters('targetLogicAppName'))]",
+            "triggerId": "[resourceId('Microsoft.Logic/workflows/triggers', parameters('targetLogicAppName'), 'manual')]"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.EventGrid/systemTopics",
+            "apiVersion": "2021-12-01",
+            "name": "[parameters('topicName')]",
+            "location": "eastus2",
+            "properties": {
+                "source": "[parameters('workspaceResourceId')]",
+                "topicType": "Microsoft.MachineLearningServices.Workspaces"
+            }
+        },
+        {
+            "type": "Microsoft.EventGrid/systemTopics/eventSubscriptions",
+            "apiVersion": "2021-12-01",
+            "name": "[concat(parameters('systemTopics_ModelRegistered_name'), '/egs-trunkbased-modelregistry-dev')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.EventGrid/systemTopics', parameters('topicName'))]"
+            ],
+            "properties": {
+                "destination": {
+                    "properties": {
+                        "maxEventsPerBatch": 1,
+                        "preferredBatchSizeInKilobytes": 64,
+                        "endpointUrl": "[listCallbackUrl(variables('targetLogicApp').triggerId, '2019-05-01').value]"
+                    },
+                    "endpointType": "WebHook"
+                },
+                "filter": {
+                    "includedEventTypes": [
+                        "Microsoft.MachineLearningServices.ModelRegistered"
+                    ],
+                    "enableAdvancedFilteringOnArrays": true
+                },
+                "labels": [],
+                "eventDeliverySchema": "EventGridSchema",
+                "retryPolicy": {
+                    "maxDeliveryAttempts": 30,
+                    "eventTimeToLiveInMinutes": 1440
+                }
+            }
+        }
+    ]
+}

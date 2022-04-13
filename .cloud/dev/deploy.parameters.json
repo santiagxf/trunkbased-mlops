@@ -31,6 +31,15 @@
         },
         "datasetsFileSystem": {
             "value": "trusted"
+        },
+        "adoOrganizationName": {
+            "value": "santiagxf"
+        },
+        "adoProjectName": {
+            "value": "trunkbased-mlops"
+        },
+        "adoModelCdPipelineDefinitionId": {
+            "value": 14
         }
     }
 }
