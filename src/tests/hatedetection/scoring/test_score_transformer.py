@@ -1,6 +1,8 @@
 """Unit tests for score_transformer
 """
+import os
 import pandas as pd
+import mlflow
 import pytest
 from azureml.core import Workspace
 from azureml.core.authentication import AzureCliAuthentication
@@ -28,30 +30,21 @@ def test_split_to_sequence_len(text):
     n_words = [len(seq.split()) for seq in sequences]
     assert all(n <= seq_len for n in n_words)
 
-def test_init_from_aml_workspace(ws_config_file):
-    """ Unit test for score_transformer.init()
-    """
-    # Authenticate
-    cli_auth = AzureCliAuthentication()
-
-    # Get Azure ML Workspace information
-    ws = Workspace.from_config(path=ws_config_file, auth=cli_auth)
-
-    score_transformer.init(from_workspace=True, workspace=ws)
-    assert score_transformer.MODEL is not None
-
 def test_run_scores(ws_config_file):
     """Unit test for score_transformer.run()
     """
     # Authenticate
     cli_auth = AzureCliAuthentication()
     ws = Workspace.from_config(path=ws_config_file, auth=cli_auth)
+    
+    mlflow.set_tracking_uri(ws.get_mlflow_tracking_uri())
+    os.environ['MLFLOW_TRACKING_URI'] = ws.get_mlflow_tracking_uri()
 
-    score_transformer.init(from_workspace=True, workspace=ws)
-    scores = score_transformer.run(raw_data=raw_data)
+    model = mlflow.pyfunc.load_model(f'models:/hate-pt-speech/latest')
+    results = model.predict(raw_data)
 
     # Test scores is within range (0,1)
-    assert all(score >= 0 for score in scores)
-    assert all(score <= 1 for score in scores)
+    assert all(score >= 0 for score in results['confidence'])
+    assert all(score <= 1 for score in results['confidence'])
     # Test number of scores returned is the same as the number of rows of input data
-    assert len(scores) == len(raw_data)
+    assert len(results) == len(raw_data)
