@@ -99,11 +99,11 @@ We can use MLOps to enforce this workflow and achive automatica integration and 
 | Area             | Workflow/pipeline    | Description                                        | Triggers on |
 |------------------|------------------|----------------------------------------------------| ----------- |
 | Workspaces       | [Workspace-CD](docs/workflows.md#Workspaces)     | Performs deployments of the Azure Machine Learning resources using Infrastructure as Code (IaC) and ensure workspaces' assets including datasets, data sources and compute clusters. | `main` for changes in path `datasets/*` and `.cloud/*`   | 
-| Environments     | [Environment-CI](docs/workflows.md#Environments)   | Performs the build and basic validations on the training and inference environments. | PR into `main` on paths `environments/*` |
-| Environments     | [Environment-CD](docs/workflows.md#Environments)   | Builds training and inference environments and deploys them on Azure ML | `main` for changes in path `environments/*` |
-| Models           | [Model-CI](docs/workflows.md#Models)         | Ensures that the model training can be executed in the indicated training environment and that the source code complies with quality standards. | PR into `main` for paths `src/*` and `jobs/*`. |
-| Models           | [Model-CT](docs/workflows.md#Models)         | Responsable for continous training of the model and its corresponding registration in model's registry. This pipeline ensure `main` is always deployable. | `main` for changes in path `src/*` and `jobs/*` |
-| Models           | [Model-CD](docs/workflows.md#Models)         | Responsable of the continuos evaluation and deployment of new trained models. | New model registered in the model registry |
+| Environments     | [Environment-CI](docs/workflows.md#environment-ci-traininginference-environments-continuous-integration)   | Performs the build and basic validations on the training and inference environments. | PR into `main` on paths `environments/*` |
+| Environments     | [Environment-CD](docs/workflows.md#environment-cd-traininginference-environments-continuous-deployment)   | Builds training and inference environments and deploys them on Azure ML | `main` for changes in path `environments/*` |
+| Models           | [Model-CI](docs/workflows.md#model-ci-model-continuous-integration)         | Ensures that the model training can be executed in the indicated training environment and that the source code complies with quality standards. | PR into `main` for paths `src/*` and `jobs/*`. |
+| Models           | [Model-CT](docs/workflows.md#model-ct-model-continuous-training)         | Responsable for continous training of the model and its corresponding registration in model's registry. This pipeline ensure `main` is always deployable. | `main` for changes in path `src/*` and `jobs/*` |
+| Models           | [Model-CD](docs/workflows.md#model-cd-model-continuous-deployment)         | Responsable of the continuos evaluation and deployment of new trained models. | New model registered in the model registry |
 
 ### Details
 
