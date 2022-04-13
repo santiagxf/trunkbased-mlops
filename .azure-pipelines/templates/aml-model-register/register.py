@@ -1,3 +1,4 @@
+import os
 import logging
 import mlflow
 import azureml.core as aml
@@ -35,7 +36,9 @@ def register(subscription_id: str, resource_group: str, workspace_name:str, name
     if run_id:
         logging.info(f"[INFO] Logging with MLflow {run_id}.")
 
-        mlflow.set_registry_uri(ws.get_mlflow_tracking_uri())
+        mlflow_tracking_uri = f'azureml://eastus2.api.azureml.ms/mlflow/v1.0/subscriptions/{subscription_id}/resourceGroups/{resource_group}/providers/Microsoft.MachineLearningServices/workspaces/{workspace_name}'
+        os.environ['MLFLOW_TRACKING_URI'] = mlflow_tracking_uri
+        mlflow.set_registry_uri(mlflow_tracking_uri)
         mlflow.register_model(f'runs:/{run_id}/{model_path}', name)
     else:
         aml.Model.register(workspace=ws, 
