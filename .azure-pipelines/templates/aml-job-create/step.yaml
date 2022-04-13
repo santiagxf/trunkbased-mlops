@@ -44,6 +44,11 @@ steps:
               sleep 60s
               echo "##[debug]Still queued/running" 
             done
+
+            if [[ $(az ml job show -n $JOB_NAME --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }} | jq -r '.status') == "Failed" ]];
+              echo "##vso[task.logissue type=error;]Remote job status is failed."
+              exit 1
+            fi
           fi
         fi
     target:
