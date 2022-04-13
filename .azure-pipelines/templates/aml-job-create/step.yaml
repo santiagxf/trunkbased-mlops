@@ -55,7 +55,7 @@ steps:
             do
               sleep 60s
               echo "##[debug]Still queued/running"
-              JOB_STATUS=$(az ml job show -n $JOB_NAME --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }} | jq -r '.status')
+              JOB_STATUS=$(az ml job show -n $JOB_NAME --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }} | jq -r '.status')
             done
 
             if [[ $JOB_STATUS == "Failed" ]]; then
