@@ -10,7 +10,7 @@ trainer:
     per_device_eval_batch_size: 64
     learning_rate: 0.00005
     warmup_steps: 500
-    weight_decay: 0.01
+    weight_decay: 0.1
     report_to: 
      - "tensorboard"
 data:
