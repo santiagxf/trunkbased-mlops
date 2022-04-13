@@ -31,9 +31,10 @@ stages:
       - template: templates/aml-job-create/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
-          stepDisplayName: Computing McNemar statistic
           name: ${{ variables.modelName }}-eval
+          stepDisplayName: Computing McNemar statistic
           jobFile: jobs/hatedetection/evaluate.job.yml
+          useGitMessageForName: false
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
           noWait: false
