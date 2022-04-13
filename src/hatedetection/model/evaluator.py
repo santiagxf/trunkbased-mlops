@@ -62,8 +62,8 @@ def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_da
     """
     
     logging.info(f"[INFO] Comparing models {champion} vs {challenger}")
-    return compute_mcnemmar(_model_uri_or_none(champion),
-                            _model_uri_or_none(challenger),
+    return compute_mcnemmar(_model_uri_or_none(model_name, champion),
+                            _model_uri_or_none(model_name, challenger),
                             eval_dataset,
                             confidence)
 
