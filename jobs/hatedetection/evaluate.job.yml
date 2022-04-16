@@ -4,7 +4,12 @@ experiment_name: hate-pt-speech-eval
 description: Evaluates two hate detection models
 code: ../../src/
 command: >-
-  python -m jobtools hatedetection.model.evaluator resolve_and_compare --eval-dataset ${{inputs.eval_dataset}} --model-name ${{inputs.model_name}} --champion ${{inputs.champion}} --challenger ${{inputs.challenger}} --confidence ${{inputs.confidence}}
+  pyrunit hatedetection.model.evaluator resolve_and_compare \
+            --eval-dataset ${{inputs.eval_dataset}} \
+            --model-name ${{inputs.model_name}} \
+            --champion ${{inputs.champion}} \
+            --challenger ${{inputs.challenger}} \
+            --confidence ${{inputs.confidence}}
 inputs:
   eval_dataset:
     path: azureml:portuguese-hate-speech-tweets-eval:4
@@ -12,6 +17,5 @@ inputs:
   champion: Production
   challenger: latest
   confidence: 0.05
-
 environment: azureml:transformers-torch-19:9
 compute: azureml:gpuprdev
