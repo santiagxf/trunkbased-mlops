@@ -169,7 +169,7 @@ Ensure that a given dataset exists in Azure Machine Learning Services. If the da
 
 **Sample usage**
 
-> Creates all the datasets in the folder `datasets` that are specified in a folder structure like `datasets/[datasetname]/dataset.yml`. Datasets are initialized with data stored in the `data` folder, like ``datasets/[datasetname]/data/*`.
+> Creates all the datasets in the folder `datasets` that are specified in a folder structure like `datasets/[datasetname]/dataset.yml`. Datasets are initialized with data stored in the `sample` folder, like ``datasets/[datasetname]/sample/*`.
 
 ```yml
 - template: templates/aml-dataset-create/step.yaml
@@ -177,7 +177,7 @@ Ensure that a given dataset exists in Azure Machine Learning Services. If the da
     azureServiceConnectionName: $(SERVICECONNECTION)
     datasetFile: datasets/*/dataset.yml
     initialize: true
-    initialDataPath: data
+    initialDataPath: sample
     storageAccount: $(STORAGEACCOUNTNAME)
     workspaceName: $(WORKSPACENAME)
     resourceGroup: $(RESOURCEGROUPNAME)

@@ -18,9 +18,9 @@ project
 │   └── workflows                                       # GHA workflows
 ├── datasets                                        # Datasets configuration
 │   ├── *portuguese-hate-speech-tweets*                   # Training dataset
-│   │   └── data                                            # Initial data
+│   │   └── sample                                            # Initial sample data
 │   └── *portuguese-hate-speech-tweets-eval*              # Evaluation dataset
-│       └── data                                            # Initial data
+│       └── sample                                            # Initial sample data
 ├── docs                                            # Documentation
 ├── endpoints                                       # Azure ML endpoints
 │   └── *hate-pt-speech*                                  # Rest service for the model

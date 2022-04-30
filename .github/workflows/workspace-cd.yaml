@@ -48,7 +48,7 @@ jobs:
         with:
           datasetFile: datasets/*/dataset.yml
           initialize: true
-          initialDataPath: data
+          initialDataPath: sample
           storageAccount: ${STORAGEACCOUNTNAME}
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
