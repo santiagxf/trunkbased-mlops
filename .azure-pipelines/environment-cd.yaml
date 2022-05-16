@@ -28,11 +28,11 @@ stages:
 
       - template: templates/aml-env-build/step.yaml
         parameters:
-          envFile: environments/*/environment.yml
+          envFile: .aml/environments/*/environment.yml
 
       - template: templates/aml-env-ensure/step.yaml
         parameters:
-          envFile: environments/*/environment.yml
+          envFile: .aml/environments/*/environment.yml
           validateOnly: false
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
