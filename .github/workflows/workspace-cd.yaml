@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main ]
     paths:
-      - datasets/**
+      - .aml/data/**
       - .cloud/**
 
 jobs:
@@ -46,7 +46,7 @@ jobs:
         name: Workspaces - Datasets initialization
         uses: ./.github/actions/aml-dataset-create
         with:
-          datasetFile: datasets/*/dataset.yml
+          datasetFile: .aml/data/*/dataset.yml
           initialize: true
           initialDataPath: sample
           storageAccount: ${STORAGEACCOUNTNAME}

@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-    - jobs/**
+    - .aml/jobs/**
     - src/**
 
 jobs:
@@ -39,7 +39,7 @@ jobs:
       - name: Building environment
         uses: ./.github/actions/aml-env-build
         with:
-          envFile: environments/${CONDAENVNAME}/environment.yml
+          envFile: .aml/environments/${CONDAENVNAME}/environment.yml
 
       - name: Getting workspace config
         uses: ./.github/actions/aml-workspace-get-config
@@ -68,7 +68,7 @@ jobs:
       - name: Ensuring environment
         uses: ./.github/actions/aml-env-ensure
         with:
-          envFile: environments/${CONDAENVNAME}/environment.yml
+          envFile: .aml/environments/${CONDAENVNAME}/environment.yml
           validateOnly: true
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
@@ -77,7 +77,7 @@ jobs:
         uses: ./.github/actions/aml-job-create
         with:
           name: ${MODELNAME}
-          jobFile: jobs/hatedetection/train.job.yml
+          jobFile: .aml/jobs/hatedetection/train.job.yml
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
           noWait: false

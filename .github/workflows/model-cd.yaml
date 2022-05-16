@@ -40,7 +40,7 @@ jobs:
         uses: ./.github/actions/aml-job-create
         with:
           name: ${{ env.MODELNAME }}-eval
-          jobFile: jobs/hatedetection/evaluate.job.yml
+          jobFile: .aml/jobs/hatedetection/evaluate.job.yml
           useGitMessageForName: false
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
@@ -67,7 +67,7 @@ jobs:
           modelName: ${MODELNAME}
           champion: stage=production
           challenger: latest
-          endpoint: endpoints/${MODELNAME}/endpoint.yml
+          endpoint: .aml/endpoints/${MODELNAME}/endpoint.yml
           compareBy: eval_recall
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
@@ -133,7 +133,7 @@ jobs:
         id: deployment
         uses: ./.github/actions/aml-endpoint-deploy
         with:
-          endpointFile: endpoints/*/endpoint.yml
+          endpointFile: .aml/endpoints/*/endpoint.yml
           deploymentFile: deployments/*.yml
           modelVersion: ${{ needs.evaluation.outputs.winning }}
           workspaceName: ${WORKSPACENAME}

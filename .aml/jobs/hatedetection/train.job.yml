@@ -2,7 +2,7 @@ $schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
 display_name: hate-pt-speech
 experiment_name: hate-pt-speech
 description: Trains a model to clasificate tweets text according to hate/no hate
-code: ../../src/
+code: ../../../src/
 command: >-
   pyrunit hatedetection.train.trainer train_and_evaluate \
             --input-dataset ${{inputs.input_dataset}} \

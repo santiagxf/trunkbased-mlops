@@ -22,7 +22,7 @@ stages:
 
       - template: templates/aml-env-build/step.yaml
         parameters:
-          envFile: environments/${{ variables.condaEnvName}}/environment.yml
+          envFile: .aml/environments/${{ variables.condaEnvName}}/environment.yml
 
       - template: templates/aml-workspace-get-config/step.yaml
         parameters:

@@ -28,7 +28,7 @@ In this imaginary scenario (or not), there will be two teams working on the proj
 
 > We named the teams `development team` and `operations team` here to avoid the discussion about the details of them. The teams can be composed of roles such as `Data Scientist`, `Data Engineer`, `ML Engineer`, `MLOps Engineer`, `Cloud Engineer`, `Architect`, among others. Discussion of team composition is outside the scope of this repository, and probably there is no single good answer about how to compose either the dev or the ops team.
 
-The repository is structured in a particular way so each team can own specific parts of it. Note that this structure is opinionated and is just one way to organize a repo to support this scenario. [See here for details about how the repository is structured](docs/structure.md), and for a further discussion about why it is structured in this way check my post [Structure your Machine Learning project source code like a pro]().
+The repository is structured in a particular way so each team can own specific parts of it. Note that this structure is opinionated and is just one way to organize a repo to support this scenario. [See here for details about how the repository is structured](docs/structure.md), and for a further discussion about why it is structured in this way check my post [Structure your Machine Learning project source code like a pro](https://santiagof.medium.com/structure-your-machine-learning-project-source-code-like-a-pro-44815cac8652).
 
 ## Trunk-based development in ML projects
 
@@ -70,7 +70,7 @@ Sometimes, not all the aspects of a model evaluation can be automated and some h
 
 ### Datasets lifecycle
 
-Some machine learning git repositories have a `datasets` folder containing the data used for model training. However, git is not the best place to store and version data, for many reasons. Datasets should be placed outside of git. The appropriate location for the data will depend heavily on your data strategy and corresponding architecture, a discussion of which is beyond the scope of this repostiory. In our case, the data repository is an Azure Data Lake Storage account. Our git repository does still have a `datasets` folder, but the data used for training and evaluation is not in that folder; it has a different mission.
+Some machine learning git repositories have a `datasets` folder containing the data used for model training. However, git is not the best place to store and version data, for many reasons. Datasets should be placed outside of git. The appropriate location for the data will depend heavily on your data strategy and corresponding architecture, a discussion of which is beyond the scope of this repostiory. In our case, the data repository is an Azure Data Lake Storage account. Our git repository does still have a `datasets` folder (in `.aml/data`), but the data used for training and evaluation is not in that folder; it has a different mission of providing configuration for the data source.
 
 As noted above, a model results from a combination of code and data. Code is version-controlled on git. But datasets are version-controlled using mechanisms available in the data storage solution you are using. Since our goal is version-control models, we'll need an explicit linkage between the code versioning and the data versioning. So how can make sure that an explicit linkage between the two of them? There are a couple of options here and there is no a single best one. Our approach here is to store dataset configuration information, or "pointers," on git.
 
@@ -85,12 +85,12 @@ Dataset pointers are kept on git. If new datasets are registered, the model is n
 
 #### How datasets pointers are kept on GitHub
 
-Azure Machine Learning has the concept of a [Dataset](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-train-with-datasets). Basically, a dataset is a pointer to a storage solution where the data is located. [Azure ML allows us to materialize this concept in a `YAML` definition](https://docs.microsoft.com/en-us/azure/machine-learning/reference-yaml-dataset), so as long as we keep this definition on YAML, then we can have a git representation of the dataset in the repository. That's the role of the `datasets` folder, where you will see definitions for 2 datasets:
+Azure Machine Learning has the concept of a [Dataset](https://docs.microsoft.com/en-us/azure/machine-learning/how-to-train-with-datasets). Basically, a dataset is a pointer to a storage solution where the data is located. [Azure ML allows us to materialize this concept in a `YAML` definition](https://docs.microsoft.com/en-us/azure/machine-learning/reference-yaml-dataset), so as long as we keep this definition on YAML, then we can have a git representation of the dataset in the repository. That's the role of the `.aml/data` folder, where you will see definitions for 2 datasets:
 
  - **portuguese-hate-speech-tweets**: The training dataset for hate detection in portuguese.
  - **portuguese-hate-speech-tweets-eval**: The evaluation dataset we use to assess the performance of the models.
 
-> You will see that these datasets also have a folder called `data` inside of them. That's the initialization data so you can have a sample of this data. When datasets are created in Azure ML, we can initialize them using that data so you have something to start with. However, the data is uploaded to the Azure Storage Account you configure during infrastructure provisioning.
+> You will see that these datasets also have a folder called `sample` inside of them. That's the initialization data so you can have a sample of this data. When datasets are created in Azure ML, we can initialize them using that data so you have something to start with. However, the data is uploaded to the Azure Storage Account you configure during infrastructure provisioning.
 
 ## Using MLOps to enforce the workflow
 
@@ -98,10 +98,10 @@ We can use MLOps to enforce this workflow and achieve continuous integration and
 
 | Area             | Workflow/Pipeline    | Description                                        | Triggers on |
 |------------------|------------------|----------------------------------------------------| ----------- |
-| Workspaces       | [Workspace-CD](docs/workflows.md#Workspaces)     | Provisions the Azure Machine Learning resources including datasets, data sources, and compute clusters, using Infrastructure as Code (IaC). | `main` for changes in paths `datasets/*` or `.cloud/*`   | 
-| Environments     | [Environment-CI](docs/workflows.md#environment-ci-traininginference-environments-continuous-integration)   | Performs the build and basic validations on the training and inference environments. | PR into `main` on path `environments/*` |
-| Environments     | [Environment-CD](docs/workflows.md#environment-cd-traininginference-environments-continuous-deployment)   | Builds training and inference environments and deploys them on Azure ML | `main` for changes in path `environments/*` |
-| Models           | [Model-CI](docs/workflows.md#model-ci-model-continuous-integration)         | Ensures that the model training can be executed in the indicated training environment and that the source code complies with quality standards. | PR into `main` for paths `src/*` or `jobs/*`. |
+| Workspaces       | [Workspace-CD](docs/workflows.md#Workspaces)     | Provisions the Azure Machine Learning resources including datasets, data sources, and compute clusters, using Infrastructure as Code (IaC). | `main` for changes in paths `.aml/data/*` or `.cloud/*`   | 
+| Environments     | [Environment-CI](docs/workflows.md#environment-ci-traininginference-environments-continuous-integration)   | Performs the build and basic validations on the training and inference environments. | PR into `main` on path `.aml/environments/*` |
+| Environments     | [Environment-CD](docs/workflows.md#environment-cd-traininginference-environments-continuous-deployment)   | Builds training and inference environments and deploys them on Azure ML | `main` for changes in path `.aml/environments/*` |
+| Models           | [Model-CI](docs/workflows.md#model-ci-model-continuous-integration)         | Ensures that the model training can be executed in the indicated training environment and that the source code complies with quality standards. | PR into `main` for paths `src/*` or `.aml/jobs/*`. |
 | Models           | [Model-CT](docs/workflows.md#model-ct-model-continuous-training)         | Responsible for continuous training of the model and its corresponding model registration in model registry. This pipeline ensures that `main` is always deployable. | `main` for changes in path `src/*` or `jobs/*` |
 | Models           | [Model-CD](docs/workflows.md#model-cd-model-continuous-deployment)         | Responsible of the continuous evaluation and deployment of new trained models. | New model registered in model registry |
 

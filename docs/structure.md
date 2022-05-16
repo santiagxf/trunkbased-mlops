@@ -13,23 +13,24 @@ project
 │   └── templates                                       # ARM templates
 ├── .azure-pipelines                               # Azure DevOps CI/CD           
 │   └── templates                                       # Azure DevOps templates
-├── .github                                         # GitHub Actions CI/CD
+├── .github                                        # GitHub Actions CI/CD
 │   ├── actions                                         # GHA custom actions
 │   └── workflows                                       # GHA workflows
-├── datasets                                        # Datasets configuration
-│   ├── *portuguese-hate-speech-tweets*                   # Training dataset
-│   │   └── sample                                            # Initial sample data
-│   └── *portuguese-hate-speech-tweets-eval*              # Evaluation dataset
-│       └── sample                                            # Initial sample data
+├── .aml                                           # Azure ML resources 
+│   ├── data                                            # Datasets configuration
+│   │   ├── *portuguese-hate-speech-tweets*                   # Training dataset
+│   │   │   └── sample                                            # Initial sample data
+│   │   └── *portuguese-hate-speech-tweets-eval*              # Evaluation dataset
+│   │       └── sample                                            # Initial sample data
+│   ├── endpoints                                       # Azure ML endpoints
+│   │   └── *hate-pt-speech*                                  # Rest service for the model
+│   │       └── deployments                                     # Hate detection deployments (only one: main)
+│   ├── environments                                    # Azure ML environments
+│   │   ├── *transformers-torch-19*                           # Environment for inference
+│   │   └── *transformers-torch-19-dev*                       # Environment for training and dev
+│   └── jobs                                            # Azure ML Job definitions
+│       └── *hatedetection*                                   # Jobs for the hate dection model, including params
 ├── docs                                            # Documentation
-├── endpoints                                       # Azure ML endpoints
-│   └── *hate-pt-speech*                                  # Rest service for the model
-│       └── deployments                                     # Hate detection deployments (only one: main)
-├── environments                                    # Azure ML environments
-│   ├── *transformers-torch-19*                           # Environment for inference
-│   └── *transformers-torch-19-dev*                       # Environment for training and dev
-├── jobs                                            # Azure ML Job definitions
-│   └── *hatedetection*                                   # Jobs for the hate dection model, including params
 ├── notebooks                                       # Experimentation notebooks
 └── src                                             # Model's source code
     ├── *hatedetection*                               # Hate detection model

@@ -4,7 +4,7 @@ trigger:
     - main
   paths:
     include:
-    - endpoints/*
+    - .aml/endpoints/*
     - src/*/score/*
 
 pool:
@@ -32,7 +32,7 @@ stages:
             - template: templates/aml-endpoint-deploy/step.yaml
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)
-                endpointFile: endpoints/*/endpoint.yml
+                endpointFile: .aml/endpoints/*/endpoint.yml
                 deploymentFile: deployments/*.yml
                 modelVersion: current
                 workspaceName: $(WORKSPACENAME)

@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main ]
     paths:
-    - endpoints/**
+    - .aml/endpoints/**
     - src/*/score/**
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
         id: deployment
         uses: ./.github/actions/aml-endpoint-deploy
         with:
-          endpointFile: endpoints/*/endpoint.yml
+          endpointFile: .aml/endpoints/*/endpoint.yml
           deploymentFile: deployments/*.yml
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}

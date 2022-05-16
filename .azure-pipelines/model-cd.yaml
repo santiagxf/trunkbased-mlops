@@ -33,7 +33,7 @@ stages:
           azureServiceConnectionName: $(SERVICECONNECTION)
           name: ${{ variables.modelName }}-eval
           stepDisplayName: Computing McNemar statistic
-          jobFile: jobs/hatedetection/evaluate.job.yml
+          jobFile: .aml/jobs/hatedetection/evaluate.job.yml
           useGitMessageForName: false
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
@@ -110,7 +110,7 @@ stages:
             - template: templates/aml-endpoint-deploy/step.yaml
               parameters:
                 azureServiceConnectionName: $(SERVICECONNECTION)
-                endpointFile: endpoints/*/endpoint.yml
+                endpointFile: .aml/endpoints/*/endpoint.yml
                 deploymentFile: deployments/*.yml
                 modelVersion: $(dependencies.aml_model_evaluate.outputs['evaluate.jobMetricAssert.winning'])
                 workspaceName: $(WORKSPACENAME)
