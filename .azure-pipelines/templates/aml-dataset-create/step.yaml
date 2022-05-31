@@ -31,6 +31,8 @@ steps:
 
         for DATASET_FILE in $DATASETS_FILES
         do
+          echo "::debug::Working with dataset  '$DATASET_FILE'"
+
           DATASET_NAME=$(yq -r ".name" $DATASET_FILE)
           REMOTE_FILE=$(yq -r ".paths[0].file" $DATASET_FILE)
           REMOTE_FOLDER=$(dirname $REMOTE_FILE | cut -d/ -f6-)
@@ -50,7 +52,7 @@ steps:
               echo "##[debug]Destination: $REMOTE_FOLDER"
 
               if test -d "$LOCAL_FOLDER/${{ parameters.initialDataPath }}"; then
-                az storage blob upload-batch -d $CONTAINER_NAME --overwrite --account-name ${{ parameters.storageAccount }} --source "$LOCAL_FOLDER/${{ parameters.initialDataPath }}" --destination-path $REMOTE_FOLDER
+                az storage blob upload-batch -d $CONTAINER_NAME --auth-mode login --overwrite --account-name ${{ parameters.storageAccount }} --source "$LOCAL_FOLDER/${{ parameters.initialDataPath }}" --destination-path $REMOTE_FOLDER
               else
                 echo "##vso[task.logissue type=error]Folder $LOCAL_FOLDER/${{ parameters.initialDataPath }} not found."
                 exit 1

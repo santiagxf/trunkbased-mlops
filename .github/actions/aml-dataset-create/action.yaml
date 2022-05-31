@@ -34,6 +34,8 @@ runs:
 
         for DATASET_FILE in $DATASETS_FILES
         do
+          echo "::debug::Working with dataset '$DATASET_FILE'"
+          
           DATASET_NAME=$(yq -r ".name" $DATASET_FILE)
           REMOTE_FILE=$(yq -r ".path" $DATASET_FILE)
           REMOTE_FOLDER=$(dirname $REMOTE_FILE | cut -d/ -f6-)
