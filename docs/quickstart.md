@@ -32,6 +32,26 @@ Ensure the service principal created before has the following permissions:
 
 To add role assignments to Azure resources follow the guide: [Assign Azure roles using the Azure portal](https://docs.microsoft.com/en-us/azure/role-based-access-control/role-assignments-portal?tabs=current).
 
+## Configure your Infrastructure as Code
+
+Azure resources are deployed using ARM templates. All the required resources for this sample project are indicated as ARM templates in the directory `.cloud`. Inside this folder you will find:
+
+- `templates` folder: This folder contains all the ARM templates with the details about how to deploy the required resources. The template is generic and parameterized. This has the benefit that you can use the same template with different parameters for different environments. For instance you can deploy the same templates to `dev` using small configurations to save costs and bigger SKUs on `production` to handle the workload demand.
+- `dev` folder: This folder represents the paramters of the `development` environment. In this sample, only one environment is indicated but you can create as many environments as you want. 
+
+Open the file `.cloud/dev/deploy.parameters.json` and configure the parameters for your dev environment. The required parameters are:
+
+ - `location`: Region to deploy resources.
+ - `workspaceName`: The name of the Azure ML workspace.
+ - `resourceGroupName`: The name of the Azure resource group configured above.
+ - `cpuTrainComputeSize`: The VM size of the compute cluster with CPU configuration.
+ - `gpuTrainComputeSize`: The VM size of the compute cluster with GPU configuration.
+ - `cpuTrainNodeCount`: The max number of nodes in the CPU cluster. To save costs, the cluster has a minimun number of nodes set to 0. This means that if no jobs are being executed, the cluster is deallocated.
+ - `gpuTrainNodeCount`: The max number of nodes in the GPU cluster. To save costs, the cluster has a minimun number of nodes set to 0. This means that if no jobs are being executed, the cluster is deallocated.
+ - `datasetsResourceGroup`: The resource group where the Azure Storage Account used for datasets is placed. Remember that this Storage Account is not created by the infrastructure as code, but it is referenced by Azure ML and that's why the information is needed.
+ - `datasetsAccountName`: The name of the storage account used for datasets. Remember that this Storage Account is not created by the infrastructure as code, but it is referenced by Azure ML and that's why the information is needed.
+ - `datasetsFileSystem`: The name of the file system in `datasetsAccountName` to be used. Please use the value `trusted` as datasets are configured to point to this file system.
+
 ## Next steps
 
 After you are done, you will have to follow some configuration related to the CI/CD implementation. That will depend on the tool you are using. Follow [Quick start guide for Azure DevOps](quickstart-devops.md) and [Quick start guide for GitHub Actions](quickstart-github.md) depending which one you are using.
