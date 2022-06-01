@@ -12,7 +12,7 @@ command: >-
             --confidence ${{inputs.confidence}}
 inputs:
   eval_dataset:
-    path: azureml:portuguese-hate-speech-tweets-eval:4
+    path: azureml:portuguese-hate-speech-tweets-eval:1
   model_name: hate-pt-speech
   champion: Production
   challenger: latest
