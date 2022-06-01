@@ -4,7 +4,7 @@ experiment_name: hate-pt-speech
 description: Trains a model to clasificate tweets text according to hate/no hate
 code: ../../../src/
 command: >-
-  pyrunit hatedetection.train.trainer train_and_evaluate \
+  jobtools hatedetection.train.trainer train_and_evaluate \
             --input-dataset ${{inputs.input_dataset}} \
             --eval-dataset ${{inputs.eval_dataset}} \
             --params ${{inputs.params}}

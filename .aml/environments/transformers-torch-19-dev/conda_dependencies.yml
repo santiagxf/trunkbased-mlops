@@ -10,6 +10,7 @@ dependencies:
       - azureml-telemetry==1.39.0
       - azureml-mlflow==1.39.0
       - mlflow-skinny==1.25.0
+      - protobuf~=3.19.0
       - torch==1.9
       - transformers==4.10
       - tensorboard==2.6

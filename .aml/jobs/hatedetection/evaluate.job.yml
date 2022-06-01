@@ -4,7 +4,7 @@ experiment_name: hate-pt-speech-eval
 description: Evaluates two hate detection models
 code: ../../../src/
 command: >-
-  pyrunit hatedetection.model.evaluator resolve_and_compare \
+  jobtools hatedetection.model.evaluator resolve_and_compare \
             --eval-dataset ${{inputs.eval_dataset}} \
             --model-name ${{inputs.model_name}} \
             --champion ${{inputs.champion}} \
