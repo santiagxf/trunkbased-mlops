@@ -23,7 +23,7 @@ steps:
     displayName: Generating datasets
     inputs:
       scriptType: bash
-      scriptLocation: inlineScript
+      scriptLocation: scriptPath
       azureSubscription: ${{ parameters.azureServiceConnectionName }}
       scriptPath: $(Build.SourcesDirectory)/.azure-pipelines/templates/aml-dataset-create/step.sh
       arguments: ${{ parameters.datasetFile }} ${{ parameters.workspaceName }} ${{ parameters.resourceGroup }} ${{ parameters.initialize }} ${{ parameters.initialDataPath }} ${{ parameters.storageAccount }}
