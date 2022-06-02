@@ -100,7 +100,7 @@ stages:
                 azureServiceConnectionName: $(SERVICECONNECTION)
                 modelName: ${{ variables.modelName }}
                 #modelVersion: $(deployment.deployedVersion)
-                modelVersion: $(dependencies.aml_model_evaluate.outputs['evaluate.compare.winning'])
+                modelVersion: $(MODEL_VERSION_TO_DEPLOY)
                 property: stage
                 value: production
                 exclusive: true
