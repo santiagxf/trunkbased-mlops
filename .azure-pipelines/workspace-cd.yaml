@@ -33,6 +33,7 @@ stages:
 
   - job: datasets_init
     displayName: Datasets - Initialization
+    dependsOn: iac_deployment
     steps:
       - template: templates/aml-cli-install/step.yaml
         parameters:
