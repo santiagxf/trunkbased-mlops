@@ -34,7 +34,7 @@ steps:
           echo "::debug::Working with dataset  '$DATASET_FILE'"
 
           DATASET_NAME=$(yq -r ".name" $DATASET_FILE)
-          REMOTE_FILE=$(yq -r ".paths[0].file" $DATASET_FILE)
+          REMOTE_FILE=$(yq -r ".path" $DATASET_FILE)
           REMOTE_FOLDER=$(dirname $REMOTE_FILE | cut -d/ -f6-)
           CONTAINER_NAME=$(dirname $REMOTE_FILE | cut -d/ -f4)
           LOCAL_FOLDER=$(dirname $DATASET_FILE)
