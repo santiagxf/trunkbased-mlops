@@ -28,10 +28,5 @@ runs:
   steps:
     - name: Generating datasets
       shell: bash
-      run: . ${{ github.action_path }}/action.sh "${{ inputs.datasetFile }}" \
-                                                  ${{ inputs.workspaceName }} \
-                                                  ${{ inputs.resourceGroup }} \
-                                                  ${{ inputs.initialize }} \
-                                                  ${{ inputs.initialDataPath }} \
-                                                  ${{ inputs.storageAccount }}
+      run: . ${{ github.action_path }}/action.sh "${{ inputs.datasetFile }}" ${{ inputs.workspaceName }} ${{ inputs.resourceGroup }} ${{ inputs.initialize }} ${{ inputs.initialDataPath }} ${{ inputs.storageAccount }}
 
