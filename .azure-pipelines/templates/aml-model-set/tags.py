@@ -82,7 +82,8 @@ def add_tag(subscription_id: str, resource_group: str, workspace_name:str, name:
         logging.info(f'[INFO] Adding tag {tag} with value {value}')
         model.add_tags({ tag: value})
     else:
-        logging.error(f'[ERR] No model with name {name} and version {version}')
+        logging.info(f'[INFO] No model with name {name} and version {version} matching. No tags has been updated.')
+
 
 def remove_tag(subscription_id: str, resource_group: str, workspace_name:str, name: str, version: str, tag: str):
     """

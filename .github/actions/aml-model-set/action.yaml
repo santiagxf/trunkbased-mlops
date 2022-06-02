@@ -44,7 +44,7 @@ runs:
         SUBSCRIPTION_ID=$(az account show | jq -r ".id")
         
         if ${{ inputs.exclusive }}; then
-          echo "::debug::Removing or replacing tag ${{ inputs.property }} from model ${{ inputs.modelName }}:$VERSION_REST"
+          echo "::debug::Removing or replacing tag ${{ inputs.property }} from model ${{ inputs.modelName }}"
           if [[ "${{ inputs.replaceExistingWith }}" == "" ]]; then
             python -m jobtools ${{ github.action_path }}/tags.py remove_tag \
             --subscription-id $SUBSCRIPTION_ID \

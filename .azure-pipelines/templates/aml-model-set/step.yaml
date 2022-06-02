@@ -38,7 +38,7 @@ steps:
       if ${{ lower(parameters.exclusive) }}; then
         ACTION_PATH=$(Build.SourcesDirectory)/.azure-pipelines/templates/aml-model-set/
 
-        echo "##[debug]Removing or replacing tag ${{ parameters.property }} from model ${{ parameters.modelName }}:$VERSION_REST"
+        echo "##[debug]Removing or replacing tag ${{ parameters.property }} from model ${{ parameters.modelName }}"
         if [[ "${{ parameters.replaceExistingWith }}" == "" ]]; then
           # az ml model update -n "${{ parameters.modelName }}" -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} --version $VERSION_RESET --set tags={}
           python -m jobtools  $ACTION_PATH/tags.py remove_tag \
@@ -49,7 +49,7 @@ steps:
             --tag ${{ parameters.property }}
 
         else
-          echo "##[debug]Replacing tag ${{ parameters.property }} from model ${{ parameters.modelName }}:$VERSION_REST with value ${{ parameters.replaceExistingWith }}"
+          echo "##[debug]Replacing tag ${{ parameters.property }} from model ${{ parameters.modelName }} with value ${{ parameters.replaceExistingWith }}"
           python -m jobtools $ACTION_PATH/tags.py add_tag \
             --subscription-id $SUBSCRIPTION_ID \
             --workspace-name ${{ parameters.workspaceName }} \

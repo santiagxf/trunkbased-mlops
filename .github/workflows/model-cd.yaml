@@ -124,8 +124,8 @@ jobs:
           property: stage
           value: production
           exclusive: true
-          replaceExistingWith: archived
           isMlflowStage: true
+          replaceExistingWith: archived
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
       

@@ -77,11 +77,13 @@ stages:
 - stage: aml_model_deployment
   displayName: Model - Deployment
   dependsOn: aml_model_evaluate
-  condition: and(eq(dependencies.aml_model_evaluate.outputs['evaluate.compare.result'], 'true'), eq(dependencies.aml_model_evaluate.outputs['evaluate.jobMetricAssert.result'], 'true'))
+  condition: and(eq(dependencies.aml_model_evaluate.evaluate.outputs['compare.result'], 'true'), eq(dependencies.aml_model_evaluate.evaluate.outputs['jobMetricAssert.result'], 'true'))
   jobs:
   - deployment: model_deployment
     displayName: Model deployment
     environment: amlworkspace_$(env)
+    variables:
+      MODEL_VERSION_TO_DEPLOY: $[ dependencies.aml_model_evaluate.evaluate.outputs['jobMetricAssert.winning'] ]
     strategy: 
       runOnce:
         deploy:
@@ -98,7 +100,7 @@ stages:
                 azureServiceConnectionName: $(SERVICECONNECTION)
                 modelName: ${{ variables.modelName }}
                 #modelVersion: $(deployment.deployedVersion)
-                modelVersion: $(dependencies.aml_model_evaluate.outputs['evaluate.jobMetricAssert.winning'])
+                modelVersion: $(MODEL_VERSION_TO_DEPLOY)
                 property: stage
                 value: production
                 exclusive: true
