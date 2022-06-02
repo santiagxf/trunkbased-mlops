@@ -79,7 +79,7 @@ steps:
         if ${COMPARE,,} ; then
           echo "##vso[task.logissue type=warning;]Challenger model won the compare."
 
-          WINNING=$(python $$(Build.SourcesDirectory)/.azure-pipelines/templates/aml-model-compare/model_version.py \
+          WINNING=$(python $(Build.SourcesDirectory)/.azure-pipelines/templates/aml-model-compare/model_version.py \
             --subscription-id $SUBSCRIPTION_ID \
             --workspace-name ${{ parameters.workspaceName }} \
             --resource-group ${{ parameters.resourceGroup }} \
