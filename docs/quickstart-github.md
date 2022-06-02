@@ -89,8 +89,11 @@ Certain actions in the pipeline, like a deployment, will require approval. To co
 
 Run pipelines in the following order:
 
-1. workspace-CD
-2. environment-CD
-3. model-CD
+1. Workspace-CD
+    - This will ensure the infrastructure is deployed and datasets created.
+2. Environment-CD
+    - This will ensure the environments to run training jobs are avaiable.
+3. Model-CT
+    - This will start the training of a model. Once a model is registered, then the pipeline Model-CD will run automatically.
 
 ![](assets/github-model-cd-stages-deploy.png)
