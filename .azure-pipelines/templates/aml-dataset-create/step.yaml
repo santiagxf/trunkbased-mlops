@@ -26,4 +26,4 @@ steps:
       scriptLocation: scriptPath
       azureSubscription: ${{ parameters.azureServiceConnectionName }}
       scriptPath: $(Build.SourcesDirectory)/.azure-pipelines/templates/aml-dataset-create/step.sh
-      arguments: ${{ parameters.datasetFile }} ${{ parameters.workspaceName }} ${{ parameters.resourceGroup }} ${{ parameters.initialize }} ${{ parameters.initialDataPath }} ${{ parameters.storageAccount }}
+      arguments: ${{ parameters.datasetFile }} ${{ parameters.workspaceName }} ${{ parameters.resourceGroup }} ${{ lower(parameters.initialize) }} ${{ parameters.initialDataPath }} ${{ parameters.storageAccount }}
