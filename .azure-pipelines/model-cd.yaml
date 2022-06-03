@@ -83,7 +83,7 @@ stages:
     displayName: Model deployment
     environment: amlworkspace_$(env)
     variables:
-      MODEL_VERSION_TO_DEPLOY: $[ dependencies.aml_model_evaluate.evaluate.outputs['compare.winning'] ]
+      MODEL_VERSION_TO_DEPLOY: $[ stageDependencies.aml_model_evaluate.evaluate.outputs['compare.winning'] ]
     strategy: 
       runOnce:
         deploy:
