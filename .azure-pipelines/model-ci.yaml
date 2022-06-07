@@ -36,7 +36,7 @@ stages:
           source: src
           useConda: true
           condaEnvName: ${{ variables.condaEnvName }}
-          disable: W1203,C0103,W0603,R0801,R0913
+          disable: W1203,C0103,C0303,W0603,R0801,R0913
 
       - template: templates/azure-pytest-run/step.yaml
         parameters:
