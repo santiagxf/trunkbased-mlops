@@ -22,21 +22,21 @@ stages:
 
       - template: templates/aml-env-build/step.yaml
         parameters:
-          envFile: environments/${{ variables.condaEnvName}}/environment.yml
+          envFile: .aml/environments/${{ variables.condaEnvName}}/environment.yml
 
       - template: templates/aml-workspace-get-config/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
-          outputFile: workspace.config.json
+          outputFile: $(Pipeline.Workspace)/workspace.config.json
 
       - template: templates/pylint-run/step.yaml
         parameters:
           source: src
           useConda: true
           condaEnvName: ${{ variables.condaEnvName }}
-          disable: W1203,C0103,W0603,R0801,R0913
+          disable: W1203,C0103,C0303,W0603,W0632,R0801,R0913
 
       - template: templates/azure-pytest-run/step.yaml
         parameters:
@@ -44,12 +44,12 @@ stages:
           source: src
           useConda: true
           condaEnvName: ${{ variables.condaEnvName }}
-          params: -q --ws-config-file="workspace.config.json"
+          params: -q --ws-config-file="$(Pipeline.Workspace)/workspace.config.json"
 
       - template: templates/aml-env-ensure/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
-          envFile: environments/${{ variables.condaEnvName}}/environment.yml
+          envFile: .aml/environments/${{ variables.condaEnvName}}/environment.yml
           validateOnly: true
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
@@ -58,7 +58,7 @@ stages:
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
           name: ${{ variables.modelName}}
-          jobFile: jobs/hatedetection/train.job.yml
+          jobFile: .aml/jobs/hatedetection/train.job.yml
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)
           noWait: false

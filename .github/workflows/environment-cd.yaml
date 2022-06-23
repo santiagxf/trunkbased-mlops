@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main ]
     paths:
-    - environments/**
+    - .aml/environments/**
 
 jobs:
   deployment:
@@ -38,12 +38,12 @@ jobs:
       - name: Building environment
         uses: ./.github/actions/aml-env-build
         with:
-          envFile: environments/*/environment.yml
+          envFile: .aml/environments/*/environment.yml
       
       - name: Ensuring environment
         uses: ./.github/actions/aml-env-ensure
         with:
-          envFile: environments/*/environment.yml
+          envFile: .aml/environments/*/environment.yml
           validateOnly: false
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}

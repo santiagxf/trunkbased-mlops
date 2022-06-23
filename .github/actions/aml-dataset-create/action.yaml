@@ -28,37 +28,5 @@ runs:
   steps:
     - name: Generating datasets
       shell: bash
-      run: |
-        echo "::debug::Looking for datasets definition at '${{ inputs.datasetFile }}'"
-        DATASETS_FILES=$(find ${{ inputs.datasetFile }};)
-
-        for DATASET_FILE in $DATASETS_FILES
-        do
-          DATASET_NAME=$(yq -r ".name" $DATASET_FILE)
-          REMOTE_FILE=$(yq -r ".paths[0].file" $DATASET_FILE)
-          REMOTE_FOLDER=$(dirname $REMOTE_FILE | cut -d/ -f6-)
-          CONTAINER_NAME=$(dirname $REMOTE_FILE | cut -d/ -f4)
-          LOCAL_FOLDER=$(dirname $DATASET_FILE)
-
-          if [[ $(az ml data list --name $DATASET_NAME --workspace-name ${{ inputs.workspaceName }} --resource-group ${{ inputs.resourceGroup }}) ]]; then
-            echo "::debug::Dataset $DATASET_NAME already in target workspace."
-          else
-            echo "::debug::Dataset $DATASET_NAME is missing. Creating from file $DATASET_FILE."
-            az ml data create --file $DATASET_FILE --resource-group ${{ inputs.resourceGroup }} --workspace-name ${{ inputs.workspaceName }}
-            
-            if ${{ inputs.initialize }}; then
-              # Data uploaded manually as AzureFileCopy@4 not supported in Linux
-              echo "::debug::Uploading data for $DATASET_NAME in container $CONTAINER_NAME (${{ inputs.storageAccount }})"
-              echo "::debug::Source: $LOCAL_FOLDER/${{ inputs.initialDataPath }}"
-              echo "::debug::Destination: $REMOTE_FOLDER"
-
-              if test -d "$LOCAL_FOLDER/${{ inputs.initialDataPath }}"; then
-                az storage blob upload-batch -d $CONTAINER_NAME --overwrite --account-name ${{ inputs.storageAccount }} --source "$LOCAL_FOLDER/${{ inputs.initialDataPath }}" --destination-path $REMOTE_FOLDER
-              else
-                echo "::error::Folder $LOCAL_FOLDER/${{ inputs.initialDataPath }} not found."
-                exit 1
-              fi
-            fi
-          fi
-        done
+      run: . ${{ github.action_path }}/action.sh "${{ inputs.datasetFile }}" ${{ inputs.workspaceName }} ${{ inputs.resourceGroup }} ${{ inputs.initialize }} ${{ inputs.initialDataPath }} ${{ inputs.storageAccount }}
 

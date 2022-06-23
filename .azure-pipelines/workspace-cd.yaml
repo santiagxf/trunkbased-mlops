@@ -4,7 +4,7 @@ trigger:
     - main
   paths:
     include:
-    - datasets/*
+    - .aml/data/*
     - .cloud/*
 
 pool:
@@ -33,6 +33,7 @@ stages:
 
   - job: datasets_init
     displayName: Datasets - Initialization
+    dependsOn: iac_deployment
     steps:
       - template: templates/aml-cli-install/step.yaml
         parameters:
@@ -42,9 +43,9 @@ stages:
       - template: templates/aml-dataset-create/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
-          datasetFile: datasets/*/dataset.yml
+          datasetFile: .aml/data/*/dataset.yml
           initialize: true
-          initialDataPath: data
+          initialDataPath: sample
           storageAccount: $(STORAGEACCOUNTNAME)
           workspaceName: $(WORKSPACENAME)
           resourceGroup: $(RESOURCEGROUPNAME)

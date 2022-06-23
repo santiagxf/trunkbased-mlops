@@ -1,0 +1,10 @@
+$schema: https://azuremlschemas.azureedge.net/latest/environment.schema.json
+name: transformers-torch-19-dev
+description: 'An environment to work with transformers in a dev box'
+version: 10
+image: mcr.microsoft.com/azureml/openmpi3.1.2-ubuntu18.04
+os_type: linux
+tags:
+  backend: torch
+  framework: transformers
+conda_file: conda_dependencies.yml

@@ -5,7 +5,7 @@ on:
   pull_request:
     branches: [ main ]
     paths:
-      - environments/**
+      - .aml/environments/**
 
 jobs:
   integration:
@@ -43,7 +43,7 @@ jobs:
       - name: Ensuring environment
         uses: ./.github/actions/aml-env-ensure
         with:
-          envFile: environments/*/environment.yml
+          envFile: .aml/environments/*/environment.yml
           validateOnly: true
           failOnMissing: false
           workspaceName: ${WORKSPACENAME}

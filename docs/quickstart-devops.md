@@ -50,7 +50,7 @@ Infrastructure is deployed automatically by IaC pipelines. However, some secrets
     - `computeAdminUserPassword`: The password used for compute instances. For instance `Pass@word1`.
     - `AUTOMATION_OBJECT_ID`: The object id of the service principal used in the azure service connection.
 
-        > To get the Object ID of a service principal follow this steps: [Find service principal object ID](https://docs.microsoft.com/en-us/azure/healthcare-apis/azure-api-for-fhir/find-identity-object-ids#find-service-principal-object-id)
+        > To get the Object ID of a service principal follow this steps: [Find service principal object ID](https://docs.microsoft.com/en-us/azure/healthcare-apis/azure-api-for-fhir/find-identity-object-ids#find-service-principal-object-id). **DO NOT USE THE OBJECT ID displayed in the Azure Portal.**
 
         `az ad sp show --id XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX --query objectId`
 
@@ -129,6 +129,9 @@ Certain actions in the pipeline, like a deployment, will require approval. To co
 
 Run pipelines in the following order:
 
-1. workspace-CD
-2. environment-CD
-3. model-CD
+1. Workspace-CD
+    - This will ensure the infrastructure is deployed and datasets created.
+2. Environment-CD
+    - This will ensure the environments to run training jobs are avaiable.
+3. Model-CT
+    - This will start the training of a model. Once a model is registered, then the pipeline Model-CD will run automatically.

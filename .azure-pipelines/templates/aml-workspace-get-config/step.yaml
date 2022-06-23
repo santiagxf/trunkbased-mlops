@@ -21,6 +21,8 @@ steps:
 
         SUBSCRIPTION_ID=$(az account show | jq -r ".id")
         jq -n \
-          --arg WORKSPACE_NAME ${{ parameters.workspaceName }} RESOURCE_GROUP ${{ parameters.resourceGroup }} SUBSCRIPTION_ID $SUBSCRIPTION_ID \
+          --arg WORKSPACE_NAME ${{ parameters.workspaceName }} \
+          --arg RESOURCE_GROUP ${{ parameters.resourceGroup }} \
+          --arg SUBSCRIPTION_ID $SUBSCRIPTION_ID \
           '{ "subscription_id": $SUBSCRIPTION_ID, "resource_group": $RESOURCE_GROUP, "workspace_name": $WORKSPACE_NAME }' > ${{ parameters.outputFile }}
 

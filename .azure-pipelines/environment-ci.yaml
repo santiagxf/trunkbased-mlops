@@ -22,12 +22,12 @@ stages:
 
       - template: templates/aml-env-build/step.yaml
         parameters:
-          envFile: environments/*/environment.yml
+          envFile: .aml/environments/*/environment.yml
 
       - template: templates/aml-env-ensure/step.yaml
         parameters:
           azureServiceConnectionName: $(SERVICECONNECTION)
-          envFile: environments/*/environment.yml
+          envFile: .aml/environments/*/environment.yml
           validateOnly: true
           failOnMissing: false
           workspaceName: $(WORKSPACENAME)

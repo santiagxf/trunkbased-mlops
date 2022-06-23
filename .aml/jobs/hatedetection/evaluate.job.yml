@@ -1,0 +1,21 @@
+$schema: https://azuremlschemas.azureedge.net/latest/commandJob.schema.json
+display_name: hate-pt-speech-eval
+experiment_name: hate-pt-speech-eval
+description: Evaluates two hate detection models
+code: ../../../src/
+command: >-
+  jobtools hatedetection.model.evaluator resolve_and_compare \
+            --eval-dataset ${{inputs.eval_dataset}} \
+            --model-name ${{inputs.model_name}} \
+            --champion ${{inputs.champion}} \
+            --challenger ${{inputs.challenger}} \
+            --confidence ${{inputs.confidence}}
+inputs:
+  eval_dataset:
+    path: azureml:portuguese-hate-speech-tweets-eval:1
+  model_name: hate-pt-speech
+  champion: Production
+  challenger: latest
+  confidence: 0.05
+environment: azureml:transformers-torch-19:10
+compute: azureml:gpuprdev

@@ -42,28 +42,28 @@ def train_and_evaluate(input_dataset: str, eval_dataset: str,
     classifier.split_seq_len = params.data.preprocessing.split_seq_len
 
     if eval_dataset:
-        examples_train, labels_train = load_examples(input_dataset,
-                                                    split_seq=True,
-                                                    unique_words=classifier.split_unique_words,
-                                                    seq_len = classifier.split_seq_len)
-        examples_eval, labels_eval = load_examples(eval_dataset,
+        X_train, y_train = load_examples(input_dataset,
+                                                     split_seq=True,
+                                                     unique_words=classifier.split_unique_words,
+                                                     seq_len = classifier.split_seq_len)
+        X_eval, y_eval = load_examples(eval_dataset,
                                                    split_seq=True,
                                                    unique_words=classifier.split_unique_words,
                                                    seq_len = classifier.split_seq_len)
     else:
         logging.warning('[WARN] Evaluation will happen over the training dataset as evaluation \
                         dataset has not been provided.')
-        examples_train, labels_train, examples_eval, labels_eval = load_examples(input_dataset,
+        X_train, y_train, X_eval, y_eval = load_examples(input_dataset,
                                                     eval_size=0.3,
                                                     split_seq=True,
                                                     unique_words=classifier.split_unique_words,
                                                     seq_len = classifier.split_seq_len)
 
-    train_dataset = ClassificationDataset(examples=examples_train,
-                                          labels=labels_train,
+    train_dataset = ClassificationDataset(examples=X_train,
+                                          labels=y_train,
                                           tokenizer=classifier.tokenizer)
-    eval_dataset = ClassificationDataset(examples=examples_eval,
-                                         labels=labels_eval,
+    eval_dataset = ClassificationDataset(examples=X_eval,
+                                         labels=y_eval,
                                          tokenizer=classifier.tokenizer)
 
     training_args = TrainingArguments(**vars(params.trainer))
@@ -88,7 +88,7 @@ def train_and_evaluate(input_dataset: str, eval_dataset: str,
     signature = ModelSignature(
         inputs=Schema([
             ColSpec(DataType.string, "text"),
-        ]), 
+        ]),
         outputs=Schema([
             ColSpec(DataType.integer, "hate"),
             ColSpec(DataType.double, "confidence"),

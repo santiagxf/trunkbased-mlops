@@ -33,34 +33,31 @@ steps:
     azureSubscription: ${{ parameters.azureServiceConnectionName }}
     inlineScript: |
       set -e
+      SUBSCRIPTION_ID=$(az account show | jq -r ".id")
       
       if ${{ lower(parameters.exclusive) }}; then
-        VERSION_RESET=$(az ml model list -n "${{ parameters.modelName }}" -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} | jq -r --arg PROP_VALUE ${{ parameters.value }} '.[] | select(.tags.${{ parameters.property }} == $PROP_VALUE) | .version')
         ACTION_PATH=$(Build.SourcesDirectory)/.azure-pipelines/templates/aml-model-set/
 
-        if [[ "$VERSION_RESET" != "" ]]; then
-          echo "##[debug]Removing or replacing tag ${{ parameters.property }} from model ${{ parameters.modelName }}:$VERSION_REST"
-          if [[ "${{ parameters.replaceExistingWith }}" == "" ]]; then
-            # az ml model update -n "${{ parameters.modelName }}" -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} --version $VERSION_RESET --set tags={}
-            python -m jobtools  $ACTION_PATH/tags.py remove_tag \
-              --subscription-id $SUBSCRIPTION_ID \
-              --workspace-name ${{ parameters.workspaceName }} \
-              --resource-group ${{ parameters.resourceGroup }} \
-              --name ${{ parameters.modelName }} \
-              --tag ${{ parameters.property }}
+        echo "##[debug]Removing or replacing tag ${{ parameters.property }} from model ${{ parameters.modelName }}"
+        if [[ "${{ parameters.replaceExistingWith }}" == "" ]]; then
+          # az ml model update -n "${{ parameters.modelName }}" -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} --version $VERSION_RESET --set tags={}
+          python -m jobtools  $ACTION_PATH/tags.py remove_tag \
+            --subscription-id $SUBSCRIPTION_ID \
+            --workspace-name ${{ parameters.workspaceName }} \
+            --resource-group ${{ parameters.resourceGroup }} \
+            --name ${{ parameters.modelName }} \
+            --tag ${{ parameters.property }}
 
-          else
-            echo "##[debug]Replacing tag ${{ parameters.property }} from model ${{ parameters.modelName }}:$VERSION_REST with value ${{ parameters.replaceExistingWith }}"
-            # az ml model update -n "${{ parameters.modelName }}" -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} --version $VERSION_RESET --set tags.${{ parameters.property }}=${{ parameters.replaceExistingWith }}
-            python -m jobtools $ACTION_PATH/tags.py add_tag \
-              --subscription-id $SUBSCRIPTION_ID \
-              --workspace-name ${{ parameters.workspaceName }} \
-              --resource-group ${{ parameters.resourceGroup }} \
-              --name ${{ parameters.modelName }} \
-              --version $VERSION_RESET  \
-              --tag ${{ parameters.property }} \
-              --value ${{ parameters.replaceExistingWith }}
-          fi
+        else
+          echo "##[debug]Replacing tag ${{ parameters.property }} from model ${{ parameters.modelName }} with value ${{ parameters.replaceExistingWith }}"
+          python -m jobtools $ACTION_PATH/tags.py add_tag \
+            --subscription-id $SUBSCRIPTION_ID \
+            --workspace-name ${{ parameters.workspaceName }} \
+            --resource-group ${{ parameters.resourceGroup }} \
+            --name ${{ parameters.modelName }} \
+            --version "${{ parameters.property }}=${{ parameters.value }}"  \
+            --tag ${{ parameters.property }} \
+            --value ${{ parameters.replaceExistingWith }}
         fi
       fi
 
@@ -72,7 +69,6 @@ steps:
       fi
       
       echo "##[debug]Applying tag ${{ parameters.property }}=${{ parameters.value }} to model ${{ parameters.modelName }}:$MODEL_VERSION"
-      # az ml model update -n "${{ parameters.modelName }}" -g ${{ parameters.resourceGroup }} -w ${{ parameters.workspaceName }} --version $MODEL_VERSION --set tags.${{ parameters.property }}=${{ parameters.value }}
       python -m jobtools $ACTION_PATH/tags.py add_tag \
           --subscription-id $SUBSCRIPTION_ID \
           --workspace-name ${{ parameters.workspaceName }} \
@@ -83,7 +79,7 @@ steps:
           --value ${{ parameters.value }}
       
       if ${{ parameters.isMlflowStage }}; then
-        echo ""##[debug]Moving model ${{ parameters.modelName }}:$MODEL_VERSION to stage ${{ parameters.value }}"
+        echo "##[debug]Moving model ${{ parameters.modelName }}:$MODEL_VERSION to stage ${{ parameters.value }}"
         python -m jobtools $ACTION_PATH/tags.py update_model_stage \
           --subscription-id $SUBSCRIPTION_ID \
           --workspace-name ${{ parameters.workspaceName }} \

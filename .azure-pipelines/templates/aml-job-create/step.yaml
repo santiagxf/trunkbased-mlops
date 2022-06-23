@@ -5,6 +5,9 @@ parameters:
   type: string
 - name: jobFile
   type: string
+- name: useGitMessageForName
+  type: boolean
+  default: true
 - name: workspaceName
   type: string
 - name: resourceGroup
@@ -29,8 +32,16 @@ steps:
         echo "##[debug]Creating job with name: $JOB_NAME" 
         echo "##vso[task.setvariable variable=jobName;isOutput=true]$JOB_NAME" 
 
-        az ml job create -n $JOB_NAME -f ${{ parameters.jobFile }} --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }}
+        if ${{ lower(parameters.useGitMessageForName) }}; then
+          DISPLAY_NAME="$(Build.SourceVersionMessage)"
+          DISPLAY_NAME=$(echo ${DISPLAY_NAME// /-} | tr -dc '[:alnum:]-')
+          echo "::debug::Configuring display name to: $DISPLAY_NAME" 
+        else
+          DISPLAY_NAME=$JOB_NAME
+        fi
 
+        az ml job create -n $JOB_NAME -f ${{ parameters.jobFile }} --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }} --set display_name="$DISPLAY_NAME"
+        
         if ! ${{ parameters.noWait }}; then
           echo "##[debug]Streaming logs"
           
@@ -39,14 +50,16 @@ steps:
           else
             echo "##vso[task.logissue type=warning;]Log capturing didn't work. Check experiment details."
             echo "##[debug]Waiting for the job "
-            while [[ $(az ml job show -n $JOB_NAME --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }} | jq -r '.status') =~ ^(Running|Queued)$ ]];
+            JOB_STATUS="Queued"
+            while ! [[ $JOB_STATUS =~ ^(Failed|Completed|Canceled)$ ]];
             do
               sleep 60s
-              echo "##[debug]Still queued/running" 
+              echo "##[debug]Still queued/running"
+              JOB_STATUS=$(az ml job show -n $JOB_NAME --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }} | jq -r '.status')
             done
 
-            if [[ $(az ml job show -n $JOB_NAME --resource-group ${{ parameters.resourceGroup }} --workspace-name ${{ parameters.workspaceName }} | jq -r '.status') == "Failed" ]]; then
-              echo "##vso[task.logissue type=error;]Remote job status is failed."
+            if [[ $JOB_STATUS != "Completed" ]]; then
+              echo "##vso[task.logissue type=error;]Remote job status is failed or canceled."
               exit 1
             fi
           fi

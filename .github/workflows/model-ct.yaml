@@ -5,7 +5,7 @@ on:
   push:
     branches: [ main ]
     paths:
-    - jobs/**
+    - .aml/jobs/**
     - src/**
 
 jobs:
@@ -36,7 +36,7 @@ jobs:
       - name: Ensuring environment
         uses: ./.github/actions/aml-env-ensure
         with:
-          envFile: environments/${CONDAENVNAME}/environment.yml
+          envFile: .aml/environments/${CONDAENVNAME}/environment.yml
           validateOnly: true
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
@@ -46,7 +46,7 @@ jobs:
         uses: ./.github/actions/aml-job-create
         with:
           name: ${{ env.MODELNAME }}
-          jobFile: jobs/hatedetection/train.job.yml
+          jobFile: .aml/jobs/hatedetection/train.job.yml
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
           noWait: false

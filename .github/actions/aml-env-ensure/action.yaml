@@ -45,7 +45,7 @@ runs:
             if [[ $(az ml environment show --name $ENV_NAME --workspace-name ${{ inputs.workspaceName }} --resource-group ${{ inputs.resourceGroup }} --version $ENV_VERSION) ]]; then
               echo "::debug::Verifying environment specification and checking for differences with given"
               az ml environment show --name $ENV_NAME --workspace-name ${{ inputs.workspaceName }} --resource-group ${{ inputs.resourceGroup }} --version $ENV_VERSION | jq ".conda_file | del(.name)" | yq -y > conda.yml
-              if cmp -s conda.yml $ENV_FOLDER/$ENV_CONDA_FILE; then
+              if diff -w -B conda.yml $ENV_FOLDER/$ENV_CONDA_FILE; then
                 echo "::debug::Environments validation passed"
               else
                 echo "::error file=$ENV_FILE::Environment file definition doesn't match the one registered. Please increase version to get it created"
