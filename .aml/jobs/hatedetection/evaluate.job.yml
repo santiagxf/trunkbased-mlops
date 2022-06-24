@@ -17,5 +17,5 @@ inputs:
   champion: Production
   challenger: latest
   confidence: 0.05
-environment: azureml:transformers-torch-19:11
+environment: azureml:transformers-torch-19:12
 compute: azureml:gpuprdev
