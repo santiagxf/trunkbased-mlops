@@ -62,7 +62,7 @@ jobs:
           source: src
           useConda: true
           condaEnvName: ${CONDAENVNAME}
-          params: -q --ws-config-file="workspace.config.json"
+          args: -q --ws-config-file="workspace.config.json"
       
       - name: Ensuring environment
         uses: ./.github/actions/aml-env-ensure
