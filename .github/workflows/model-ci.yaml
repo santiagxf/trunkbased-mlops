@@ -47,19 +47,18 @@ jobs:
           workspaceName: ${WORKSPACENAME}
           resourceGroup: ${RESOURCEGROUPNAME}
           outputFile: workspace.config.json
-      
-      - name: Running PyLint
-        uses: ./.github/actions/pylint-run
+
+      - name: Run lintering with PyLint
+        uses: pyrunit/pylint-action@v1.0.0
         with:
           source: src
           useConda: true
           condaEnvName: ${CONDAENVNAME}
-          disable: W1203,C0103,C0303,W0603,W0632,R0801,R0913, 
+          disable: W1203,C0103,C0303,W0603,W0632,R0801,R0913
       
-      - name: Running unit tests
-        uses: ./.github/actions/azure-pytest-run
+      - name: Running tests with PyTest
+        uses: pyrunit/pytest-action@v1.0.0
         with:
-          creds: ${{ secrets.AZURE_CREDENTIALS }}
           source: src
           useConda: true
           condaEnvName: ${CONDAENVNAME}
