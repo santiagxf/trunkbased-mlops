@@ -2,9 +2,6 @@ name: Running PyTest
 description: 'Run pytest tests that may rely on Azure and hence they are executed in the context of an authenticated console. Tests can get the authentication token from it if needed.'
 
 inputs:
-  creds:
-    description: 'Azure credentials'
-    required: true
   source:
     description: 'Directory where the source code is located. Defaults to current directory.'
     required: true

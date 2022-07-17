@@ -456,7 +456,7 @@ Run `pytest` tests that may rely on Azure and hence they are executed in the con
 | condaEnvName               | Name of the conda environment to use. Required if `useConda` is `true`. | No |
 | testFolder                 | Folder where test are placed. Defaults to `tests`. | No |
 | version                    | PyTest library version. Defaults to `6.2.5`. | Yes |
-| params                     | Parameters, if any, to provide to the execution. For instance, to provide test parameters you can use `-q --param1=value1 --param2=value2` | No |
+| args                       | Parameters, if any, to provide to the execution. For instance, to provide test parameters you can use `-q --param1=value1 --param2=value2` | No |
 
 **Sample usage**
 
@@ -480,7 +480,7 @@ Run `pytest` tests that may rely on Azure and hence they are executed in the con
   parameters:
     azureServiceConnectionName: $(SERVICECONNECTION)
     source: src
-    params: -q --input-file=mydata.json
+    args: -q --input-file=mydata.json
 ```
 
 ## azure-arm-template-deployment

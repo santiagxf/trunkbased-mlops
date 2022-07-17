@@ -19,7 +19,7 @@ parameters:
 - name: version
   type: string
   default: 6.2.5
-- name: params
+- name: args
   type: string
   default: ''
 - name: outputFile
@@ -48,10 +48,10 @@ steps:
 
         if [[ '${{ parameters.configuration }}' == '' ]]; then
           echo "##[debug]Running tests"
-          (cd ${{ parameters.source }} && python -m pytest ${{ parameters.testFolder }} ${{ parameters.params }} --junit-xml=${{ parameters.outputFile }})
+          (cd ${{ parameters.source }} && python -m pytest ${{ parameters.testFolder }} ${{ parameters.args }} --junit-xml=${{ parameters.outputFile }})
         else
           echo "##[debug]Running tests with configuration from ${{ parameters.configuration }}."
-          (cd ${{ parameters.source }}; python -m pytest ${{ parameters.testFolder }} ${{ parameters.params }} -c ${{ parameters.configuration }} --junit-xml=${{ parameters.outputFile }})
+          (cd ${{ parameters.source }}; python -m pytest ${{ parameters.testFolder }} ${{ parameters.args }} -c ${{ parameters.configuration }} --junit-xml=${{ parameters.outputFile }})
         fi
 
         if ${{ lower(parameters.useConda) }}; then
