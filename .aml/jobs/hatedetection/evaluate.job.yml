@@ -9,7 +9,7 @@ command: >-
             --model-name ${{inputs.model_name}} \
             --champion ${{inputs.champion}} \
             --challenger ${{inputs.challenger}} \
-            --class-output-field ${{inputs.class_output_field}} \
+            --class-output ${{inputs.class_output}} \
             --confidence ${{inputs.confidence}}
 inputs:
   eval_dataset:
@@ -17,7 +17,7 @@ inputs:
   model_name: hate-pt-speech
   champion: Production
   challenger: latest
-  class_output_field: hate
+  class_output: hate
   confidence: 0.05
 environment: azureml:transformers-torch-19:12
 compute: azureml:gpuprdev
