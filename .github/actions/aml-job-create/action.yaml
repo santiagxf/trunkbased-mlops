@@ -75,6 +75,8 @@ runs:
     - name: Uploading job logs
       uses: actions/upload-artifact@v2
       if: ${{ (failure() || success()) && inputs.noWait == 'false' }}
+      env:
+        logfile: ${{ inputs.name }}
       with:
-        name: ${{ inputs.name }}-log
+        name: ${logfile}-log
         path: job.log
