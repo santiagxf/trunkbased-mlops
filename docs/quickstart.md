@@ -52,6 +52,8 @@ Change the following parameters to unique values for you. The default names are 
  - `location`: Region to deploy resources.
  - `workspaceName`: The name of the Azure ML workspace.
  - `resourceGroupName`: The name of the Azure resource group configured above.
+
+The next parameters can be left as they are, unless you are trying out a different model.
  - `cpuTrainComputeSize`: The VM size of the compute cluster with CPU configuration.
  - `gpuTrainComputeSize`: The VM size of the compute cluster with GPU configuration.
  - `cpuTrainNodeCount`: The max number of nodes in the CPU cluster. To save costs, the cluster has a minimun number of nodes set to 0. This means that if no jobs are being executed, the cluster is deallocated.

@@ -38,7 +38,7 @@ def compute_classification_metrics(pred: Dict[str, torch.Tensor]) -> Dict[str, f
     }
 
 def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_dataset: str,
-                        confidence: float = 0.05) -> Dict[str, Dict[str, float]]:
+                        class_output: str, confidence: float = 0.05) -> Dict[str, float]:
     """
     Resolves the model from it's name and runs the evaluation routine.
 
@@ -52,6 +52,8 @@ def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_da
         Challenger version of the model. This can be a number, or a label like `latest` or `Production`
     eval_dataset: str
         Path that leads to the dataset.
+    class_output: str
+        Name of the output produced by the model where the predicted class is placed.
     confidence: float
         The condifidence level of the test (p-value). Defaults to 95% (0.05)
 
@@ -65,11 +67,13 @@ def resolve_and_compare(model_name: str, champion: str, challenger: str, eval_da
     return compute_mcnemmar(_model_uri_or_none(model_name, champion),
                             _model_uri_or_none(model_name, challenger),
                             eval_dataset,
+                            class_output,
                             confidence)
 
 def _model_uri_or_none(model_name: str, version: str) -> str:
     """
-    Build a model URI in MLFlow format for a given model in the registry.
+    Build a model URI in MLFlow format for a given model in the registry. If
+    there is no model registered, then it returns None.
 
     Parameters
     ----------
@@ -84,15 +88,18 @@ def _model_uri_or_none(model_name: str, version: str) -> str:
         The model URI or None.
     """
     client = mlflow.tracking.MlflowClient()
-    if version.isdigit() or version == 'latest':
-        return f"models:/{model_name}/{version}"
-    else:
-        if len(client.get_latest_versions(model_name, stages=[version])) > 0:
-            return f"models:/{model_name}/{version}"
+    if not version.isdigit():
+        if version == 'latest':
+            if (len(client.get_latest_versions(model_name)) == 0):
+                return None
 
-    return None
+        if len(client.get_latest_versions(model_name, stages=[version])) == 0:
+            return None
 
-def _predict_batch(model, data, batch_size = 64):
+    return f"models:/{model_name}/{version}"
+
+
+def _predict_batch(model, data, class_field, batch_size = 64):
     sample_size = len(data)
     batches_idx = range(0, math.ceil(sample_size / batch_size))
     scores = np.zeros(sample_size)
@@ -100,12 +107,12 @@ def _predict_batch(model, data, batch_size = 64):
     for batch_idx in batches_idx:
         bfrom = batch_idx * batch_size
         bto = bfrom + batch_size
-        scores[bfrom:bto] = model.predict(data.iloc[bfrom:bto].to_frame("text"))['hate']
+        scores[bfrom:bto] = model.predict(data.iloc[bfrom:bto])[class_field]
     
     return scores
 
 def compute_mcnemmar(champion_path: str, challenger_path: str, eval_dataset: str,
-                     confidence: float = 0.05) -> Dict[str, Dict[str, Any]]:
+                     class_output: str, confidence: float = 0.05) -> Dict[str, Any]:
     """
     Compares two hate detection models and decides if the two models make the same mistakes or not.
     Note that this method doesn't tell which one is better but if the models are statistically
@@ -119,6 +126,8 @@ def compute_mcnemmar(champion_path: str, challenger_path: str, eval_dataset: str
         Path to the challenger model.
     eval_dataset: str
         Path to the evaluation dataset.
+    class_output: str
+        Name of the output produced by the model where the predicted class is placed.
     confidence: float
         The condifidence level of the test (p-value). Defaults to 95% (0.05)
 
@@ -133,14 +142,14 @@ def compute_mcnemmar(champion_path: str, challenger_path: str, eval_dataset: str
     if champion_path and challenger_path:
         text, _ = load_examples(eval_dataset)
         champion_model = mlflow.pyfunc.load_model(champion_path)
-        champion_scores = _predict_batch(champion_model, text)
+        champion_scores = _predict_batch(champion_model, text, class_output)
 
         logging.info("[INFO] Unloading champion object from memory")
         del champion_model
         torch.cuda.synchronize()
 
         challenger_model = mlflow.pyfunc.load_model(challenger_path)
-        challenger_scores = _predict_batch(challenger_model, text)
+        challenger_scores = _predict_batch(challenger_model, text, class_output)
 
         logging.info("[INFO] Unloading challenger object from memory")
         del challenger_model
