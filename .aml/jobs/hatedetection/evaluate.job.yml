@@ -9,7 +9,7 @@ command: >-
             --model-name ${{inputs.model_name}} \
             --champion ${{inputs.champion}} \
             --challenger ${{inputs.challenger}} \
-            --class-output-field ${{inputs.class_output_field}}
+            --class-output-field ${{inputs.class_output_field}} \
             --confidence ${{inputs.confidence}}
 inputs:
   eval_dataset:
