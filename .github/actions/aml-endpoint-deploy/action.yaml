@@ -48,7 +48,7 @@ runs:
       shell: bash
       run: |
         set -e
-        . deploy.sh ${{ inputs.endpointFile }} ${{ inputs.deploymentFile }} ${{ inputs.workspaceName }} ${{ inputs.resourceGroup }} ${{ inputs.noWait }} ${{ inputs.secretsToKeyVault }} ${{ inputs.keyVaultName }} ${{ inputs.args }}
+        . ${{ github.action_path }}/deploy.sh ${{ inputs.endpointFile }} ${{ inputs.deploymentFile }} ${{ inputs.workspaceName }} ${{ inputs.resourceGroup }} ${{ inputs.noWait }} ${{ inputs.secretsToKeyVault }} ${{ inputs.keyVaultName }} ${{ inputs.args }}
     
     - name: Collecting deployment logs
       id: collect_logs
