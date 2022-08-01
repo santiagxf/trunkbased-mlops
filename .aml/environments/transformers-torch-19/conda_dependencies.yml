@@ -6,6 +6,7 @@ dependencies:
   - pip:
       - mlflow-skinny==1.25.0
       - azureml-mlflow==1.41.0
+      - 'urllib3<=1.26.7,>=1.23'
       - msrest==0.6.21
       - protobuf~=3.19.0
       - torch==1.9
