@@ -1,4 +1,5 @@
 import os
+import math
 import logging
 import pathlib
 
@@ -6,6 +7,7 @@ from typing import Dict, Union
 from mlflow.pyfunc import PythonModel, PythonModelContext
 
 import torch
+import numpy as np
 import pandas as pd
 
 from transformers.models.auto.tokenization_auto import AutoTokenizer
@@ -76,7 +78,7 @@ class HateDetectionClassifier(PythonModel):
                 artifacts[pathlib.Path(file).stem]=os.path.join(self.artifacts_path, file)
         return artifacts
 
-    def predict(self, context: PythonModelContext, data: Union[list, pd.Series, pd.DataFrame]):
+    def predict_single(self, context: PythonModelContext, data: Union[list, pd.Series, pd.DataFrame]):
         """
         Predicts a single batch of data.
 
@@ -113,6 +115,35 @@ class HateDetectionClassifier(PythonModel):
         results = data[['index', 'hate', 'confidence']].groupby('index').agg({'hate': pd.Series.mode, 'confidence': 'mean' })
 
         return results
+
+
+    def predict(self, context: PythonModelContext, data: Union[list, pd.Series, pd.DataFrame], batch_size: int = 64):
+        """
+        Predicts.
+
+        Parameters
+        ----------
+        data: Union[list, pd.Series, pd.DataFrame]
+            The data you want to run the model on.
+        batch_size: int
+            The batch size to read the data. Defaults to 64.
+
+        Return
+        ------
+        pd.DataFrame
+            A dataframe with a column hate with the probabilities of the given text of containing hate.
+        """
+
+        sample_size = len(data)
+        batches_idx = range(0, math.ceil(sample_size / batch_size))
+        scores = np.zeros((sample_size, 2))
+
+        for batch_idx in batches_idx:
+            bfrom = batch_idx * batch_size
+            bto = bfrom + batch_size
+            scores[bfrom:bto] = self.predict_single(context, data.iloc[bfrom:bto]).values
+        
+        return pd.DataFrame(scores, columns=['hate', 'confidence'])
 
     def __getstate__(self):
         state = self.__dict__.copy()

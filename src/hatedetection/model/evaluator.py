@@ -99,18 +99,6 @@ def _model_uri_or_none(model_name: str, version: str) -> str:
     return f"models:/{model_name}/{version}"
 
 
-def _predict_batch(model, data, class_field, batch_size = 64):
-    sample_size = len(data)
-    batches_idx = range(0, math.ceil(sample_size / batch_size))
-    scores = np.zeros(sample_size)
-
-    for batch_idx in batches_idx:
-        bfrom = batch_idx * batch_size
-        bto = bfrom + batch_size
-        scores[bfrom:bto] = model.predict(data.iloc[bfrom:bto])[class_field]
-    
-    return scores
-
 def compute_mcnemmar(champion_path: str, challenger_path: str, eval_dataset: str,
                      class_output: str, confidence: float = 0.05) -> Dict[str, Any]:
     """
@@ -142,14 +130,14 @@ def compute_mcnemmar(champion_path: str, challenger_path: str, eval_dataset: str
     if champion_path and challenger_path:
         text, _ = load_examples(eval_dataset)
         champion_model = mlflow.pyfunc.load_model(champion_path)
-        champion_scores = _predict_batch(champion_model, text, class_output)
+        champion_scores = champion_model.predict_batch(text)[class_output]
 
         logging.info("[INFO] Unloading champion object from memory")
         del champion_model
         torch.cuda.synchronize()
 
         challenger_model = mlflow.pyfunc.load_model(challenger_path)
-        challenger_scores = _predict_batch(challenger_model, text, class_output)
+        challenger_scores = challenger_model.predict_batch(text)[class_output]
 
         logging.info("[INFO] Unloading challenger object from memory")
         del challenger_model
