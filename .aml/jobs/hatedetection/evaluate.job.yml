@@ -19,5 +19,5 @@ inputs:
   challenger: latest
   class_output: hate
   confidence: 0.05
-environment: azureml:transformers-torch-19:13
+environment: azureml:transformers-torch-19:14
 compute: azureml:gpuprdev
