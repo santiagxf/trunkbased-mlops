@@ -89,10 +89,62 @@ jobs:
       result: ${{ steps.compare.outputs.result }}
       winning: ${{ steps.compare.outputs.winning }}
 
-  deployment:
+  deployment-dev:
     environment: amlworkspace_dev
     runs-on: ubuntu-latest
     needs: evaluation
+    if: ${{ needs.evaluation.outputs.result == 'true' }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Load environment from YAML
+        uses: doughepi/yaml-env-action@v1.0.0
+        with:
+            files: .github/variables.yaml
+
+      - id: job_preparation
+        name: Installing dependencies
+        uses: ./.github/actions/aml-cli-install
+        with:
+          componentSupport: false
+          minVersion: 2.0
+          pythonTools: true
+
+      - name: Logining in into Azure
+        uses: Azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Moving model's stage
+        uses: ./.github/actions/aml-model-set
+        with:
+          modelName: ${MODELNAME}
+          modelVersion: ${{ needs.evaluation.outputs.winning }}
+          property: stage
+          value: production
+          exclusive: true
+          isMlflowStage: true
+          replaceExistingWith: archived
+          workspaceName: ${WORKSPACENAME}
+          resourceGroup: ${RESOURCEGROUPNAME}
+      
+      - name: Deploying models
+        id: deployment
+        uses: ./.github/actions/aml-endpoint-deploy
+        with:
+          endpointFile: .aml/endpoints/*/endpoint.yml
+          deploymentFile: deployments/*.yml
+          modelVersion: ${{ needs.evaluation.outputs.winning }}
+          workspaceName: ${WORKSPACENAME}
+          resourceGroup: ${RESOURCEGROUPNAME}
+          secretsToKeyVault: true
+          keyVaultName: ${KEYVAULTNAME}
+
+  deployment-prd:
+    environment: amlworkspace_prod
+    runs-on: ubuntu-latest
+    needs: [evaluation, deployment-dev]
     if: ${{ needs.evaluation.outputs.result == 'true' }}
 
     steps:
